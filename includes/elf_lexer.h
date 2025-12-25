@@ -32,7 +32,7 @@ typedef struct ElfLexer
 }t_elf_lexer;
 
 t_elf_lexer* elf_create_lexer(const char* source);
-t_elf_token* elf_create_token(char c, t_token_type type);
+t_elf_token* elf_create_token(char c, t_elf_token_type type);
 t_elf_token_type elf_get_tokentype(char c);
 
 
