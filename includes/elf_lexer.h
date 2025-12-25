@@ -1,6 +1,5 @@
 #pragma once
-
-#include "elf_defines.h"
+#include <toolbox/tbdefines.h>
 
 typedef enum TokenType
 {

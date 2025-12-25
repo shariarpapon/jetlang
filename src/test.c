@@ -1,9 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "elf_lexer.h"
-#include "elf_defines.h"
-
+#include <elf_lexer.h>
+#include <toolbox/tbdefines.h>
+    
 int main(void)
 {
     const char* source = "test: lexer creation--->";

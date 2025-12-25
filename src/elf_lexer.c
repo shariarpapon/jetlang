@@ -3,9 +3,7 @@
 #include <assert.h>
 #include <stdio.h>
 
-#include "elf_lexer.h"
-#include "elf_defines.h"
-
+#include <elf_lexer.h>
 
 t_elf_lexer* elf_create_lexer(const char* source)
 {
