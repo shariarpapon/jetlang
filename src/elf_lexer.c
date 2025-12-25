@@ -83,22 +83,22 @@ t_elf_token_type elf_get_tokentype(char c)
         return OPERATOR;
 
         case '"':
-        return DB_QUOTE;
+        return DBL_QUOTE;
 
         case ';':
-        return STMT_END;
+        return SEMI_COLON;
 
         case '{': 
-        return SCOPE_BEG;
+        return BRACE_OPEN;
 
         case '}':
-        return SCOPE_END;
+        return BRACE_CLOSE;
 
         case '(':
-        return EXPR_BEG;
+        return PARAN_OPEN;
 
         case ')':
-        return EXPR_END;
+        return PARAN_END;
 
         case '\0':
         return TERMINATE;

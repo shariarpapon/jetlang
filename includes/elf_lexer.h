@@ -10,12 +10,12 @@ typedef enum TokenType
     OPERATOR,
     WHITE_SPACE,
     DOT,
-    DB_QUOTE,
-    STMT_END,
-    SCOPE_BEG,
-    SCOPE_END,
-    EXPR_BEG,
-    EXPR_END,
+    DBL_QUOTE,
+    SEMI_COLON,
+    BRACE_OPEN,
+    BRACE_CLOSE,
+    PARAN_OPEN,
+    PARAN_END,
     TERMINATE,
 } t_elf_token_type;
 
