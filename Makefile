@@ -27,7 +27,7 @@ build/%.o: src/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Custom target to clean and rebuild
-rebuild r:
+rebuild rb:
 	$(MAKE) clean
 	$(MAKE) all
 
