@@ -1,4 +1,5 @@
 #pragma once
+#include <toolbox/tblist.h>
 
 typedef enum TokenType
 {
@@ -19,20 +20,22 @@ typedef enum TokenType
 
 typedef struct Token
 {
-    char c;
+    const char* source;
+    size_t start;
+    size_t end;
     t_elf_token_type type;
 } t_elf_token;
 
 typedef struct ElfLexer
 {
     const char* source;
-    t_elf_token** tokens;
+    tblist* tokens;
 }t_elf_lexer;
 
-t_elf_lexer* elf_create_lexer(const char* source);
-t_elf_token* elf_create_token(char c, t_elf_token_type type);
-t_elf_token_type elf_get_tokentype(char c);
-
+t_elf_lexer* elf_create_lexer(const char* src);
+t_elf_token* elf_create_token(const char* src, size_t start, size_t end);
+t_elf_token_type elf_get_tokentype(const char* src, size_t start, size_t end);
+void t_elf_lexer_generate_tokens(t_elf_lexer* lexer);
 
 
 
