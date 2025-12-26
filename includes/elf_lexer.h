@@ -1,5 +1,4 @@
 #pragma once
-#include <toolbox/tbdefines.h>
 
 typedef enum TokenType
 {

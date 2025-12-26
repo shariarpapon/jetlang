@@ -2,8 +2,10 @@
 #include <stdio.h>
 
 #include <elf_lexer.h>
+
+//TEST
 #include <toolbox/tbdefines.h>
-    
+
 int main(void)
 {
     const char* source = "test: lexer creation--->";
@@ -11,10 +13,10 @@ int main(void)
     t_elf_lexer* lexer = elf_create_lexer(source);
     
     if(!lexer)
-        return _false;
+        return 0;
 
     if(!lexer->tokens)
-        return _false;
+        return 0;
 
     free(lexer->tokens);
     free(lexer);     
@@ -22,5 +24,5 @@ int main(void)
 
 
 	printf("* all tests ran successfully\n");
-    return _true;
+    return 1;
 }
