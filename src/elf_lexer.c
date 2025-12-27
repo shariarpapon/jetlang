@@ -167,9 +167,30 @@ elf_TokenType elf_TokenType_eval(char c)
 
 }
 
+void elf_TokenType_trim(const char* src, size_t* i,  elf_TokenType trimType)
+{
+    char c = elf_TokenType_eval(src[*i]);
+    elf_TokenType type = elf_TokenType_eval(c);
+    if(type != trimType)
+    {
+        printf("warning: could not trim TokenType; origin TokenType does not match trim TokenType.");
+        return;
+    }
+
+    while(type == trimType)
+    {
+        (*i)++;
+        type = elf_TokenType_eval(src[*i]);
+    }
+}
+
+void elf_Lexer_addToken(elf_Lexer* lexer, size_t origin, size_t len, elf_TokenType type)
+{
+
+}
 
 
-void elf_Lexer_generate_tokens(elf_Lexer* lexer)
+void elf_Lexer_generateTokens(elf_Lexer* lexer)
 {
     if(!lexer || !lexer->source || !lexer->tokens) 
     {
@@ -181,9 +202,8 @@ void elf_Lexer_generate_tokens(elf_Lexer* lexer)
     size_t trueSize = (size_t)strlen(lexer->source) + 1;
    
     char c;  
-    elf_TokenType prevType = TOK_INVALID;
     elf_TokenType type = TOK_INVALID;
-    size_t origin;
+    size_t origin = 0;    
     
     //TEST
     return;
@@ -196,39 +216,60 @@ void elf_Lexer_generate_tokens(elf_Lexer* lexer)
         }
         
         c = lexer->source[i];
-        prevType = type;
         type = elf_TokenType_eval(c);
-        
+        origin = i;
         switch(type)
         {
             case TOK_INVALID:
             fprintf(stderr, "syntax error: no valid token type\n");
             return;
 
-            case TOK_EOF:
             break;
             case TOK_WSPACE:
-            while(type == TOK_WSPACE)
-            {
-                i++;
-                type = elf_TokenType_eval(lexer->source[i]);
-                if(type == TOK_EOF)
-                    break;
-            }
-            break;
-            
-            case TOK_OBRACE:
-            break;
-
             case TOK_IDENT:
             case TOK_NUMINT:
+            elf_TokenType_trim(lexer->source, &i, type);
+            break;
+            
+            case TOK_EOF:
+            printf("__end of source string reached__");
+            break;
+
+            case TOK_OBRACE:
+            case TOK_CBRACE:
+            case TOK_OPARAN:
+            case TOK_CPARAN:
+            case TOK_SCOLON:
+            case TOK_BAR:
+            case TOK_AMP:
+            case TOK_COMMA:
+            case TOK_DQUOTE:
+            case TOK_FSLASH:
+            case TOK_BSLASH:
+            case TOK_LTHAN:
+            case TOK_GTHAN:
+            case TOK_EQL:
+            i++;
             break;
 
             default:
+            printf("warning: TokenType not supoprted\n");
             break;
         }
-       
-    }
+        
+        //WORKING ON THIS
+        size_t len = i - origin;
+        elf_Lexer_addToken(lexer, origin, len, type);
+
+        if(type == TOK_EOF)
+            break;
+        else
+        {
+            fprintf(stderr, "error: source string did not end with TOK_EOF.\n");
+            break;
+        }
+   }
+
 }
 
 

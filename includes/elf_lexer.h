@@ -23,12 +23,13 @@ typedef enum TokenType
     TOK_COMMA,
     TOK_BAR,
     TOK_AMP,
-    TOK_POUND,
-    TOK_DOLLAR,
-    TOK_CARET,
     TOK_DQUOTE,
     TOK_SQUOTE,
+    TOK_FSLASH,
     TOK_BSLASH,
+    TOK_DOLLAR,
+    TOK_POUND,
+    TOK_CARET,
 } elf_TokenType;
 
 typedef struct Token
@@ -48,9 +49,10 @@ typedef struct ElfLexer
 elf_Lexer* elf_Lexer_create(const char* src);
 elf_Token* elf_Token_create(const char* src, size_t origin, size_t len, elf_TokenType type);
 elf_TokenType elf_TokenType_eval(char c);
-void elf_Lexer_generate_tokens(elf_Lexer* lexer);
 
-
+void elf_TokenType_trim(const char* src, size_t* i, elf_TokenType trimType);
+void elf_Lexer_generateTokens(elf_Lexer* lexer);
+void elf_Lexer_addToken(elf_Lexer* lexer, size_t origin, size_t len, elf_TokenType type);
 
 
 
