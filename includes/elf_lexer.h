@@ -3,40 +3,52 @@
 
 typedef enum TokenType
 {
-    INVALID_TOKEN=0,
-    IDENTIFIER,
-    DIGIT,
-    OPERATOR,
-    WHITE_SPACE,
-    DOT,
-    DBL_QUOTE,
-    SEMI_COLON,
-    BRACE_OPEN,
-    BRACE_CLOSE,
-    PARAN_OPEN,
-    PARAN_END,
-    TERMINATE,
-} t_elf_token_type;
+    TOK_INVALID,
+    TOK_EOF,
+    TOK_IDENT,
+    TOK_WSPACE,
+    TOK_KWORD,
+    TOK_NUMINT,
+    TOK_NUMFLOAT,
+    TOK_OPR,
+    TOK_DOT,
+    TOK_SCOLON,
+    TOK_GTHAN,
+    TOK_LTHAN,
+    TOK_EQL,
+    TOK_OBRACE,
+    TOK_CBRACE,
+    TOK_OPARAN,
+    TOK_CPARAN,
+    TOK_COMMA,
+    TOK_BAR,
+    TOK_AMP,
+    TOK_POUND,
+    TOK_DOLLAR,
+    TOK_CARET,
+    TOK_DQUOTE,
+    TOK_SQUOTE,
+    TOK_BSLASH,
+} elf_TokenType;
 
 typedef struct Token
 {
     const char* source;
-    size_t start;
-    size_t end;
-    t_elf_token_type type;
-} t_elf_token;
+    size_t origin;
+    size_t len;
+    elf_TokenType type;
+} elf_Token;
 
 typedef struct ElfLexer
 {
     const char* source;
     tblist* tokens;
-}t_elf_lexer;
+}elf_Lexer;
 
-t_elf_lexer* elf_create_lexer(const char* src);
-t_elf_token* elf_create_token(const char* src, size_t start, size_t end);
-t_elf_token_type elf_get_tokentype(const char* src, size_t start, size_t end);
-void t_elf_lexer_generate_tokens(t_elf_lexer* lexer);
-
+elf_Lexer* elf_Lexer_create(const char* src);
+elf_Token* elf_Token_create(const char* src, size_t origin, size_t len, elf_TokenType type);
+elf_TokenType elf_TokenType_eval(char c);
+void elf_Lexer_generate_tokens(elf_Lexer* lexer);
 
 
 
