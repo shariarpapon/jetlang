@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #include <elf_lexer.h>
+#include <elf_token.h>
 #include <toolbox/tbdefines.h>
 #include <toolbox/tblist.h>
 
