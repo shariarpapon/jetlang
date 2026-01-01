@@ -4,33 +4,45 @@
 
 typedef enum TokenType
 {
-    TOK_invalid,
+    TOK_Invalid=0,
     TOK_EOF,
-    TOK_IDENT,
-    TOK_keyword,
-    TOK_WSPACE,
-    TOK_NUMINT,
-    TOK_NUMFLOAT,
-    TOK_OPR,
-    TOK_DOT,
-    TOK_SCOLON,
-    TOK_GTHAN,
-    TOK_LTHAN,
-    TOK_EQL,
-    TOK_OBRACE,
-    TOK_CBRACE,
-    TOK_OPARAN,
-    TOK_CPARAN,
-    TOK_COMMA,
-    TOK_BAR,
-    TOK_AMP,
-    TOK_DQUOTE,
-    TOK_SQUOTE,
-    TOK_FSLASH,
-    TOK_BSLASH,
-    TOK_DOLLAR,
-    TOK_POUND,
-    TOK_CARET,
+
+    //literals
+    TOK_Identifier,
+    TOK_Keyword,
+    TOK_Number,
+    TOK_String,
+    TOK_BlockComment,
+    TOK_LineComment,
+
+    //Logics
+    TOK_Assign,  // = 
+    TOK_Equal,   // ==  
+    TOK_NEqual,  // !=
+    TOK_Less,    // <
+    TOK_LEqual,  // <=
+    TOK_Greater, // >
+    TOK_GEqual,  // >=
+    TOK_And,     // &&
+    TOK_Or,      // ||
+    TOK_Not,     // !
+    
+    //Mathematical operators
+    TOK_Plus,   // + 
+    TOK_Minus,  // -
+    TOK_Star,   // *
+    TOK_Slash,  // /
+
+    //Punctuations
+    TOK_Semicolon,  // ;
+    TOK_Dot,        // . 
+    TOK_LParen,     // (
+    TOK_RParen,     // )
+    TOK_LBrace,     // {
+    TOK_RBrace,     // }
+    TOK_LBracket,   // [
+    TOK_RBracket,   // ]
+
 } elf_TokenType;
 
 
@@ -44,9 +56,6 @@ typedef struct Token
 } elf_Token;
 
 elf_Token* elf_Token_create(const char* source, size_t origin, size_t len, elf_TokenType type);
-
-elf_TokenType elf_TokenType_eval(char c);
-
 
 
 
