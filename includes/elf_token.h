@@ -4,44 +4,55 @@
 
 typedef enum TokenType
 {
-    TOK_Invalid=0,
-    TOK_EOF,
+    TOK_INV=0,    // Invalid / unrecognized token type
+    TOK_EOF,      // End of file
 
     //literals
-    TOK_Identifier,
-    TOK_Keyword,
-    TOK_Number,
-    TOK_String,
-    TOK_BlockComment,
-    TOK_LineComment,
+    TOK_ID,   // identifiers
+    TOK_KW,   // keywords (reserved words)
+    TOK_NUM,  // 0..9 (numeric literal)
+    TOK_STR,  // "string literal"
+    TOK_BCOM, // /*block comment*/
+    TOK_LCOM, // //line comment
 
-    //Logics
-    TOK_Assign,  // = 
-    TOK_Equal,   // ==  
-    TOK_NEqual,  // !=
-    TOK_Less,    // <
-    TOK_LEqual,  // <=
-    TOK_Greater, // >
-    TOK_GEqual,  // >=
-    TOK_And,     // &&
-    TOK_Or,      // ||
-    TOK_Not,     // !
+    //Comparison & logical operators
+    TOK_ASG,       // = 
+    TOK_EQ,        // ==  
+    TOK_NEQ,       // !=
+    TOK_LT,        // <
+    TOK_LTE,       // <=
+    TOK_GT,        // >
+    TOK_GTE,       // >=
+    TOK_BAND,      // &
+    TOK_AND,       // &&
+    TOK_BOR,       // |
+    TOK_OR,        // ||
+    TOK_XOR,        // ^
+    TOK_NOT,       // !
     
-    //Mathematical operators
-    TOK_Plus,   // + 
-    TOK_Minus,  // -
-    TOK_Star,   // *
-    TOK_Slash,  // /
+    //Arithmetic operators
+    TOK_PLUS,       // + 
+    TOK_MINUS,      // -
+    TOK_STAR,       // *
+    TOK_SLASH,      // /
+    TOK_PERCENT,    // %
+    
+    TOK_PLUSEQ,     // +=
+    TOK_MINEQ,      // -=
+    TOK_MULEQ,      // *=
+    TOK_DIVEQ,      // /=
+    TOK_MODEQ,      // %=
+    TOK_POW,        // **
 
     //Punctuations
-    TOK_Semicolon,  // ;
-    TOK_Dot,        // . 
-    TOK_LParen,     // (
-    TOK_RParen,     // )
-    TOK_LBrace,     // {
-    TOK_RBrace,     // }
-    TOK_LBracket,   // [
-    TOK_RBracket,   // ]
+    TOK_SEMI,  // ;
+    TOK_DOT,   // . 
+    TOK_LPAR,  // (
+    TOK_RPAR,  // )
+    TOK_LBR,   // {
+    TOK_RBR,   // }
+    TOK_LBRK,  // [
+    TOK_RBRK,  // ]
 
 } elf_TokenType;
 

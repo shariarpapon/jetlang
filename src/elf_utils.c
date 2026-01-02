@@ -1,18 +1,44 @@
-#include <stdlib.h>
 #include <elf_utils.h>
 
-_bool elf_isWhiteSpace(char c)
+BOOL* elf_newBool()
 {
-    switch(c)
+    BOOL* ptr = (BOOL*)malloc(sizeof(BOOL));
+    if(!ptr)
     {
-        case ' ': case '\t': case '\n':
-        case '\v': case '\r': case '\f':
-            return _true;
-        
-        default:
-            return _false;
+        ptr = NULL;
+        fprintf(stderr, "error: unable to allocate new BOOL memory.");
+        return (BOOL*){0};
     }
+    *ptr = FALSE;
+    return ptr;
 }
+
+void elf_disposeBool(BOOL* b)
+{
+    if(b)
+        free(b);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
