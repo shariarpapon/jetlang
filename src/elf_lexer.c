@@ -213,76 +213,35 @@ elf_TokenType elf_Lexer_getAtomOprType(char c, BOOL* succ)
             oprType = TOK_PERCENT;
             break;
     }
+
+    
     return oprType;
 }
 
 elf_TokenType elf_Lexer_getCompOprType(elf_TokenType l, elf_TokenType r, BOOL* succ)
 {
-    *succ = FALSE;
-    if(r == TOK_ASG)
+    if(!succ)
     {
-        if(l == TOK_ASG)
-         {
-            *succ = TRUE;
-            return TOK_EQ;
-         }
-         else if(l == TOK_NOT)
-         {
-            *succ = TRUE;
-            return TOK_NEQ;
-         }
-         else if(l == TOK_PLUS)
-         {
-            *succ = TRUE;
-            return TOK_PLUSEQ;
-         }
-         else if(l == TOK_MINUS)
-         {
-            *succ = TRUE;
-            return TOK_MINEQ;
-         }
-         else if(l == TOK_STAR)
-         {
-            *succ = TRUE;
-            return TOK_MULEQ;
-         }
-         else if(l == TOK_SLASH)
-         {
-            *succ = TRUE;
-            return TOK_DIVEQ;
-         }
-         else if(l == TOK_PERCENT)
-         {
-            *succ = TRUE;
-            return TOK_MODEQ;
-         }
-         else if(l == TOK_GT)
-         {
-            *succ = TRUE;
-            return TOK_GTE;
-         }
-         else if(l == TOK_LT)
-         {
-            *succ = TRUE;
-            return TOK_LTE;
-         }
+        fprintf(stderr, "error: output status BOOL 'success' does not have valid allocation.\n");
+        return TOK_INV;
     }
-    else if(l == TOK_BOR && r == TOK_BOR)
-    
+
+    *succ = TRUE;
+    if (r == TOK_ASG) 
     {
-        *succ = TRUE;
-        return TOK_OR;
+        if (l == TOK_ASG)          {  return TOK_EQ; }
+        else if (l == TOK_NOT)     {  return TOK_NEQ; }
+        else if (l == TOK_PLUS)    {  return TOK_PLUSEQ; }
+        else if (l == TOK_MINUS)   {  return TOK_MINEQ; }
+        else if (l == TOK_STAR)    {  return TOK_MULEQ; }
+        else if (l == TOK_SLASH)   {  return TOK_DIVEQ; }
+        else if (l == TOK_PERCENT) {  return TOK_MODEQ; }
+        else if (l == TOK_GT)      {  return TOK_GTE; }
+        else if (l == TOK_LT)      {  return TOK_LTE; }
     }
-    else if(l == TOK_BAND && r == TOK_BAND)
-    {
-        *succ = TRUE;
-        return TOK_AND;
-    }
-    else if(l == TOK_STAR && r == TOK_STAR)
-    {
-        *succ = TRUE;
-        return TOK_POW;
-    }
+    else if (l == TOK_BOR && r == TOK_BOR) { *succ = TRUE; return TOK_OR; }
+    else if (l == TOK_BAND && r == TOK_BAND) { *succ = TRUE; return TOK_AND; }
+    else if (l == TOK_STAR && r == TOK_STAR) { *succ = TRUE; return TOK_POW; }  
     
     *succ = FALSE;
     return TOK_INV;
