@@ -2,7 +2,7 @@
 CC = gcc
 
 # Recursively include all header directories under includes/ and libs/
-HEADER_DIRS := $(shell find includes libs -type d)
+HEADER_DIRS := $(shell find include libs -type d)
 CFLAGS = -Wall -std=c11 -g $(addprefix -I,$(HEADER_DIRS))
 
 # Source and build directories

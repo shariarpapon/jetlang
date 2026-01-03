@@ -1,0 +1,10 @@
+object player
+{
+    string name = "alex";
+    int score = "316"
+
+    string get_name_function(arg1, arg2)  
+    {
+        ret name;
+    }
+}

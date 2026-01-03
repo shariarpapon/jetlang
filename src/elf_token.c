@@ -3,13 +3,13 @@
 #include <string.h>
 #include <elf_token.h>
 
-elf_Token* elf_Token_create(const char* source, size_t origin, size_t len, elf_TokenType type)
+elf_token* elf_token_create(const char* source, size_t origin, size_t len, elf_token_type type)
 {
-    elf_Token* token = (elf_Token*)malloc(sizeof(elf_Token));
+    elf_token* token = (elf_token*)malloc(sizeof(elf_token));
     if(!token)
     {
         fprintf(stderr, "error: couldn't allocate token memory.");
-        return (elf_Token*){0};
+        return (elf_token*){0};
     }
 
     token->source = source;
@@ -20,7 +20,7 @@ elf_Token* elf_Token_create(const char* source, size_t origin, size_t len, elf_T
 }
 
 
-void elf_Token_printList(elf_Token** tokens, size_t count)
+void elf_token_print_list(elf_token** tokens, size_t count)
 {
     if(!tokens)
     {
@@ -36,14 +36,14 @@ void elf_Token_printList(elf_Token** tokens, size_t count)
     
     for(size_t i = 0; i < count; i++)
     {  
-        elf_Token* token = *tokens;
+        elf_token* token = *tokens;
         tokens++;
-        const char* typeStr = elf_TokenType_str(token->type);
+        const char* typeStr = elf_token_type_str(token->type);
         printf("%s  %.*s \n", typeStr, (int)token->len, token->source + token->origin);    
     }
 }
 
-const char* elf_TokenType_str(elf_TokenType type)
+const char* elf_token_type_str(elf_token_type type)
 {
     switch(type)
     {

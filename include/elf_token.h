@@ -1,7 +1,7 @@
 #pragma once
 #include <stdlib.h>
 
-typedef enum TokenType
+typedef enum
 {
     TOK_INV=0,    // Invalid / unrecognized token type
     TOK_EOF,      // End of file
@@ -53,20 +53,20 @@ typedef enum TokenType
     TOK_LBRK,  // [
     TOK_RBRK,  // ]
 
-} elf_TokenType;
+} elf_token_type;
 
 
-typedef struct Token 
+typedef struct 
 {
     const char* source;
     size_t origin;
     size_t len;
-    elf_TokenType type;
-} elf_Token;
+    elf_token_type type;
+} elf_token;
 
 
-elf_Token* elf_Token_create(const char* source, size_t origin, size_t len, elf_TokenType type);
-const char* elf_TokenType_str(elf_TokenType type);
-void elf_Token_printList(elf_Token** list, size_t count);
+elf_token* elf_token_create(const char* source, size_t origin, size_t len, elf_token_type type);
+const char* elf_token_type_str(elf_token_type type);
+void elf_token_print_list(elf_token** list, size_t count);
 
 

@@ -1,11 +1,16 @@
 #include <stdio.h>
+#include <string.h>
 #include <elf_lexer.h>
 
 int main(void)
 {
-    const char* source = "{ num = 123; }";
+    const char* source = read_text_file("elfcode.ef");
+    if(source == NULL)
+    {
+        return FALSE;
+    }
 
-    elf_Lexer* lexer = elf_Lexer_create(source);
+    elf_lexer* lexer = elf_lexer_create(source);
     
     if(!lexer)
         return FALSE;
@@ -13,16 +18,16 @@ int main(void)
     if(!lexer->tokens)
         return FALSE; 
 
-    elf_Lexer_tokenize(lexer);
+    elf_lexer_tokenize(lexer);
     printf("tokenization complete...\n");
     
     printf("\n******* printing-token-list *******\n\n");
-    elf_Token_printList((elf_Token**)lexer->tokens->elements, lexer->tokens->count); 
+    elf_token_print_list((elf_token**)lexer->tokens->elements, lexer->tokens->count); 
     printf("\n******* list-end *******\n\n");
     
-    elf_Lexer_fullDispose(lexer);
+    elf_lexer_full_dispose(lexer);
     printf("lexer disposed...\n");
 
 	printf("* all tests ran successfully\n");
     return TRUE;
-}
+ }
