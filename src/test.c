@@ -1,6 +1,4 @@
-
 #include <stdio.h>
-
 #include <elf_lexer.h>
 #include <elf_token.h>
 #include <toolbox/tbdefines.h>
@@ -17,6 +15,13 @@ int main(void)
     if(!lexer->tokens)
         return _false; 
 
+    elf_Lexer_tokenize(lexer);
+    printf("tokenization complete...\n");
+    
+    printf("\n******* printing-token-list *******\n\n");
+    elf_Token_printList((elf_Token**)lexer->tokens->elements, lexer->tokens->count); 
+    printf("\n******* list-end *******\n\n");
+    
     elf_Lexer_fullDispose(lexer);
     printf("lexer disposed...\n");
 

@@ -1,6 +1,5 @@
 #pragma once
-
-#include<stdlib.h>
+#include <stdlib.h>
 
 typedef enum TokenType
 {
@@ -27,7 +26,7 @@ typedef enum TokenType
     TOK_AND,       // &&
     TOK_BOR,       // |
     TOK_OR,        // ||
-    TOK_XOR,        // ^
+    TOK_XOR,       // ^
     TOK_NOT,       // !
     
     //Arithmetic operators
@@ -57,7 +56,6 @@ typedef enum TokenType
 } elf_TokenType;
 
 
-
 typedef struct Token 
 {
     const char* source;
@@ -66,7 +64,9 @@ typedef struct Token
     elf_TokenType type;
 } elf_Token;
 
-elf_Token* elf_Token_create(const char* source, size_t origin, size_t len, elf_TokenType type);
 
+elf_Token* elf_Token_create(const char* source, size_t origin, size_t len, elf_TokenType type);
+const char* elf_TokenType_str(elf_TokenType type);
+void elf_Token_printList(elf_Token** list, size_t count);
 
 

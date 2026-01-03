@@ -59,31 +59,25 @@ BOOL elf_Lexer_tokenize(elf_Lexer* lexer)
         fprintf(stderr, "error: cannot tokenize, lexer or lexer->tokens is invalid.\n");
         return FALSE;
     }
-    char c;  
-    while(1)
+    while(elf_Lexer_peek(lexer) != elf_EOF)
     {
-        c = elf_Lexer_peek(lexer);
-        if(elf_Lexer_isWhiteSpace(c) == TRUE)
-            elf_Lexer_trimNext(lexer); 
-
-        if(c == elf_EOF)
-        {
-            elf_Lexer_emitToken(lexer, lexer->cursor, 1, TOK_EOF);
-            return TRUE;
-        }
-        
-        if(elf_Lexer_consumeType(lexer, TOK_ID, elf_Lexer_isIdentifier))
+        if(elf_Lexer_consumeWhiteSpace(lexer) == TRUE)
             continue;
-        if(elf_Lexer_consumeType(lexer, TOK_NUM, elf_Lexer_isNumber))
+        else if(elf_Lexer_consumeTypeSeq(lexer, TOK_ID, elf_Lexer_isIdentifier) == TRUE)
             continue;
-        if(elf_Lexer_consumeLineComment(lexer))
+        else if(elf_Lexer_consumeTypeSeq(lexer, TOK_NUM, elf_Lexer_isNumber) == TRUE)
             continue;
-        if(elf_Lexer_consumeBlockComment(lexer))
+        else if(elf_Lexer_consumeLineComment(lexer) == TRUE)
             continue;
-        if(elf_Lexer_consumeOperator(lexer))
-            continue;
+        else if(elf_Lexer_consumeBlockComment(lexer) == TRUE)
+           continue;
+        else if(elf_Lexer_consumeOperator(lexer) == TRUE)
+           continue;
+         
+        elf_Lexer_emitToken(lexer, lexer->cursor, 1, TOK_INV);
+        elf_Lexer_advance(lexer);
     }
-
+    return TRUE;
 }
 
 BOOL elf_Lexer_isIdentifier(char c)
@@ -133,92 +127,29 @@ BOOL elf_Lexer_isWhiteSpace(char c)
     return isWhiteSpace;
 }
 
-BOOL elf_Lexer_isOperatorAtom(char c)
+elf_TokenType elf_Lexer_tryGetSingleCharOprType(char c, BOOL* succ)
 {
+    *succ = TRUE;
     switch(c)
     {
-        case '=':
-        case '>':
-        case '<':
-        case '|':
-        case '&':
-        case '+':
-        case '-':
-        case '*':
-        case '/':
-        case '%':
-        case '^':
-        case '!':
-        return TRUE;
+        case '=': return TOK_ASG;
+        case '>': return TOK_GT;
+        case '<': return TOK_LT; 
+        case '!': return TOK_NOT;
+        case '&': return TOK_BAND;
+        case '^': return TOK_XOR;
+        case '|': return TOK_BOR;
+        case '+': return TOK_PLUS;
+        case '-': return TOK_MINUS;
+        case '*': return TOK_STAR;
+        case '/': return TOK_SLASH;
+        case '%': return TOK_PERCENT;
     }
-    return FALSE;
+    *succ = FALSE; 
+    return TOK_INV;
 }
 
-elf_TokenType elf_Lexer_getAtomOprType(char c, BOOL* succ)
-{
-    *succ = FALSE;
-    elf_TokenType oprType = TOK_INV;
-    switch(c)
-    {
-        default:
-            *succ = FALSE;
-            oprType = TOK_INV; 
-            break;
-        case '=': 
-            *succ = TRUE;
-            oprType = TOK_ASG;
-            break;
-        case '>': 
-            *succ = TRUE;
-            oprType = TOK_GT;
-            break;
-        case '<': 
-            *succ = TRUE;
-            oprType = TOK_LT;
-            break;
-        case '!':
-            *succ = TRUE;
-            oprType = TOK_NOT;
-            break;
-        case '&':
-            *succ =  TRUE;
-            oprType = TOK_BAND;
-            break;
-        case '^':
-            *succ = TRUE;
-            oprType = TOK_XOR;
-            break;
-        case '|':
-            *succ = TRUE;
-            oprType = TOK_BOR;
-            break;
-        case '+':
-            *succ = TRUE;
-            oprType = TOK_PLUS;
-            break;
-        case '-':
-            *succ = TRUE;
-            oprType = TOK_MINUS;
-            break;
-        case '*':
-            *succ = TRUE;
-            oprType = TOK_STAR;
-            break;
-        case '/':
-            *succ = TRUE;
-            oprType = TOK_SLASH;
-            break;
-        case '%':
-            *succ = TRUE;
-            oprType = TOK_PERCENT;
-            break;
-    }
-
-    
-    return oprType;
-}
-
-elf_TokenType elf_Lexer_getCompOprType(elf_TokenType l, elf_TokenType r, BOOL* succ)
+elf_TokenType elf_Lexer_tryGetCompoundOprType(elf_TokenType l, elf_TokenType r, BOOL* succ)
 {
     if(!succ)
     {
@@ -250,11 +181,11 @@ elf_TokenType elf_Lexer_getCompOprType(elf_TokenType l, elf_TokenType r, BOOL* s
 char elf_Lexer_consume(elf_Lexer* lexer)
 {
     char c = elf_Lexer_peek(lexer);
-    elf_Lexer_next(lexer);
+    elf_Lexer_advance(lexer);
     return c;
 }
 
-BOOL elf_Lexer_consumeType(elf_Lexer* lexer, elf_TokenType type, BOOL(*isMatch)(char))
+BOOL elf_Lexer_consumeTypeSeq(elf_Lexer* lexer, elf_TokenType type, BOOL(*isMatch)(char))
 {
     if(!isMatch( elf_Lexer_peek(lexer)))
     {
@@ -280,22 +211,21 @@ BOOL elf_Lexer_consumeLineComment(elf_Lexer* lexer)
     }
 
     size_t origin = lexer->cursor;
-    elf_Lexer_consume(lexer);
-    elf_Lexer_consume(lexer);
+    elf_Lexer_advance(lexer);
+    elf_Lexer_advance(lexer);
 
     while(elf_Lexer_peek(lexer) != elf_EOF)
     {
         if(elf_Lexer_peek(lexer) == '\n' || 
            elf_Lexer_peek(lexer) == '\r')
         {
-            elf_Lexer_consume(lexer);
+            elf_Lexer_advance(lexer);
             size_t len = lexer->cursor - origin;
             elf_Lexer_emitToken(lexer, origin, len, TOK_LCOM);
             return TRUE;        
         }
-        elf_Lexer_consume(lexer);
-    }
-    
+        elf_Lexer_advance(lexer);
+    }   
     return FALSE;
 }
 
@@ -307,19 +237,19 @@ BOOL elf_Lexer_consumeBlockComment(elf_Lexer* lexer)
     }
 
     size_t origin = lexer->cursor;
-    elf_Lexer_consume(lexer);
-    elf_Lexer_consume(lexer);
+    elf_Lexer_advance(lexer);
+    elf_Lexer_advance(lexer);
     while(elf_Lexer_peek(lexer) != elf_EOF)
     {
         if(elf_Lexer_peek(lexer) == '*' && elf_Lexer_peekNext(lexer) == '/')
         {
-            elf_Lexer_consume(lexer);
-            elf_Lexer_consume(lexer);
+            elf_Lexer_advance(lexer);
+            elf_Lexer_advance(lexer);
             size_t len = lexer->cursor - origin;
             elf_Lexer_emitToken(lexer, origin, len, TOK_BCOM);
             return TRUE;
         }
-        elf_Lexer_consume(lexer);
+        elf_Lexer_advance(lexer);
     }
 
     return FALSE;
@@ -331,33 +261,39 @@ BOOL elf_Lexer_consumeOperator(elf_Lexer* lexer)
     size_t origin = lexer->cursor;
     char curr = elf_Lexer_peek(lexer);
     char next = elf_Lexer_peekNext(lexer);
+    BOOL succ = FALSE;
 
-    BOOL* succ = elf_newBool();
-    elf_TokenType oprType = elf_Lexer_getAtomOprType(curr, succ);
-    if(*succ != TRUE)
-    {
-        elf_disposeBool(succ);
+    elf_TokenType oprType = elf_Lexer_tryGetSingleCharOprType(curr, &succ);
+    if(succ != TRUE) 
         return FALSE;
-    }
  
-    elf_Lexer_consume(lexer);
+    elf_Lexer_advance(lexer);
     len++;
 
-    elf_TokenType nextOprType = elf_Lexer_getAtomOprType(next, succ);
-    if(*succ == TRUE)
+    elf_TokenType nextOprType = elf_Lexer_tryGetSingleCharOprType(next, &succ);
+    if(succ == TRUE)
     { 
-        elf_TokenType cmpdType = elf_Lexer_getCompOprType(oprType, nextOprType, succ);
-        if(*succ == TRUE)
+        elf_TokenType cmpdType = elf_Lexer_tryGetCompoundOprType(oprType, nextOprType, &succ);
+        if(succ == TRUE)
         {
-            elf_Lexer_consume(lexer);
+            elf_Lexer_advance(lexer);
             len++;
             oprType = cmpdType;   
         }
     }   
     elf_Lexer_emitToken(lexer, origin, len, oprType);
-    elf_disposeBool(succ);
     return len != 0;
-} 
+}
+
+BOOL elf_Lexer_consumeWhiteSpace(elf_Lexer* lexer)
+{
+    if(elf_Lexer_isWhiteSpace(elf_Lexer_peek(lexer)) == FALSE)
+        return FALSE;
+    elf_Lexer_advance(lexer);
+    while(elf_Lexer_isWhiteSpace(elf_Lexer_peek(lexer)) == TRUE)
+        elf_Lexer_advance(lexer);
+    return TRUE;
+}
 
 char elf_Lexer_peekLast(elf_Lexer* lexer)
 {
@@ -365,7 +301,7 @@ char elf_Lexer_peekLast(elf_Lexer* lexer)
     if(last < 0)
     {
         printf("warning: currently cursor at first char, cannot peek last; will return EOF char.\n");
-        return '\0';
+        return elf_EOF;
     }
     return lexer->source[last];
 }
@@ -376,7 +312,7 @@ char elf_Lexer_peekNext(elf_Lexer* lexer)
     if(next >= lexer->cursor)
     {
         printf("warning: currently cursor at last char, cannot peek next; will return EOF char.\n");
-        return '\0';
+        return elf_EOF;
     }
     return lexer->source[next];
 }
@@ -398,25 +334,9 @@ char elf_Lexer_tryPeekAhead(elf_Lexer* lexer, size_t n, BOOL* succ)
     return lexer->source[i];
 }
 
-void elf_Lexer_next(elf_Lexer* lexer)
+void elf_Lexer_advance(elf_Lexer* lexer)
 {
     lexer->cursor++;
-}
-
-void elf_Lexer_trimNext(elf_Lexer* lexer)
-{
-    elf_Lexer_next(lexer);
-    char c = elf_Lexer_peek(lexer);
-
-    while(1)
-    {
-        if(elf_Lexer_isWhiteSpace(c) == TRUE)
-        { 
-            elf_Lexer_next(lexer);
-            c = elf_Lexer_peek(lexer);
-        }
-        else return;
-    }
 }
 
 
