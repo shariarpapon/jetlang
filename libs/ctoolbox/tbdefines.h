@@ -1,8 +1,8 @@
 #pragma once
 
-#define _bool int
-#define _true 1
-#define _false 0
+#define tbBOOL int
+#define tbTRUE 1
+#define tbFALSE 0
 
 
 

@@ -1,7 +1,5 @@
 #include <stdio.h>
 #include <elf_lexer.h>
-#include <elf_token.h>
-#include <toolbox/tbdefines.h>
 
 int main(void)
 {
@@ -10,10 +8,10 @@ int main(void)
     elf_Lexer* lexer = elf_Lexer_create(source);
     
     if(!lexer)
-        return _false;
+        return FALSE;
 
     if(!lexer->tokens)
-        return _false; 
+        return FALSE; 
 
     elf_Lexer_tokenize(lexer);
     printf("tokenization complete...\n");
@@ -26,5 +24,5 @@ int main(void)
     printf("lexer disposed...\n");
 
 	printf("* all tests ran successfully\n");
-    return _true;
+    return TRUE;
 }

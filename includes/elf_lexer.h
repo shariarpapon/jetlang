@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <elf_token.h>
 #include <elf_utils.h>
-#include <toolbox/tblist.h>
+#include <ctoolbox/tblist.h>
 
 typedef struct ElfLexer
 {
