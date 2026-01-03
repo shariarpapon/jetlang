@@ -21,7 +21,7 @@ BOOL elf_lexer_is_ident(char c);
 BOOL elf_lexer_is_number(char c);
 BOOL elf_lexer_is_whitespace(char c);
 
-BOOL elf_lexer_scan_type_seq(elf_lexer* lexer, elf_token_type type, BOOL(*predicate)(char));
+BOOL elf_lexer_scan_type_seq(elf_lexer* lexer, elf_token_type type, BOOL(*is_char_of_specified_type)(char));
 BOOL elf_lexer_scan_line_com(elf_lexer* lexer);
 BOOL elf_lexer_scan_block_com(elf_lexer* lexer);
 BOOL elf_lexer_scan_opr(elf_lexer* lexer);
@@ -32,7 +32,7 @@ elf_token_type elf_lexer_eval_cmpd_opr_type(elf_token_type l, elf_token_type r, 
 
 char elf_lexer_consume(elf_lexer* lexer);
 char elf_lexer_peek(elf_lexer* lexer);
-char elf_lexer_peek_last(elf_lexer* lexer);
+char elf_lexer_peek_prev(elf_lexer* lexer);
 char elf_lexer_peek_next(elf_lexer* lexer);
 char elf_lexer_try_peek_ahead(elf_lexer* lexer, size_t n, BOOL* succ);
 

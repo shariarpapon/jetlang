@@ -7,8 +7,8 @@ typedef enum
     TOK_EOF,      // End of file
 
     //literals
-    TOK_ID,   // identifiers
-    TOK_KW,   // keywords (reserved words)
+    TOK_IDENT,   // identifiers
+    TOK_KWD,   // keywords (reserved words)
     TOK_NUM,  // 0..9 (numeric literal)
     TOK_STR,  // "string literal"
     TOK_BCOM, // /*block comment*/
@@ -34,7 +34,7 @@ typedef enum
     TOK_MINUS,      // -
     TOK_STAR,       // *
     TOK_SLASH,      // /
-    TOK_PERCENT,    // %
+    TOK_MOD,    // %
     
     TOK_PLUSEQ,     // +=
     TOK_MINEQ,      // -=
@@ -48,10 +48,10 @@ typedef enum
     TOK_DOT,   // . 
     TOK_LPAR,  // (
     TOK_RPAR,  // )
-    TOK_LBR,   // {
-    TOK_RBR,   // }
-    TOK_LBRK,  // [
-    TOK_RBRK,  // ]
+    TOK_LBRC,   // {
+    TOK_RBRC,   // }
+    TOK_LBRCK,  // [
+    TOK_RBRCK,  // ]
 
 } elf_token_type;
 

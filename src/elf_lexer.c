@@ -63,7 +63,7 @@ BOOL elf_lexer_tokenize(elf_lexer* lexer)
     {
         if(elf_lexer_scan_whitepace(lexer) == TRUE)
             continue;
-        else if(elf_lexer_scan_type_seq(lexer, TOK_ID, elf_lexer_is_ident) == TRUE)
+        else if(elf_lexer_scan_type_seq(lexer, TOK_IDENT, elf_lexer_is_ident) == TRUE)
             continue;
         else if(elf_lexer_scan_type_seq(lexer, TOK_NUM, elf_lexer_is_number) == TRUE)
             continue;
@@ -143,7 +143,7 @@ elf_token_type elf_lexer_eval_opr_type(char c, BOOL* succ)
         case '-': return TOK_MINUS;
         case '*': return TOK_STAR;
         case '/': return TOK_SLASH;
-        case '%': return TOK_PERCENT;
+        case '%': return TOK_MOD;
     }
     *succ = FALSE; 
     return TOK_INV;
@@ -166,7 +166,7 @@ elf_token_type elf_lexer_eval_cmpd_opr_type(elf_token_type l, elf_token_type r, 
         else if (l == TOK_MINUS)   {  return TOK_MINEQ; }
         else if (l == TOK_STAR)    {  return TOK_MULEQ; }
         else if (l == TOK_SLASH)   {  return TOK_DIVEQ; }
-        else if (l == TOK_PERCENT) {  return TOK_MODEQ; }
+        else if (l == TOK_MOD) {  return TOK_MODEQ; }
         else if (l == TOK_GT)      {  return TOK_GTE; }
         else if (l == TOK_LT)      {  return TOK_LTE; }
     }
@@ -295,12 +295,12 @@ BOOL elf_lexer_scan_whitepace(elf_lexer* lexer)
     return TRUE;
 }
 
-char elf_lexer_peek_last(elf_lexer* lexer)
+char elf_lexer_peek_prev(elf_lexer* lexer)
 {
     size_t last = lexer->cursor - 1;
     if(last < 0)
     {
-        printf("warning: currently cursor at first char, cannot peek last; will return EOF char.\n");
+        printf("wrn: cannot neek prev, index < 0... returning null-term\n");
         return NULL_TERM;
     }
     return lexer->source[last];
@@ -311,7 +311,7 @@ char elf_lexer_peek_next(elf_lexer* lexer)
     size_t next = lexer->cursor + 1;
     if(next >= lexer->cursor)
     {
-        printf("warning: currently cursor at last char, cannot peek next; will return EOF char.\n");
+        printf("wrn: cannot peek next, EOF reached... returning null-term\n");
         return NULL_TERM;
     }
     return lexer->source[next];

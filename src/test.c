@@ -1,14 +1,19 @@
 #include <stdio.h>
 #include <string.h>
+#include <stddef.h>
 #include <elf_lexer.h>
+#include <elf_utils.h>
 
 int main(void)
 {
-    const char* source = read_text_file("elfcode.ef");
-    if(source == NULL)
+    size_t src_len = 0;
+    const char* source = (const char*)load_text_file("elfcode.ef", &src_len);
+    if(!source)
     {
-        return FALSE;
+        fprintf(stderr, "error: could not load source text\n");
     }
+
+    printf("source text loaded (len: %zu):\n\n%s\n", src_len, source);
 
     elf_lexer* lexer = elf_lexer_create(source);
     
@@ -26,7 +31,9 @@ int main(void)
     printf("\n******* list-end *******\n\n");
     
     elf_lexer_full_dispose(lexer);
+    free((void*)source);
     printf("lexer disposed...\n");
+    
 
 	printf("* all tests ran successfully\n");
     return TRUE;
