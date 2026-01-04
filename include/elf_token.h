@@ -34,7 +34,7 @@ typedef enum
     TOK_MINUS,      // -
     TOK_STAR,       // *
     TOK_SLASH,      // /
-    TOK_MOD,    // %
+    TOK_MOD,        // %
     
     TOK_PLUSEQ,     // +=
     TOK_MINEQ,      // -=
@@ -44,12 +44,13 @@ typedef enum
     TOK_POW,        // **
 
     //Punctuations
+    TOK_COMMA, // ,
     TOK_SEMI,  // ;
     TOK_DOT,   // . 
     TOK_LPAR,  // (
     TOK_RPAR,  // )
-    TOK_LBRC,   // {
-    TOK_RBRC,   // }
+    TOK_LBRC,  // {
+    TOK_RBRC,  // }
     TOK_LBRK,  // [
     TOK_RBRK,  // ]
 

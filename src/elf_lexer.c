@@ -61,20 +61,20 @@ BOOL elf_lexer_tokenize(elf_lexer* lexer)
     }
     while(elf_lexer_peek(lexer) != NULL_TERM)
     {
-        if(elf_lexer_scan_whitepace(lexer) == TRUE)
-            continue;
-        else if(elf_lexer_scan_ident(lexer)== TRUE)
-            continue;
-        else if (elf_lexer_scan_num(lexer)== TRUE)
-            continue;
-        else if(elf_lexer_scan_line_com(lexer) == TRUE)
+        if(elf_lexer_scan_line_com(lexer) == TRUE)
             continue;
         else if(elf_lexer_scan_block_com(lexer) == TRUE)
            continue;
-        else if(elf_lexer_scan_opr(lexer) == TRUE)
-           continue;
+        else if(elf_lexer_scan_whitepace(lexer) == TRUE)
+            continue;
+        else if(elf_lexer_scan_ident(lexer)== TRUE)
+            continue;
         else if(elf_lexer_scan_symbol(lexer) == TRUE)
             continue;
+        else if (elf_lexer_scan_num(lexer)== TRUE)
+            continue;
+        else if(elf_lexer_scan_opr(lexer) == TRUE)
+           continue;
 
         elf_lexer_emit_token(lexer, lexer->cursor, 1, TOK_INV);
         elf_lexer_advance(lexer);
@@ -104,7 +104,7 @@ BOOL elf_lexer_is_ident(char c)
     return FALSE;
 }
 
-BOOL elf_lexer_is_num(char c)
+BOOL elf_lexer_is_digit(char c)
 {
     switch (c)
     {
@@ -168,7 +168,7 @@ elf_token_type elf_lexer_eval_cmpd_opr_type(elf_token_type l, elf_token_type r, 
         else if (l == TOK_MINUS)   {  return TOK_MINEQ; }
         else if (l == TOK_STAR)    {  return TOK_MULEQ; }
         else if (l == TOK_SLASH)   {  return TOK_DIVEQ; }
-        else if (l == TOK_MOD) {  return TOK_MODEQ; }
+        else if (l == TOK_MOD)     {  return TOK_MODEQ; }
         else if (l == TOK_GT)      {  return TOK_GTE; }
         else if (l == TOK_LT)      {  return TOK_LTE; }
     }
@@ -198,7 +198,7 @@ BOOL elf_lexer_scan_ident(elf_lexer* lexer)
     elf_lexer_advance(lexer);
 
     while(elf_lexer_is_ident(elf_lexer_peek(lexer))
-       || elf_lexer_is_num(elf_lexer_peek(lexer)) )
+       || elf_lexer_is_digit(elf_lexer_peek(lexer)) )
     {
         elf_lexer_advance(lexer);
     }
@@ -210,14 +210,14 @@ BOOL elf_lexer_scan_ident(elf_lexer* lexer)
 
 BOOL elf_lexer_scan_num(elf_lexer* lexer)
 {
-    if(elf_lexer_is_num(elf_lexer_peek(lexer)) == FALSE)
+    if(elf_lexer_is_digit(elf_lexer_peek(lexer)) == FALSE)
     {
         return FALSE;
     }
 
     size_t origin = lexer->cursor;
     elf_lexer_advance(lexer); 
-    while(elf_lexer_is_num(elf_lexer_peek(lexer)))
+    while(elf_lexer_is_digit(elf_lexer_peek(lexer)))
     {
         elf_lexer_advance(lexer);
     }
@@ -293,10 +293,12 @@ BOOL elf_lexer_scan_opr(elf_lexer* lexer)
  
     elf_lexer_advance(lexer);
     len++;
-
+    
+    succ = FALSE;
     elf_token_type nextOprType = elf_lexer_eval_opr_type(next, &succ);
     if(succ == TRUE)
-    { 
+    {
+        succ = FALSE;
         elf_token_type cmpdType = elf_lexer_eval_cmpd_opr_type(oprType, nextOprType, &succ);
         if(succ == TRUE)
         {
@@ -326,14 +328,15 @@ BOOL elf_lexer_scan_symbol(elf_lexer* lexer)
     switch(elf_lexer_peek(lexer))
     {
         default: return FALSE;
-        case ';': type = TOK_SEMI; break;
-        case '.': type = TOK_DOT ; break;
-        case '(': type = TOK_LPAR; break;
-        case ')': type = TOK_RPAR; break;
-        case '{': type = TOK_LBRC; break;
-        case '}': type = TOK_RBRC; break;
-        case '[': type = TOK_LBRK; break;
-        case ']': type = TOK_RBRK; break;
+        case ';': type = TOK_SEMI;  break;
+        case '.': type = TOK_DOT ;  break;
+        case '(': type = TOK_LPAR;  break;
+        case ')': type = TOK_RPAR;  break;
+        case '{': type = TOK_LBRC;  break;
+        case '}': type = TOK_RBRC;  break;
+        case '[': type = TOK_LBRK;  break;
+        case ']': type = TOK_RBRK;  break;
+        case ',': type = TOK_COMMA; break;
     }
     elf_lexer_advance(lexer);
     elf_lexer_emit_token(lexer, origin, 1, type);

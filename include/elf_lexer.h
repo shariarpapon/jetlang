@@ -18,7 +18,7 @@ void elf_lexer_full_dispose(elf_lexer* lexer);
 BOOL elf_lexer_tokenize(elf_lexer* lexer);
 
 BOOL elf_lexer_is_ident(char c);
-BOOL elf_lexer_is_num(char c);
+BOOL elf_lexer_is_digit(char c);
 BOOL elf_lexer_is_whitespace(char c);
 
 BOOL elf_lexer_scan_ident(elf_lexer* lexer);

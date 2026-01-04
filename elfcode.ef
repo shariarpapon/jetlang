@@ -1,10 +1,5 @@
-object player
+bool is_even(int num)
 {
-    string name = "alex";
-    int score = "316"
-
-    string get_name_function(arg1, arg2)  
-    {
-        ret name;
-    }
+    if(num % 2 == 0)
+        return true;
 }

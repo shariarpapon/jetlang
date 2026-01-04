@@ -50,34 +50,6 @@ char* load_text_file(const char* path, size_t* out_len)
 }
 
 
-void println_concated_n(const char* s, const char* c, size_t n)
-{   
-    if(!s || !c)
-    {
-        fprintf(stderr, "error: cannot concat, provided string invalid\n");
-        return;
-    }
-    size_t s_len = strlen(s);
-    size_t c_len = strlen(c);
-    if(s_len == 0 || c_len == 0)
-    {
-        fprintf(stderr, "error: cannot concat, provided string invalid\n");
-        return;
-    }
-
-    size_t f_len = (n > s_len) ? s_len : n;
-    size_t out_len = f_len + c_len + 1;
-    char out[out_len];
-    memcpy(out, s, f_len);
-    memcpy(out + f_len, c, c_len);
-    out[out_len] = NULL_TERM;
-    puts(out);
-}
-
-
-
-
-
 
 
 
