@@ -11,9 +11,10 @@ int main(void)
     if(!source)
     {
         fprintf(stderr, "error: could not load source text\n");
+        return FALSE;
     }
 
-    printf("source text loaded (len: %zu):\n\n%s\n", src_len, source);
+    printf("source text loaded (len: %zu):\n\n%s\n\n", src_len, source);
 
     elf_lexer* lexer = elf_lexer_create(source);
     
@@ -24,17 +25,11 @@ int main(void)
         return FALSE; 
 
     elf_lexer_tokenize(lexer);
-    printf("tokenization complete...\n");
-    
-    printf("\n******* printing-token-list *******\n\n");
     elf_token_print_list((elf_token**)lexer->tokens->elements, lexer->tokens->count); 
-    printf("\n******* list-end *******\n\n");
-    
     elf_lexer_full_dispose(lexer);
-    free((void*)source);
-    printf("lexer disposed...\n");
     
-
-	printf("* all tests ran successfully\n");
+    free((void*)source);
+    
+    printf("* all tests ran successfully\n");
     return TRUE;
  }

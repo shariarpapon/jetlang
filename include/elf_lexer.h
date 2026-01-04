@@ -21,16 +21,15 @@ BOOL elf_lexer_is_ident(char c);
 BOOL elf_lexer_is_digit(char c);
 BOOL elf_lexer_is_whitespace(char c);
 
-BOOL elf_lexer_scan_ident(elf_lexer* lexer);
-BOOL elf_lexer_scan_num(elf_lexer* lexer);
-BOOL elf_lexer_scan_line_com(elf_lexer* lexer);
-BOOL elf_lexer_scan_block_com(elf_lexer* lexer);
-BOOL elf_lexer_scan_opr(elf_lexer* lexer);
+BOOL elf_lexer_try_scan_ident(elf_lexer* lexer);
+BOOL elf_lexer_try_scan_num(elf_lexer* lexer);
+BOOL elf_lexer_try_scan_line_com(elf_lexer* lexer);
+BOOL elf_lexer_try_scan_block_com(elf_lexer* lexer);
+BOOL elf_lexer_try_scan_char(elf_lexer* lexer);
 BOOL elf_lexer_scan_whitepace(elf_lexer* lexer);
-BOOL elf_lexer_scan_symbol(elf_lexer* lexer);
 
-elf_token_type elf_lexer_eval_opr_type(char c, BOOL* succ);
-elf_token_type elf_lexer_eval_cmpd_opr_type(elf_token_type l, elf_token_type r, BOOL* succ);
+elf_token_type elf_lexer_try_get_char_type(char c, BOOL* succ);
+elf_token_type elf_lexer_try_get_cmpd_char_type(elf_token_type l, elf_token_type r, BOOL* succ);
 
 char elf_lexer_consume(elf_lexer* lexer);
 char elf_lexer_peek(elf_lexer* lexer);

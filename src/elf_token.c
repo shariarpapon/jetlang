@@ -35,13 +35,15 @@ void elf_token_print_list(elf_token** tokens, size_t count)
         return;
     }
     
+    printf("\ntoken list [%zu]:\n\n", count);
     for(size_t i = 0; i < count; i++)
     {  
         elf_token* token = *tokens;
         tokens++;
         const char* type_str = elf_token_type_str(token->type);
-        printf("%-12s %.*s\n", type_str, (int)token->len, token->source + token->origin);        
+        printf("   %-12s %.*s\n", type_str, (int)token->len, token->source + token->origin);        
     }
+    printf("\n");
 }
 
 const char* elf_token_type_str(elf_token_type type)
