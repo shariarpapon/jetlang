@@ -1,12 +1,9 @@
-bool is_even(int num)
-{
-    //this is a line comment
-    
-    /*
-        this is a block comment which
-        can have new lines.
-    */
+int fibonacci(int n) {
+    if (n <= 1) {
+        return n; // Base cases: F(0) = 0, F(1) = 1
+    }
+    // Recursive case: F(n) = F(n-1) + F(n-2)
 
-    if(num % 2 == 0)
-        return true;
+    return fibonacci(n - 1) + fibonacci(n - 2);
 }
+

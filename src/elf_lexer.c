@@ -39,10 +39,10 @@ elf_lexer* elf_lexer_create(const char* source)
 
 void elf_lexer_full_dispose(elf_lexer* lexer)
 {
-    printf("full disposing lexer (including the given lexer ptr)...");
+    printf("full disposing lexer...");
     free(lexer->tokens);
     free(lexer);
-    printf("successful!\n\n");
+    printf("successful!\n");
 }
 
 void elf_lexer_emit_token(elf_lexer* lexer, size_t origin, size_t len, elf_token_type type)
@@ -57,7 +57,7 @@ void elf_lexer_emit_token(elf_lexer* lexer, size_t origin, size_t len, elf_token
 
 BOOL elf_lexer_tokenize(elf_lexer* lexer)
 {
-    printf("tokenizing...\n\n");
+    printf("tokenizing...\n");
     if(!lexer || !lexer->tokens) 
     {
         fprintf(stderr, "error: cannot tokenize, lexer or lexer->tokens is invalid.\n");
@@ -65,7 +65,7 @@ BOOL elf_lexer_tokenize(elf_lexer* lexer)
     }
     while(elf_lexer_peek(lexer) != NULL_TERM)
     {
-        if(elf_lexer_scan_whitepace(lexer) == TRUE)
+        if(elf_lexer_try_scan_whitespace(lexer) == TRUE)
             continue;
         else if(elf_lexer_try_scan_line_com(lexer) == TRUE)
             continue;
@@ -75,15 +75,13 @@ BOOL elf_lexer_tokenize(elf_lexer* lexer)
             continue;
         else if(elf_lexer_try_scan_char(lexer) == TRUE)
            continue;
-       //  else if(elf_lexer_scan_symbol(lexer) == TRUE)
-       //      continue;
         else if (elf_lexer_try_scan_num(lexer)== TRUE)
             continue;
 
         elf_lexer_emit_token(lexer, lexer->cursor, 1, TOK_INV);
         elf_lexer_advance(lexer);
     } 
-    printf("\ntokenization complete...\n");
+    printf("tokenization complete!\n");
     return TRUE;
 }
 
@@ -257,8 +255,8 @@ BOOL elf_lexer_try_scan_line_com(elf_lexer* lexer)
     {
         if(elf_lexer_peek(lexer) == '\n')
         {
-            elf_lexer_advance(lexer);
             size_t len = lexer->cursor - origin;
+            elf_lexer_advance(lexer);
             elf_lexer_emit_token(lexer, origin, len, TOK_LCOM);
             return TRUE;        
         }
@@ -325,7 +323,7 @@ BOOL elf_lexer_try_scan_char(elf_lexer* lexer)
     return len != 0;
 }
 
-BOOL elf_lexer_scan_whitepace(elf_lexer* lexer)
+BOOL elf_lexer_try_scan_whitespace(elf_lexer* lexer)
 {
     if(elf_lexer_is_whitespace(elf_lexer_peek(lexer)) == FALSE)
         return FALSE;
