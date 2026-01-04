@@ -90,8 +90,8 @@ const char* elf_token_type_str(elf_token_type type)
         case TOK_RPAR:    return "TOK_RPAR";
         case TOK_LBRC:     return "TOK_LBRC";
         case TOK_RBRC:     return "TOK_RBRC";
-        case TOK_LBRCK:    return "TOK_LBRCK";
-        case TOK_RBRCK:    return "TOK_RBRCK";
+        case TOK_LBRK:    return "TOK_LBRK";
+        case TOK_RBRK:    return "TOK_RBRK";
     }
 }
 

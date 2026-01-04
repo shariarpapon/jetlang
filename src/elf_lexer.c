@@ -63,9 +63,9 @@ BOOL elf_lexer_tokenize(elf_lexer* lexer)
     {
         if(elf_lexer_scan_whitepace(lexer) == TRUE)
             continue;
-        else if(elf_lexer_scan_type_seq(lexer, TOK_IDENT, elf_lexer_is_ident) == TRUE)
+        else if(elf_lexer_scan_ident(lexer)== TRUE)
             continue;
-        else if(elf_lexer_scan_type_seq(lexer, TOK_NUM, elf_lexer_is_number) == TRUE)
+        else if (elf_lexer_scan_num(lexer)== TRUE)
             continue;
         else if(elf_lexer_scan_line_com(lexer) == TRUE)
             continue;
@@ -73,7 +73,9 @@ BOOL elf_lexer_tokenize(elf_lexer* lexer)
            continue;
         else if(elf_lexer_scan_opr(lexer) == TRUE)
            continue;
-         
+        else if(elf_lexer_scan_symbol(lexer) == TRUE)
+            continue;
+
         elf_lexer_emit_token(lexer, lexer->cursor, 1, TOK_INV);
         elf_lexer_advance(lexer);
     }
@@ -102,7 +104,7 @@ BOOL elf_lexer_is_ident(char c)
     return FALSE;
 }
 
-BOOL elf_lexer_is_number(char c)
+BOOL elf_lexer_is_num(char c)
 {
     switch (c)
     {
@@ -185,23 +187,45 @@ char elf_lexer_consume(elf_lexer* lexer)
     return c;
 }
 
-BOOL elf_lexer_scan_type_seq(elf_lexer* lexer, elf_token_type type, BOOL(*predicate)(char))
+BOOL elf_lexer_scan_ident(elf_lexer* lexer)
 {
-    if(!predicate( elf_lexer_peek(lexer)))
+    if(elf_lexer_is_ident(elf_lexer_peek(lexer)) == FALSE)
     {
         return FALSE;
     }
 
     size_t origin = lexer->cursor;
-    elf_lexer_consume(lexer);
-    while(predicate(elf_lexer_peek(lexer)))
+    elf_lexer_advance(lexer);
+
+    while(elf_lexer_is_ident(elf_lexer_peek(lexer))
+       || elf_lexer_is_num(elf_lexer_peek(lexer)) )
     {
-        elf_lexer_consume(lexer);
+        elf_lexer_advance(lexer);
+    }
+
+    size_t len = lexer->cursor - origin;
+    elf_lexer_emit_token(lexer, origin, len, TOK_IDENT);
+    return len != 0;
+}
+
+BOOL elf_lexer_scan_num(elf_lexer* lexer)
+{
+    if(elf_lexer_is_num(elf_lexer_peek(lexer)) == FALSE)
+    {
+        return FALSE;
+    }
+
+    size_t origin = lexer->cursor;
+    elf_lexer_advance(lexer); 
+    while(elf_lexer_is_num(elf_lexer_peek(lexer)))
+    {
+        elf_lexer_advance(lexer);
     }
     size_t len = lexer->cursor - origin;
-    elf_lexer_emit_token(lexer, origin, len, type);
-    return TRUE;
+    elf_lexer_emit_token(lexer, origin, len, TOK_NUM);
+    return len != 0;
 }
+
 
 BOOL elf_lexer_scan_line_com(elf_lexer* lexer)
 {
@@ -292,6 +316,27 @@ BOOL elf_lexer_scan_whitepace(elf_lexer* lexer)
     elf_lexer_advance(lexer);
     while(elf_lexer_is_whitespace(elf_lexer_peek(lexer)) == TRUE)
         elf_lexer_advance(lexer);
+    return TRUE;
+}
+
+BOOL elf_lexer_scan_symbol(elf_lexer* lexer)
+{
+    size_t origin = lexer->cursor;
+    elf_token_type type = TOK_INV;
+    switch(elf_lexer_peek(lexer))
+    {
+        default: return FALSE;
+        case ';': type = TOK_SEMI; break;
+        case '.': type = TOK_DOT ; break;
+        case '(': type = TOK_LPAR; break;
+        case ')': type = TOK_RPAR; break;
+        case '{': type = TOK_LBRC; break;
+        case '}': type = TOK_RBRC; break;
+        case '[': type = TOK_LBRK; break;
+        case ']': type = TOK_RBRK; break;
+    }
+    elf_lexer_advance(lexer);
+    elf_lexer_emit_token(lexer, origin, 1, type);
     return TRUE;
 }
 

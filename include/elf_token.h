@@ -50,8 +50,8 @@ typedef enum
     TOK_RPAR,  // )
     TOK_LBRC,   // {
     TOK_RBRC,   // }
-    TOK_LBRCK,  // [
-    TOK_RBRCK,  // ]
+    TOK_LBRK,  // [
+    TOK_RBRK,  // ]
 
 } elf_token_type;
 
