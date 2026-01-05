@@ -21,27 +21,27 @@ elf_token* elf_token_create(const char* source, size_t origin, size_t len, elf_t
 }
 
 
-void elf_token_print_list(elf_token** tokens, size_t count)
+void elf_token_print_vect(elf_token** tokens, size_t count)
 {
     if(!tokens)
     {
-        fprintf(stderr, "error: cannot print tokens, token list invalid.\n");
+        fprintf(stderr, "error: cannot print tokens, token vect invalid.\n");
         return;
     }
 
     if(count == 0)
     {
-        printf("# nothing to print, token list is empty\n");
+        printf("# nothing to print, token vect is empty\n");
         return;
     }
     
-    printf("\ntoken list [%zu]:\n\n", count);
+    printf("\ntoken vect [%zu]:\n\n", count);
     for(size_t i = 0; i < count; i++)
     {  
         elf_token* token = *tokens;
         tokens++;
         const char* type_str = elf_token_type_str(token->type);
-        printf("   %-12s %.*s\n", type_str, (int)token->len, token->source + token->origin);        
+        printf("%zu   %-12s %.*s\n",i+1, type_str, (int)token->len, token->source + token->origin);        
     }
     printf("\n");
 }

@@ -7,14 +7,16 @@ CFLAGS = -Wall -std=c11 -g $(addprefix -I,$(HEADER_DIRS))
 SRC = $(wildcard src/*.c)
 OBJ = $(SRC:src/%.c=build/%.o)
 BIN = elf
-ELF_CODE_FILE = *.ef pt
-
 LIBS := $(shell find libs -name "*.a")
+
+ELF_FLAGS =
+ELF_CODE_FILE = *.ef
+TEST_EXEC = ./elf $(ELF_CODE_FILE) $(ELF_FLAGS)
 
 all: run
 
 run: $(BIN)
-	./elf $(ELF_CODE_FILE)
+	$(TEST_EXEC)
 
 $(BIN): $(OBJ)
 	mkdir -p build

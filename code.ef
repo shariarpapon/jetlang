@@ -1,0 +1,11 @@
+object player
+{
+    str name: "alex";
+    uint age: 22;
+
+    bool is_age_same(uint a)
+    {
+        return a = 22;
+    }
+}
+

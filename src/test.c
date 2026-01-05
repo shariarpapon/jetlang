@@ -13,7 +13,7 @@ static int arg_count;
 static char** args;
 
 void print_source(const char* src, size_t src_len);
-BOOL find_arg(const char* target);
+bool find_arg(const char* target);
 
 int main(int argc, char** argv)
 {
@@ -44,7 +44,7 @@ int main(int argc, char** argv)
     arg_count--;
 
     
-    if(find_arg(ARG_PRINT_ALL) == TRUE || find_arg(ARG_PRINT_SOURCE) ==  TRUE)
+    if(find_arg(ARG_PRINT_ALL) == true || find_arg(ARG_PRINT_SOURCE) ==  true)
         print_source(source, src_len);
     
     elf_lexer* lexer = elf_lexer_create(source);
@@ -55,16 +55,16 @@ int main(int argc, char** argv)
     if(!lexer->tokens)
         return 1; 
     
-    if(find_arg(ARG_LEXER_EMIT_TOKENS) == TRUE)
+    if(find_arg(ARG_LEXER_EMIT_TOKENS) == true)
     {
-        lexer->emit_comments = TRUE;
+        lexer->emit_comments = true;
     }
 
     elf_lexer_tokenize(lexer);
    
-    if(find_arg(ARG_PRINT_ALL) == TRUE || find_arg(ARG_PRINT_TOKENS))
-        elf_token_print_list((elf_token**)lexer->tokens->elements, lexer->tokens->count); 
-   
+    if(find_arg(ARG_PRINT_ALL) == true || find_arg(ARG_PRINT_TOKENS))
+        elf_token_print_vect((elf_token**)lexer->tokens->elements, lexer->tokens->count); 
+    
     elf_lexer_full_dispose(lexer); 
     free((void*)source);
 
@@ -79,15 +79,15 @@ void print_source(const char* source, size_t src_len)
     puts("\n*****************************************************\n");
 }
 
-BOOL find_arg(const char* target)
+bool find_arg(const char* target)
 {
     if(arg_count <= 0 || !target || !args) 
-        return FALSE;
+        return false;
 
     for(int i = 0; i < arg_count; i++)
     {
         if(strcmp(args[i], target) == 0)
-            return TRUE;
+            return true;
     }
-    return FALSE;
+    return false;
 }

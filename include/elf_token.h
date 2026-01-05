@@ -68,6 +68,6 @@ typedef struct
 
 elf_token* elf_token_create(const char* source, size_t origin, size_t len, elf_token_type type);
 const char* elf_token_type_str(elf_token_type type);
-void elf_token_print_list(elf_token** list, size_t count);
+void elf_token_print_vect(elf_token** vect, size_t count);
 
 
