@@ -22,6 +22,7 @@ elf_lexer* elf_lexer_create(const char* source)
     lexer->source = source;
     lexer->len = strlen(source) + 1;
     lexer->cursor = 0;
+    lexer->emit_comments = FALSE;
 
     const size_t tok_capacity = 128;
     lexer->tokens = tblist_create(tok_capacity);
@@ -257,7 +258,8 @@ BOOL elf_lexer_try_scan_line_com(elf_lexer* lexer)
         {
             size_t len = lexer->cursor - origin;
             elf_lexer_advance(lexer);
-            elf_lexer_emit_token(lexer, origin, len, TOK_LCOM);
+            if(lexer->emit_comments == TRUE)
+                elf_lexer_emit_token(lexer, origin, len, TOK_LCOM);
             return TRUE;        
         }
         elf_lexer_advance(lexer);
@@ -281,8 +283,9 @@ BOOL elf_lexer_try_scan_block_com(elf_lexer* lexer)
         {
             elf_lexer_advance(lexer);
             elf_lexer_advance(lexer);
-            size_t len = lexer->cursor - origin;
-            elf_lexer_emit_token(lexer, origin, len, TOK_BCOM);
+            size_t len = lexer->cursor - origin; 
+            if(lexer->emit_comments == TRUE)
+                elf_lexer_emit_token(lexer, origin, len, TOK_BCOM);
             return TRUE;
         }
         elf_lexer_advance(lexer);

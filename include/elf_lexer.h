@@ -9,6 +9,7 @@ typedef struct
     const char* source;
     size_t len; //including null terminal ('\0')
     size_t cursor;
+    BOOL emit_comments;
     tblist* tokens;
 } elf_lexer;
 

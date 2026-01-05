@@ -4,6 +4,11 @@
 #include <elf_lexer.h>
 #include <elf_utils.h>
 
+#define ARG_PRINT_TOKENS "pt"
+#define ARG_PRINT_SOURCE "ps"
+#define ARG_PRINT_ALL "pa"
+#define ARG_LEXER_EMIT_TOKENS "lec"
+
 static int arg_count;
 static char** args;
 
@@ -14,36 +19,57 @@ int main(int argc, char** argv)
 {
     arg_count = argc;
     args = argv;
+    
+    //skip calling file cmd
+    args++;
+    arg_count--;
 
+    if(!args)
+    {
+        fprintf(stderr, "error: no valid source file path provided\n");
+        return 1;
+    }
+    
     size_t src_len = 0;
-    const char* source = (const char*)load_text_file("elfcode.ef", &src_len);
+    //now *arg should point to the source file path (the 2nd arg)
+    const char* source = (const char*)load_text_file(*args, &src_len);
     if(!source)
     {
         fprintf(stderr, "error: could not load source text\n");
-        return FALSE;
+        return 1;
     }
     
-    if(find_arg("a") == TRUE || find_arg("s") ==  TRUE)
+    //skip the file path arg
+    args++;
+    arg_count--;
+
+    
+    if(find_arg(ARG_PRINT_ALL) == TRUE || find_arg(ARG_PRINT_SOURCE) ==  TRUE)
         print_source(source, src_len);
     
     elf_lexer* lexer = elf_lexer_create(source);
     
     if(!lexer)
-        return FALSE;
+        return 1;
 
     if(!lexer->tokens)
-        return FALSE; 
+        return 1; 
+    
+    if(find_arg(ARG_LEXER_EMIT_TOKENS) == TRUE)
+    {
+        lexer->emit_comments = TRUE;
+    }
 
     elf_lexer_tokenize(lexer);
    
-    if(find_arg("a") == TRUE || find_arg("t"))
+    if(find_arg(ARG_PRINT_ALL) == TRUE || find_arg(ARG_PRINT_TOKENS))
         elf_token_print_list((elf_token**)lexer->tokens->elements, lexer->tokens->count); 
    
     elf_lexer_full_dispose(lexer); 
     free((void*)source);
 
     printf("* all tests ran successfully\n");
-    return TRUE;
+    return 0;
 }
 
 void print_source(const char* source, size_t src_len)
