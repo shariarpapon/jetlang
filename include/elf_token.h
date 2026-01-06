@@ -6,9 +6,24 @@ typedef enum
     TOK_INV=0,    // Invalid / unrecognized token type
     TOK_EOF,      // End of file
 
-    //literals
     TOK_IDENT,   // identifiers
-    TOK_KWD,   // keywords (reserved words)
+    
+    //native reserved identifiers / keywords
+    TOK_KWD_NULL, //representive of "value of nothing" 
+    TOK_KWD_TRUE, // boolean value: true
+    TOK_KWD_FALSE,
+    
+    TOK_KWD_INT,    // type decl int
+    TOK_KWD_FLOAT,  // type decl loat
+    TOK_KWD_STRING, // type decl string
+    TOK_KWD_CHAR,  // type decl char
+    TOK_KWD_BOOL,   // type decl boolean
+
+    TOK_KWD_IF,     // decl conditional-if
+    TOK_KWD_ELSE,    // decl conditional-else
+    TOK_KWD_FOR,     // decl loop-for
+    TOK_KWD_WHILE,  // decl loop-while
+
     TOK_NUM,  // 0..9 (numeric literal)
     TOK_STR,  // "string literal"
     TOK_BCOM, // /*block comment*/
@@ -44,6 +59,7 @@ typedef enum
     TOK_POW,        // **
 
     //Punctuations
+    TOK_COLON,  // :
     TOK_COMMA, // ,
     TOK_SEMI,  // ;
     TOK_DOT,   // . 

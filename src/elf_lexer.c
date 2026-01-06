@@ -156,6 +156,7 @@ elf_token_type elf_lexer_try_get_char_type(char c, bool* succ)
         case '/': return TOK_SLASH;
         case '%': return TOK_MOD;
 
+        case ':': return TOK_COLON;
         case ';': return TOK_SEMI;  
         case '.': return TOK_DOT ;
         case '(': return TOK_LPAR;
@@ -198,6 +199,28 @@ elf_token_type elf_lexer_try_get_cmpd_char_type(elf_token_type l, elf_token_type
     *succ = false;
     return TOK_INV;
 }
+
+//TEST
+
+bool elf_lexer_try_get_kwd_type(const char* s, size_t len, elf_token_type* out_tok_type)
+{ 
+    return false;
+}
+
+bool e_lexer_try_get_char_type(char c, elf_token_type* out_tok_type) 
+{
+    return false;
+}
+
+bool e_lexer_try_get_cmpd_char_type(char lhs, char rhs, elf_token_type* out_tok_type) 
+{
+    return false;
+}
+
+//TEST^
+
+
+
 
 char elf_lexer_consume(elf_lexer* lexer)
 {
