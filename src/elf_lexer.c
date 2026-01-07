@@ -261,30 +261,32 @@ bool e_lexer_try_get_char_type(char c, elf_token_type* out_tok_type)
     
     switch(c)
     {
-        case '=': *out_tok_type = TOK_ASG;
-        case '>': *out_tok_type = TOK_GT;
-        case '<': *out_tok_type = TOK_LT; 
-        case '!': *out_tok_type = TOK_NOT;
-        case '&': *out_tok_type = TOK_BAND;
-        case '^': *out_tok_type = TOK_XOR;
-        case '|': *out_tok_type = TOK_BOR;
-        case '+': *out_tok_type = TOK_PLUS;
-        case '-': *out_tok_type = TOK_MINUS;
-        case '*': *out_tok_type = TOK_STAR;
-        case '/': *out_tok_type = TOK_SLASH;
-        case '%': *out_tok_type = TOK_MOD;
+        case '=': *out_tok_type = TOK_ASG;     
+        case '>': *out_tok_type = TOK_GT;            
+        case '<': *out_tok_type = TOK_LT;      
+        case '!': *out_tok_type = TOK_NOT;     
+        case '&': *out_tok_type = TOK_BAND;    
+        case '^': *out_tok_type = TOK_XOR;     
+        case '|': *out_tok_type = TOK_BOR;     
+        case '+': *out_tok_type = TOK_PLUS;    
+        case '-': *out_tok_type = TOK_MINUS;   
+        case '*': *out_tok_type = TOK_STAR;    
+        case '/': *out_tok_type = TOK_SLASH;   
+        case '%': *out_tok_type = TOK_MOD;     
 
-        case ':': *out_tok_type = TOK_COLON;
-        case ';': *out_tok_type = TOK_SEMI;  
-        case '.': *out_tok_type = TOK_DOT ;
-        case '(': *out_tok_type = TOK_LPAR;
-        case ')': *out_tok_type = TOK_RPAR;
-        case '{': *out_tok_type = TOK_LBRC;
-        case '}': *out_tok_type = TOK_RBRC;
-        case '[': *out_tok_type = TOK_LBRK;
-        case ']': *out_tok_type = TOK_RBRK;
+        case ':': *out_tok_type = TOK_COLON;   
+        case ';': *out_tok_type = TOK_SEMI;     
+        case '.': *out_tok_type = TOK_DOT ;    
+        case '(': *out_tok_type = TOK_LPAR;    
+        case ')': *out_tok_type = TOK_RPAR;    
+        case '{': *out_tok_type = TOK_LBRC;    
+        case '}': *out_tok_type = TOK_RBRC;    
+        case '[': *out_tok_type = TOK_LBRK;    
+        case ']': *out_tok_type = TOK_RBRK;    
         case ',': *out_tok_type = TOK_COMMA;
-        default: return false;
+            return true;
+        default: 
+            return false;
     }
     return true;
 }
