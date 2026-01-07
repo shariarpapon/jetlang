@@ -7,6 +7,31 @@
 #include <elf_token.h>
 #include <elf_utils.h>
 
+typedef struct 
+{
+    const char* kwd_str;
+    elf_token_type kwd_type;
+} m_kwd;
+
+m_kwd keywords[] = 
+{
+   { "null",    TOK_KWD_NULL        },
+
+   { "onoff",   TOK_KWD_BOOL        },
+   { "on",      TOK_KWD_TRUE        }, 
+   { "off",     TOK_KWD_FALSE       },
+     
+   { "whole",   TOK_KWD_INT         },
+   { "frac",    TOK_KWD_FLOAT       }, 
+   { "text",    TOK_KWD_STRING      }, 
+   { "byte",    TOK_KWD_BYTE        }, 
+                 
+   { "if",      TOK_KWD_IF          }, 
+   { "else",    TOK_KWD_ELSE        }, 
+   { "for",     TOK_KWD_FOR         },
+   { "while",   TOK_KWD_WHILE       }, 
+};
+
 elf_lexer* elf_lexer_create(const char* source)
 {
     printf("creating lexer...");
@@ -204,17 +229,95 @@ elf_token_type elf_lexer_try_get_cmpd_char_type(elf_token_type l, elf_token_type
 
 bool elf_lexer_try_get_kwd_type(const char* s, size_t len, elf_token_type* out_tok_type)
 { 
+    if(!out_tok_type)
+    {
+        perror("invalid output pointer");
+        return false;
+    }
+
+    char token_str[len + 1];
+    memcpy(token_str, (void*)s, len);
+    token_str[len] = NULL_TERM;
+
+    for(size_t i = 0; i < sizeof(keywords); i++)
+    {
+       if(strcmp(token_str, keywords[i].kwd_str) == 0)
+       {
+            *out_tok_type = keywords[i].kwd_type;
+            return true;
+       } 
+    }
+
     return false;
 }
 
 bool e_lexer_try_get_char_type(char c, elf_token_type* out_tok_type) 
 {
-    return false;
+    if(!out_tok_type)
+    {
+        perror("invalid output pointer");
+        return false;
+    }
+    
+    switch(c)
+    {
+        case '=': *out_tok_type = TOK_ASG;
+        case '>': *out_tok_type = TOK_GT;
+        case '<': *out_tok_type = TOK_LT; 
+        case '!': *out_tok_type = TOK_NOT;
+        case '&': *out_tok_type = TOK_BAND;
+        case '^': *out_tok_type = TOK_XOR;
+        case '|': *out_tok_type = TOK_BOR;
+        case '+': *out_tok_type = TOK_PLUS;
+        case '-': *out_tok_type = TOK_MINUS;
+        case '*': *out_tok_type = TOK_STAR;
+        case '/': *out_tok_type = TOK_SLASH;
+        case '%': *out_tok_type = TOK_MOD;
+
+        case ':': *out_tok_type = TOK_COLON;
+        case ';': *out_tok_type = TOK_SEMI;  
+        case '.': *out_tok_type = TOK_DOT ;
+        case '(': *out_tok_type = TOK_LPAR;
+        case ')': *out_tok_type = TOK_RPAR;
+        case '{': *out_tok_type = TOK_LBRC;
+        case '}': *out_tok_type = TOK_RBRC;
+        case '[': *out_tok_type = TOK_LBRK;
+        case ']': *out_tok_type = TOK_RBRK;
+        case ',': *out_tok_type = TOK_COMMA;
+        default: return false;
+    }
+    return true;
 }
 
 bool e_lexer_try_get_cmpd_char_type(char lhs, char rhs, elf_token_type* out_tok_type) 
 {
-    return false;
+    if(!out_tok_type)
+    {
+        fprintf(stderr, "error: invalid output pointer\n");
+        return false;
+    }
+
+    if (rhs == '=') 
+    {
+        if       (lhs == '=')  {  *out_tok_type = TOK_EQ;     }
+        else if  (lhs == '!')  {  *out_tok_type = TOK_NEQ;    }
+        else if  (lhs == '+')  {  *out_tok_type = TOK_PLUSEQ; }
+        else if  (lhs == '-')  {  *out_tok_type = TOK_MINEQ;  }
+        else if  (lhs == '*')  {  *out_tok_type = TOK_MULEQ;  }
+        else if  (lhs == '/')  {  *out_tok_type = TOK_DIVEQ;  }
+        else if  (lhs == '%')  {  *out_tok_type = TOK_MODEQ;  }
+        else if  (lhs == '>')  {  *out_tok_type = TOK_GTE;    }
+        else if  (lhs == '<')  {  *out_tok_type = TOK_LTE;    }
+    }
+    else if  (lhs == '|' && rhs == '|') { *out_tok_type = TOK_OR; }
+    else if  (lhs == '&' && rhs == '&') { *out_tok_type = TOK_AND; }
+    else if  (lhs == '*' && rhs == '*') { *out_tok_type = TOK_POW; }  
+    else
+    {
+        *out_tok_type = TOK_INV;
+        return false;
+    }
+    return true;
 }
 
 //TEST^
@@ -250,6 +353,38 @@ bool elf_lexer_try_scan_ident(elf_lexer* lexer)
     return len != 0;
 }
 
+bool elf_lexer_try_scan_char(elf_lexer* lexer)
+{
+    size_t len = 0;
+    size_t origin = lexer->cursor;
+    char curr = elf_lexer_peek(lexer);
+    char next = elf_lexer_peek_next(lexer);
+    bool succ = false;
+
+    elf_token_type emit_type  = elf_lexer_try_get_char_type(curr, &succ);
+    if(succ != true) 
+        return false;
+ 
+    elf_lexer_advance(lexer);
+    len++;
+    
+    succ = false;
+    elf_token_type next_char_type = elf_lexer_try_get_char_type(next, &succ);
+    if(succ == true)
+    {
+        succ = false;
+        elf_token_type cmpd_char_type = elf_lexer_try_get_cmpd_char_type(emit_type, next_char_type, &succ);
+        if(succ == true)
+        {
+            len++;
+            elf_lexer_advance(lexer);
+            emit_type = cmpd_char_type;   
+        }
+    }   
+    elf_lexer_emit_token(lexer, origin, len, emit_type);
+    return len != 0;
+}
+
 bool elf_lexer_try_scan_num(elf_lexer* lexer)
 {
     if(elf_lexer_is_digit(elf_lexer_peek(lexer)) == false)
@@ -264,7 +399,7 @@ bool elf_lexer_try_scan_num(elf_lexer* lexer)
         elf_lexer_advance(lexer);
     }
     size_t len = lexer->cursor - origin;
-    elf_lexer_emit_token(lexer, origin, len, TOK_NUM);
+    elf_lexer_emit_token(lexer, origin, len, TOK_NUM_LIT);
     return len != 0;
 }
 
@@ -320,38 +455,6 @@ bool elf_lexer_try_scan_block_com(elf_lexer* lexer)
     }
 
     return false;
-}
-
-bool elf_lexer_try_scan_char(elf_lexer* lexer)
-{
-    size_t len = 0;
-    size_t origin = lexer->cursor;
-    char curr = elf_lexer_peek(lexer);
-    char next = elf_lexer_peek_next(lexer);
-    bool succ = false;
-
-    elf_token_type emit_type  = elf_lexer_try_get_char_type(curr, &succ);
-    if(succ != true) 
-        return false;
- 
-    elf_lexer_advance(lexer);
-    len++;
-    
-    succ = false;
-    elf_token_type next_char_type = elf_lexer_try_get_char_type(next, &succ);
-    if(succ == true)
-    {
-        succ = false;
-        elf_token_type cmpd_char_type = elf_lexer_try_get_cmpd_char_type(emit_type, next_char_type, &succ);
-        if(succ == true)
-        {
-            len++;
-            elf_lexer_advance(lexer);
-            emit_type = cmpd_char_type;   
-        }
-    }   
-    elf_lexer_emit_token(lexer, origin, len, emit_type);
-    return len != 0;
 }
 
 bool elf_lexer_try_scan_whitespace(elf_lexer* lexer)

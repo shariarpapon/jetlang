@@ -9,25 +9,27 @@ typedef enum
     TOK_IDENT,   // identifiers
     
     //native reserved identifiers / keywords
-    TOK_KWD_NULL, //representive of "value of nothing" 
+    TOK_KWD_NULL, // placeholder asignment
     TOK_KWD_TRUE, // boolean value: true
-    TOK_KWD_FALSE,
+    TOK_KWD_FALSE,// boolean value: false
     
-    TOK_KWD_INT,    // type decl int
-    TOK_KWD_FLOAT,  // type decl loat
-    TOK_KWD_STRING, // type decl string
-    TOK_KWD_CHAR,  // type decl char
-    TOK_KWD_BOOL,   // type decl boolean
+    TOK_KWD_VOID,   // type decl: void
+    TOK_KWD_INT,    // type decl: int
+    TOK_KWD_FLOAT,  // type decl: loat
+    TOK_KWD_STRING, // type decl: string
+    TOK_KWD_BYTE,   // type decl: byte
+    TOK_KWD_BOOL,   // type decl: boolean
 
-    TOK_KWD_IF,     // decl conditional-if
-    TOK_KWD_ELSE,    // decl conditional-else
-    TOK_KWD_FOR,     // decl loop-for
-    TOK_KWD_WHILE,  // decl loop-while
+    TOK_KWD_IF,     // decl: conditional if
+    TOK_KWD_ELSE,   // decl: conditional-else
+    TOK_KWD_FOR,    // decl: loop-for
+    TOK_KWD_WHILE,  // decl: loop-while
 
-    TOK_NUM,  // 0..9 (numeric literal)
-    TOK_STR,  // "string literal"
-    TOK_BCOM, // /*block comment*/
-    TOK_LCOM, // //line comment
+    TOK_NUM_LIT,   // 0..9 (numeric literal)
+    TOK_STR_LIT,   // "string literal"
+    TOK_CHAR_LIT,
+    TOK_BCOM,      // /*block comment*/
+    TOK_LCOM,      // //line comment
 
     //Comparison & logical operators
     TOK_ASG,       // = 

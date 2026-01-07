@@ -41,7 +41,7 @@ void elf_token_print_vect(elf_token** tokens, size_t count)
         elf_token* token = *tokens;
         tokens++;
         const char* type_str = elf_token_type_str(token->type);
-        printf("%zu   %-12s %.*s\n",i+1, type_str, (int)token->len, token->source + token->origin);        
+        printf("%-5zu %-14s %.*s\n",i+1, type_str, (int)token->len, token->source + token->origin);        
     }
     printf("\n");
 }
@@ -50,15 +50,16 @@ const char* elf_token_type_str(elf_token_type type)
 {
     switch(type)
     {
-        default:            return "TOK_UNRECOGNIZED__";
+        default:            return "unknown_token_type";
         case TOK_INV:       return "TOK_INV";
         case TOK_EOF:       return "TOK_EOF";
         
         case TOK_IDENT:     return "TOK_IDENT";
+        case TOK_KWD_NULL:  return "TOK_KWD_NULL";
         case TOK_KWD_INT:   return "TOK_KWD_INT";
         case TOK_KWD_FLOAT: return "TOK_KWD_FLOAT";
         case TOK_KWD_STRING:return "TOK_KWD_STRING";
-        case TOK_KWD_CHAR:  return "TOK_KWD_CHAR";
+        case TOK_KWD_BYTE:  return "TOK_KWD_BYTE";
         case TOK_KWD_BOOL:  return "TOK_KWD_BOOL";
         
         case TOK_KWD_IF:    return "TOK_KWD_IF";
@@ -66,8 +67,8 @@ const char* elf_token_type_str(elf_token_type type)
         case TOK_KWD_FOR:   return "TOK_KWD_FOR";
         case TOK_KWD_WHILE: return "TOK_KWD_WHILE";
         
-        case TOK_NUM:       return "TOK_NUM";
-        case TOK_STR:       return "TOK_STR";
+        case TOK_NUM_LIT:       return "TOK_NUM_LIT";
+        case TOK_STR_LIT:       return "TOK_STR_LIT";
         case TOK_BCOM:      return "TOK_BCOM";
         case TOK_LCOM:      return "TOK_LCOM";
         
