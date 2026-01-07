@@ -36,12 +36,14 @@ void elf_token_print_vect(elf_token** tokens, size_t count)
     }
     
     printf("\ntoken vector [%zu]:\n\n", count);
+    
+    printf("%-7s %-17s %-10s %s\n\n", "count", "type", "enum-id", "value");        
     for(size_t i = 0; i < count; i++)
     {  
         elf_token* token = *tokens;
         tokens++;
         const char* type_str = elf_token_type_str(token->type);
-        printf("%-5zu %-14s %.*s\n",i+1, type_str, (int)token->len, token->source + token->origin);        
+        printf("%-7zu %-17s %-10d %.*s\n",i+1, type_str,(int)token->type, (int)token->len, token->source + token->origin);        
     }
     printf("\n");
 }
