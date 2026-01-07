@@ -52,7 +52,7 @@ const char* elf_token_type_str(elf_token_type type)
 {
     switch(type)
     {
-        default:            return "unknown_token_type";
+        default:            return "unknown";
         case TOK_INV:       return "TOK_INV";
         case TOK_EOF:       return "TOK_EOF";
         
@@ -63,7 +63,9 @@ const char* elf_token_type_str(elf_token_type type)
         case TOK_KWD_STRING:return "TOK_KWD_STRING";
         case TOK_KWD_BYTE:  return "TOK_KWD_BYTE";
         case TOK_KWD_BOOL:  return "TOK_KWD_BOOL";
-        
+        case TOK_KWD_TRUE:  return "TOK_KWD_TRUE";
+        case TOK_KWD_FALSE: return "TOK_KWD_FALSE";
+
         case TOK_KWD_IF:    return "TOK_KWD_IF";
         case TOK_KWD_ELSE:  return "TOK_KWD_ELSE";
         case TOK_KWD_FOR:   return "TOK_KWD_FOR";

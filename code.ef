@@ -1,11 +1,15 @@
-object player
-{
-    str name: "alex";
-    uint age: 22;
+whole integer_num = 1;
+frac floating_num = 3.4;
+onoff flag = on;
 
-    bool is_age_same(uint a)
-    {
-        return a = 22;
-    }
+onoff is_even(whole n)
+{
+    return n % 2 == 0;
 }
 
+frac from_text(text t)
+{
+    return frac.prase_from_text(t);
+}
+
+exit;

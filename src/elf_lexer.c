@@ -7,13 +7,15 @@
 #include <elf_token.h>
 #include <elf_utils.h>
 
+#define KWD_COUNT (sizeof(keywords) / sizeof(keywords[0]))
+
 typedef struct 
 {
     const char* kwd_str;
     elf_token_type kwd_type;
 } m_kwd;
 
-m_kwd keywords[] = 
+static const m_kwd keywords[] = 
 {
    { "null",    TOK_KWD_NULL        },
 
@@ -174,8 +176,7 @@ bool elf_lexer_try_get_kwd_type(const char* s, size_t len, elf_token_type* out_t
     char token_str[len + 1];
     memcpy(token_str, (void*)s, len);
     token_str[len] = NULL_TERM;
-
-    for(size_t i = 0; i < sizeof(keywords); i++)
+    for(size_t i = 0; i < KWD_COUNT; i++)
     {
        if(strcmp(token_str, keywords[i].kwd_str) == 0)
        {
@@ -274,10 +275,10 @@ bool elf_lexer_try_scan_ident(elf_lexer* lexer)
     {
         elf_lexer_advance(lexer);
     }
-
-    size_t len = lexer->cursor - origin;
-    elf_lexer_emit_token(lexer, origin, len, TOK_IDENT);
-    return len != 0;
+    elf_token_type tok_type = TOK_IDENT;
+    elf_lexer_try_get_kwd_type(lexer->source + origin, lexer->cursor - origin, &tok_type);
+    elf_lexer_emit_token(lexer, origin, lexer->cursor - origin, tok_type); 
+    return true;
 }
 
 bool elf_lexer_try_scan_char(elf_lexer* lexer)
@@ -289,7 +290,6 @@ bool elf_lexer_try_scan_char(elf_lexer* lexer)
     elf_token_type emit_tok_type = TOK_INV;
     if(!e_lexer_try_get_char_type(curr, &emit_tok_type))
     {
-        printf("%c was not a char type\n", curr);
         return false;
     }
 
