@@ -31,7 +31,7 @@ bool elf_lexer_try_scan_whitespace(elf_lexer* lexer);
 
 bool elf_lexer_try_get_kwd_type(const char* s, size_t len, elf_token_type* out_tok_type);
 bool e_lexer_try_get_char_type(char c, elf_token_type* out_tok_type);
-bool e_lexer_try_get_cmpd_char_type(char lhs, char rhs, elf_token_type* out_tok_type);
+bool e_lexer_try_get_cmpd_char_type(char l, char r, elf_token_type* out_tok_type);
 
 elf_token_type elf_lexer_try_get_char_type(char c, bool* succ);
 elf_token_type elf_lexer_try_get_cmpd_char_type(elf_token_type l, elf_token_type r, bool* succ);

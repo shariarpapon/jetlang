@@ -35,7 +35,7 @@ void elf_token_print_vect(elf_token** tokens, size_t count)
         return;
     }
     
-    printf("\ntoken vect [%zu]:\n\n", count);
+    printf("\ntoken vector [%zu]:\n\n", count);
     for(size_t i = 0; i < count; i++)
     {  
         elf_token* token = *tokens;
@@ -67,8 +67,8 @@ const char* elf_token_type_str(elf_token_type type)
         case TOK_KWD_FOR:   return "TOK_KWD_FOR";
         case TOK_KWD_WHILE: return "TOK_KWD_WHILE";
         
-        case TOK_NUM_LIT:       return "TOK_NUM_LIT";
-        case TOK_STR_LIT:       return "TOK_STR_LIT";
+        case TOK_NUM_LIT:   return "TOK_NUM_LIT";
+        case TOK_STR_LIT:   return "TOK_STR_LIT";
         case TOK_BCOM:      return "TOK_BCOM";
         case TOK_LCOM:      return "TOK_LCOM";
         
