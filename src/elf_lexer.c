@@ -77,9 +77,7 @@ void elf_lexer_emit_token(elf_lexer* lexer, size_t origin, size_t len, elf_token
 {
     static size_t call_count = 0;
     call_count++;
-
-    elf_token* token = elf_token_create(lexer->source, origin, len, type);
-   
+    elf_token* token = elf_token_create(lexer->source, origin, len, type); 
     if(vec_append(lexer->tokens, token) == false)
     {
         fprintf(stderr, "error: could not add new token to lexer->tokens.\n");

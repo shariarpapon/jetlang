@@ -9,7 +9,7 @@ onoff is_even(whole n)
 
 frac from_text(text t)
 {
-    return frac.prase_from_text(t);
+    return frac.parse(t);
 }
 
 exit;
