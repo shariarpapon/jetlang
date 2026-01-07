@@ -68,7 +68,12 @@ elf_lexer* elf_lexer_create(const char* source)
 void elf_lexer_full_dispose(elf_lexer* lexer)
 {
     printf("full disposing lexer...");
-    free(lexer->tokens);
+    for(int i = 0; i < lexer->tokens->count; i++)
+    {
+        elf_token* tok = vec_get(lexer->tokens, i);
+        if(tok) free(tok);
+    }
+    vec_dispose(lexer->tokens);
     free(lexer);
     printf("successful!\n");
 }
