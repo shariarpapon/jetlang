@@ -23,10 +23,10 @@ bool elf_lexer_is_digit(char c);
 bool elf_lexer_is_whitespace(char c);
 
 bool elf_lexer_try_scan_ident(elf_lexer* lexer);
+bool elf_lexer_try_scan_char(elf_lexer* lexer);
 bool elf_lexer_try_scan_num(elf_lexer* lexer);
 bool elf_lexer_try_scan_line_com(elf_lexer* lexer);
 bool elf_lexer_try_scan_block_com(elf_lexer* lexer);
-bool elf_lexer_try_scan_char(elf_lexer* lexer);
 bool elf_lexer_try_scan_whitespace(elf_lexer* lexer);
 
 bool elf_lexer_try_get_kwd_type(const char* s, size_t len, elf_token_type* out_tok_type);

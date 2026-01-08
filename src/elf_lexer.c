@@ -132,17 +132,15 @@ bool elf_lexer_tokenize(elf_lexer* lexer)
 
     while(elf_lexer_peek(lexer) != NULL_TERM)
     {
-        if(elf_lexer_try_scan_whitespace(lexer) == true)
-            continue;
-        else if(elf_lexer_try_scan_line_com(lexer) == true)
-            continue;
-        else if(elf_lexer_try_scan_block_com(lexer) == true)
-           continue;
-        else if(elf_lexer_try_scan_ident(lexer)== true)
-            continue;
-        else if(elf_lexer_try_scan_char(lexer) == true)
-           continue;
-        else if (elf_lexer_try_scan_num(lexer)== true)
+        bool advanced = 
+        elf_lexer_try_scan_whitespace(lexer) ||
+        elf_lexer_try_scan_line_com(lexer)   ||
+        elf_lexer_try_scan_block_com(lexer)  ||
+        elf_lexer_try_scan_ident(lexer)      ||
+        elf_lexer_try_scan_char(lexer)       ||
+        elf_lexer_try_scan_num(lexer)        ;
+        
+        if(advanced == true)
             continue;
 
         elf_lexer_emit_token(lexer, lexer->cursor, 1, TOK_INV);
@@ -232,30 +230,31 @@ bool e_lexer_try_get_char_type(char c, elf_token_type* out_tok_type)
     
     switch(c)
     {
-        case '=': *out_tok_type = TOK_ASG;     return true;
-        case '>': *out_tok_type = TOK_GT;      return true;
-        case '<': *out_tok_type = TOK_LT;      return true;
-        case '!': *out_tok_type = TOK_NOT;     return true;
-        case '&': *out_tok_type = TOK_BAND;    return true;
-        case '^': *out_tok_type = TOK_XOR;     return true;
-        case '|': *out_tok_type = TOK_BOR;     return true;
-        case '+': *out_tok_type = TOK_PLUS;    return true;
-        case '-': *out_tok_type = TOK_MINUS;   return true;
-        case '*': *out_tok_type = TOK_STAR;    return true;
-        case '/': *out_tok_type = TOK_SLASH;   return true;
-        case '%': *out_tok_type = TOK_MOD;     return true;
+        case '=': *out_tok_type = TOK_ASG    ; break;     
+        case '>': *out_tok_type = TOK_GT     ; break;      
+        case '<': *out_tok_type = TOK_LT     ; break;      
+        case '!': *out_tok_type = TOK_NOT    ; break;     
+        case '&': *out_tok_type = TOK_BAND   ; break;    
+        case '^': *out_tok_type = TOK_XOR    ; break;     
+        case '|': *out_tok_type = TOK_BOR    ; break;     
+        case '+': *out_tok_type = TOK_PLUS   ; break;     
+        case '-': *out_tok_type = TOK_MINUS  ; break;   
+        case '*': *out_tok_type = TOK_STAR   ; break;    
+        case '/': *out_tok_type = TOK_SLASH  ; break;   
+        case '%': *out_tok_type = TOK_MOD    ; break;     
 
-        case ':': *out_tok_type = TOK_COLON;   return true;
-        case ';': *out_tok_type = TOK_SEMI;    return true;
-        case '.': *out_tok_type = TOK_DOT ;    return true;
-        case '(': *out_tok_type = TOK_LPAR;    return true;  
-        case ')': *out_tok_type = TOK_RPAR;    return true;
-        case '{': *out_tok_type = TOK_LBRC;    return true;
-        case '}': *out_tok_type = TOK_RBRC;    return true;
-        case '[': *out_tok_type = TOK_LBRK;    return true;
-        case ']': *out_tok_type = TOK_RBRK;    return true;
-        case ',': *out_tok_type = TOK_COMMA;   return true;
-        default:                               return false;
+        case ':': *out_tok_type = TOK_COLON  ; break;   
+        case ';': *out_tok_type = TOK_SEMI   ; break;    
+        case '.': *out_tok_type = TOK_DOT    ; break;    
+        case '(': *out_tok_type = TOK_LPAR   ; break;     
+        case ')': *out_tok_type = TOK_RPAR   ; break;    
+        case '{': *out_tok_type = TOK_LBRC   ; break;    
+        case '}': *out_tok_type = TOK_RBRC   ; break;    
+        case '[': *out_tok_type = TOK_LBRK   ; break;    
+        case ']': *out_tok_type = TOK_RBRK   ; break;    
+        case ',': *out_tok_type = TOK_COMMA  ; break; 
+        default: 
+            return false;                               
     }
     return true;
 }
