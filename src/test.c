@@ -62,7 +62,7 @@ int main(int argc, char** argv)
 
     elf_lexer_tokenize(lexer);
    
-    if(find_arg(ARG_PRINT_ALL) == true || find_arg(ARG_PRINT_TOKENS))
+    if(find_arg(ARG_PRINT_ALL) == true || find_arg(ARG_PRINT_TOKENS) == true)
         elf_token_print_vect((elf_token**)lexer->tokens->elements, lexer->tokens->count); 
     
     elf_lexer_full_dispose(lexer); 

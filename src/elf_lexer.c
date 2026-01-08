@@ -7,7 +7,7 @@
 #include <elf_token.h>
 #include <elf_utils.h>
 
-#define KWD_COUNT (sizeof(keywords) / sizeof(keywords[0]))
+#define KWD_COUNT (sizeof(kwd_table) / sizeof(kwd_table[0]))
 
 typedef struct 
 {
@@ -21,7 +21,7 @@ typedef struct
     elf_token_type tok_type;
 } char_token_def;
 
-static const char_token_def punctuations[] = 
+static const char_token_def punct_table[] = 
 {
     {'=', TOK_ASG   },    
     {'&', TOK_BAND  },
@@ -39,7 +39,7 @@ static const char_token_def punctuations[] =
     {'[', TOK_LBRK  },  {']', TOK_RBRK  },
 };
 
-static const string_token_def cmpd_punctuations[] = 
+static const string_token_def cmpd_punct_table[] = 
 {
     {"==", TOK_EQ     }, {"!=", TOK_NEQ   },
     {"<=", TOK_LTE    }, {">=", TOK_GTE   },
@@ -49,7 +49,7 @@ static const string_token_def cmpd_punctuations[] =
     {"%=", TOK_MODEQ  }, {"**", TOK_POW   },
 };
 
-static const string_token_def keywords[] = 
+static const string_token_def kwd_table[] = 
 { 
    { "null",   TOK_KWD_NULL    }, 
    { "bool",   TOK_KWD_BOOL    },  
@@ -212,9 +212,9 @@ bool elf_lexer_try_get_kwd_type(const char* s, size_t len, elf_token_type* out_t
     token_str[len] = NULL_TERM;
     for(size_t i = 0; i < KWD_COUNT; i++)
     {
-       if(strcmp(token_str, keywords[i].tok_value) == 0)
+       if(strcmp(token_str, kwd_table[i].tok_value) == 0)
        {
-            *out_tok_type = keywords[i].tok_type;
+            *out_tok_type = kwd_table[i].tok_type;
             return true;
        } 
     }
