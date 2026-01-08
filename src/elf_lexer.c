@@ -11,27 +11,58 @@
 
 typedef struct 
 {
-    const char* kwd_str;
-    elf_token_type kwd_type;
-} m_kwd;
+    const char* tok_value;
+    elf_token_type tok_type;
+} string_token_def;
 
-static const m_kwd keywords[] = 
+typedef struct
 {
-   { "null",    TOK_KWD_NULL        },
+    const char tok_value;
+    elf_token_type tok_type;
+} char_token_def;
 
-   { "onoff",   TOK_KWD_BOOL        },
-   { "on",      TOK_KWD_TRUE        }, 
-   { "off",     TOK_KWD_FALSE       },
-     
-   { "whole",   TOK_KWD_INT         },
-   { "frac",    TOK_KWD_FLOAT       }, 
-   { "text",    TOK_KWD_STRING      }, 
-   { "byte",    TOK_KWD_BYTE        }, 
-                 
-   { "if",      TOK_KWD_IF          }, 
-   { "else",    TOK_KWD_ELSE        }, 
-   { "for",     TOK_KWD_FOR         },
-   { "while",   TOK_KWD_WHILE       }, 
+static const char_token_def punctuations[] = 
+{
+    {'=', TOK_ASG   },    
+    {'&', TOK_BAND  },
+    {'|', TOK_BOR   },
+    {'^', TOK_XOR   },
+    {'!', TOK_NOT   },
+    {'%', TOK_MOD   },
+    {'<', TOK_LT    },  {'>', TOK_GT    },      
+    {'+', TOK_PLUS  },  {'-', TOK_MINUS }, 
+    {'*', TOK_STAR  },  {'/', TOK_SLASH },  
+    {':', TOK_COLON },  {',', TOK_COMMA }, 
+    {';', TOK_SEMI  },  {'.', TOK_DOT   },
+    {'(', TOK_LPAR  },  {')', TOK_RPAR  },
+    {'{', TOK_LBRC  },  {'}', TOK_RBRC  },
+    {'[', TOK_LBRK  },  {']', TOK_RBRK  },
+};
+
+static const string_token_def cmpd_punctuations[] = 
+{
+    {"==", TOK_EQ     }, {"!=", TOK_NEQ   },
+    {"<=", TOK_LTE    }, {">=", TOK_GTE   },
+    {"&&", TOK_AND    }, {"||", TOK_OR    },
+    {"+=", TOK_PLUSEQ }, {"-=", TOK_MINEQ },
+    {"*=", TOK_MULEQ  }, {"/=", TOK_DIVEQ },
+    {"%=", TOK_MODEQ  }, {"**", TOK_POW   },
+};
+
+static const string_token_def keywords[] = 
+{ 
+   { "null",   TOK_KWD_NULL    }, 
+   { "bool",   TOK_KWD_BOOL    },  
+   { "true",   TOK_KWD_TRUE    },
+   { "false",  TOK_KWD_FALSE   },
+   { "int",    TOK_KWD_INT     },   
+   { "float",  TOK_KWD_FLOAT   }, 
+   { "str",    TOK_KWD_STRING  },  
+   { "byte",   TOK_KWD_BYTE    }, 
+   { "if",     TOK_KWD_IF      }, 
+   { "else",   TOK_KWD_ELSE    }, 
+   { "for",    TOK_KWD_FOR     }, 
+   { "while",  TOK_KWD_WHILE   }, 
 };
 
 elf_lexer* elf_lexer_create(const char* source)
@@ -181,9 +212,9 @@ bool elf_lexer_try_get_kwd_type(const char* s, size_t len, elf_token_type* out_t
     token_str[len] = NULL_TERM;
     for(size_t i = 0; i < KWD_COUNT; i++)
     {
-       if(strcmp(token_str, keywords[i].kwd_str) == 0)
+       if(strcmp(token_str, keywords[i].tok_value) == 0)
        {
-            *out_tok_type = keywords[i].kwd_type;
+            *out_tok_type = keywords[i].tok_type;
             return true;
        } 
     }
@@ -254,13 +285,6 @@ bool e_lexer_try_get_cmpd_char_type(char left, char right, elf_token_type* out_t
     else if  (left == '*' && right == '*') { *out_tok_type = TOK_POW; }  
     else return false;
     return true;
-}
-
-char elf_lexer_consume(elf_lexer* lexer)
-{
-    char c = elf_lexer_peek(lexer);
-    elf_lexer_advance(lexer);
-    return c;
 }
 
 bool elf_lexer_try_scan_ident(elf_lexer* lexer)

@@ -1,15 +1,11 @@
-whole integer_num = 1;
-frac floating_num = 3.4;
-onoff flag = on;
-
-onoff is_even(whole n)
+object player
 {
-    return n % 2 == 0;
+    str name = "alex";
+    byte age = 20;
+    byte tag = 'a';
+    
+    decl to_string()
+    {
+        return "name is $s, age is $d and tag $c"(name, age, tag);
+    }
 }
-
-frac from_text(text t)
-{
-    return frac.parse(t);
-}
-
-exit;

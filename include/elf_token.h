@@ -60,7 +60,7 @@ typedef enum
     TOK_MODEQ,      // %=
     TOK_POW,        // **
 
-    //Punctuations
+    //Delimiters
     TOK_COLON,  // :
     TOK_COMMA, // ,
     TOK_SEMI,  // ;

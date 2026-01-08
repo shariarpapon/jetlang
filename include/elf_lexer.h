@@ -7,7 +7,7 @@
 typedef struct
 {
     const char* source;
-    size_t len; //including null terminal ('\0')
+        size_t len; //including null terminal ('\0')
     size_t cursor;
     bool emit_comments;
     vec* tokens;
@@ -17,8 +17,8 @@ elf_lexer* elf_lexer_create(const char* src);
 void elf_lexer_full_dispose(elf_lexer* lexer);
 
 bool elf_lexer_tokenize(elf_lexer* lexer);
+void elf_lexer_emit_token(elf_lexer* lexer, size_t origin, size_t len, elf_token_type type);
 
-bool elf_lexer_is_ident(char c);
 bool elf_lexer_is_digit(char c);
 bool elf_lexer_is_whitespace(char c);
 
@@ -33,14 +33,12 @@ bool elf_lexer_try_get_kwd_type(const char* s, size_t len, elf_token_type* out_t
 bool e_lexer_try_get_char_type(char c, elf_token_type* out_tok_type);
 bool e_lexer_try_get_cmpd_char_type(char left, char right, elf_token_type* out_tok_type);
 
-char elf_lexer_consume(elf_lexer* lexer);
+void elf_lexer_advance(elf_lexer* lexer);
 char elf_lexer_peek(elf_lexer* lexer);
 char elf_lexer_peek_prev(elf_lexer* lexer);
 char elf_lexer_peek_next(elf_lexer* lexer);
 char elf_lexer_try_peek_ahead(elf_lexer* lexer, size_t n, bool* succ);
 
-void elf_lexer_advance(elf_lexer* lexer);
-void elf_lexer_emit_token(elf_lexer* lexer, size_t origin, size_t len, elf_token_type type);
 
 
 
