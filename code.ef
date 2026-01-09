@@ -3,7 +3,8 @@ object player
     str name = "alex";
     byte age = 20;
     byte tag = 'a';
-    
+    float pi = 3.14.;
+    flaot halg = .5;
     decl to_string()
     {
         if(name == null || age <= 0)

@@ -25,7 +25,8 @@ typedef enum
     TOK_KWD_FOR,    // decl: loop-for
     TOK_KWD_WHILE,  // decl: loop-while
 
-    TOK_NUM_LIT,   // 0..9 (numeric literal)
+    TOK_INT_LIT,   // 0..9 (numeric literal)
+    TOK_FLOAT_LIT,  // decimal point numbers (e.g. 3.1415)
     TOK_STR_LIT,   // "string literal"
     TOK_CHAR_LIT,
     TOK_BCOM,      // /*block comment*/

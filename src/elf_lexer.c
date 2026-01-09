@@ -8,7 +8,7 @@
 #include <elf_utils.h>
 
 #define STRING_QUOTE '"'
-#define CHAR_QUOTE '\''
+#define DECIMAL_CHAR '.'
 
 typedef struct 
 {
@@ -141,12 +141,12 @@ bool elf_lexer_tokenize(elf_lexer* lexer)
     while(elf_lexer_peek(lexer) != NULL_TERM)
     {
         if      (elf_lexer_try_scan_whitespace(lexer))  continue;
-        else if (elf_lexer_try_scan_string(lexer))      continue;
+        else if (elf_lexer_try_scan_str_lit(lexer))      continue;
+        else if (elf_lexer_try_scan_num_lit(lexer))         continue;
         else if (elf_lexer_try_scan_line_com(lexer))    continue;    
         else if (elf_lexer_try_scan_block_com(lexer))   continue;     
         else if (elf_lexer_try_scan_ident(lexer))       continue;   
         else if (elf_lexer_try_scan_punct(lexer))       continue;   
-        else if (elf_lexer_try_scan_num(lexer))         continue;
 
         elf_lexer_emit_token(lexer, lexer->cursor, 1, TOK_INV);
         elf_lexer_consume(lexer);
@@ -264,7 +264,7 @@ bool elf_lexer_try_get_cmpd_punct_type(char left, char right, elf_token_type* ou
     return false; 
 }
 
-bool elf_lexer_try_scan_string(elf_lexer* lexer)
+bool elf_lexer_try_scan_str_lit(elf_lexer* lexer)
 {
     if(elf_lexer_peek(lexer) != STRING_QUOTE)
         return false;
@@ -283,8 +283,45 @@ bool elf_lexer_try_scan_string(elf_lexer* lexer)
         }
     }
     return false;
-
 }
+
+bool elf_lexer_try_scan_num_lit(elf_lexer* lexer)
+{
+    bool float_flag = false;
+    size_t origin = lexer->cursor;
+    if(!elf_lexer_is_digit(elf_lexer_peek(lexer)))
+    {
+        if(elf_lexer_peek(lexer) != DECIMAL_CHAR || !elf_lexer_is_digit(elf_lexer_peek_next(lexer)) )
+            return false;
+        else
+        {
+            float_flag = true;
+            elf_lexer_consume(lexer);
+        }
+    }
+
+    elf_lexer_consume(lexer);
+    while(elf_lexer_peek(lexer) != NULL_TERM)
+    {
+        if(elf_lexer_is_digit(elf_lexer_peek(lexer)))
+        {
+            elf_lexer_consume(lexer);
+            continue;
+        }
+        else if(elf_lexer_peek(lexer) == DECIMAL_CHAR)
+        {
+            if(float_flag) break;
+            float_flag = true;
+            elf_lexer_consume(lexer);
+        }
+        else break;
+
+    }
+    elf_token_type tok_type = float_flag ? TOK_FLOAT_LIT : TOK_INT_LIT;
+    elf_lexer_emit_token(lexer, origin, lexer->cursor - origin, tok_type);
+    return true;
+}
+
 
 bool elf_lexer_try_scan_ident(elf_lexer* lexer)
 {
@@ -326,25 +363,6 @@ bool elf_lexer_try_scan_punct(elf_lexer* lexer)
     elf_lexer_emit_token(lexer, origin, lexer->cursor - origin, emit_tok_type);
     return true;
 }
-
-bool elf_lexer_try_scan_num(elf_lexer* lexer)
-{
-    if(elf_lexer_is_digit(elf_lexer_peek(lexer)) == false)
-    {
-        return false;
-    }
-
-    size_t origin = lexer->cursor;
-    elf_lexer_consume(lexer); 
-    while(elf_lexer_is_digit(elf_lexer_peek(lexer)))
-    {
-        elf_lexer_consume(lexer);
-    }
-    size_t len = lexer->cursor - origin;
-    elf_lexer_emit_token(lexer, origin, len, TOK_NUM_LIT);
-    return len != 0;
-}
-
 
 bool elf_lexer_try_scan_line_com(elf_lexer* lexer)
 {
