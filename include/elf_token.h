@@ -16,7 +16,7 @@ typedef enum
     TOK_KWD_VOID,   // type decl: void
     TOK_KWD_INT,    // type decl: int
     TOK_KWD_FLOAT,  // type decl: loat
-    TOK_KWD_STRING, // type decl: string
+    TOK_KWD_STR, // type decl: string
     TOK_KWD_BYTE,   // type decl: byte
     TOK_KWD_BOOL,   // type decl: boolean
 

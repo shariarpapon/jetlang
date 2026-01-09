@@ -1,6 +1,6 @@
 object player
 {
-    str name = "alex";
+    str id = "pid123";
     byte age = 20;
     byte tag = 'a';
     float pi = 3.14.;

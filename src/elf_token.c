@@ -60,7 +60,7 @@ const char* elf_token_type_str(elf_token_type type)
         case TOK_KWD_NULL:  return "TOK_KWD_NULL";
         case TOK_KWD_INT:   return "TOK_KWD_INT";
         case TOK_KWD_FLOAT: return "TOK_KWD_FLOAT";
-        case TOK_KWD_STRING:return "TOK_KWD_STRING";
+        case TOK_KWD_STR:return "TOK_KWD_STR";
         case TOK_KWD_BYTE:  return "TOK_KWD_BYTE";
         case TOK_KWD_BOOL:  return "TOK_KWD_BOOL";
         case TOK_KWD_TRUE:  return "TOK_KWD_TRUE";

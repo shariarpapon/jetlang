@@ -65,7 +65,7 @@ static const kwd_token_def kwd_table[] =
    { "false",  TOK_KWD_FALSE   },
    { "int",    TOK_KWD_INT     },   
    { "float",  TOK_KWD_FLOAT   }, 
-   { "str",    TOK_KWD_STRING  },  
+   { "str",    TOK_KWD_STR  },  
    { "byte",   TOK_KWD_BYTE    }, 
    { "if",     TOK_KWD_IF      }, 
    { "else",   TOK_KWD_ELSE    }, 
@@ -140,12 +140,14 @@ bool elf_lexer_tokenize(elf_lexer* lexer)
 
     while(elf_lexer_peek(lexer) != NULL_TERM)
     {
-        if      (elf_lexer_try_scan_whitespace(lexer))  continue;
-        else if (elf_lexer_try_scan_str_lit(lexer))      continue;
-        else if (elf_lexer_try_scan_num_lit(lexer))         continue;
+        //omissions : scan-prio > all
+        if      (elf_lexer_try_scan_whitespace(lexer))  continue; 
         else if (elf_lexer_try_scan_line_com(lexer))    continue;    
-        else if (elf_lexer_try_scan_block_com(lexer))   continue;     
+        else if (elf_lexer_try_scan_block_com(lexer))   continue;      
+        
         else if (elf_lexer_try_scan_ident(lexer))       continue;   
+        else if (elf_lexer_try_scan_num_lit(lexer))     continue; 
+        else if (elf_lexer_try_scan_str_lit(lexer))     continue;
         else if (elf_lexer_try_scan_punct(lexer))       continue;   
 
         elf_lexer_emit_token(lexer, lexer->cursor, 1, TOK_INV);
