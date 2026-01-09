@@ -10,6 +10,25 @@
 #define STRING_QUOTE '"'
 #define DECIMAL_CHAR '.'
 
+struct elf_lexer
+{
+    size_t len; //including null terminal ('\0')
+    size_t cursor;
+    bool emit_comments; 
+    const char* source;
+    vec* tokens;
+};
+
+typedef struct
+{
+    elf_token_type tok_type;
+    union
+    { 
+        const char character;
+        const char* string;
+    } value;
+} tok_def;
+
 typedef struct 
 {
     const char* tok_value;
@@ -72,6 +91,28 @@ static const kwd_token_def kwd_table[] =
    { "for",    TOK_KWD_FOR     }, 
    { "while",  TOK_KWD_WHILE   }, 
 };
+
+static void elf_lexer_emit_token(elf_lexer* lexer, size_t origin, size_t len, elf_token_type type);
+static bool elf_lexer_is_digit(char c);
+static bool elf_lexer_is_ident(char c);
+static bool elf_lexer_is_whitespace(char c);
+
+static bool elf_lexer_try_scan_str_lit(elf_lexer* lexer);
+static bool elf_lexer_try_scan_num_lit(elf_lexer* lexer);
+static bool elf_lexer_try_scan_ident(elf_lexer* lexer);
+static bool elf_lexer_try_scan_punct(elf_lexer* lexer);
+static bool elf_lexer_try_scan_line_com(elf_lexer* lexer);
+static bool elf_lexer_try_scan_block_com(elf_lexer* lexer);
+static bool elf_lexer_try_scan_whitespace(elf_lexer* lexer);
+
+static bool elf_lexer_try_get_kwd_type(const char* s, size_t len, elf_token_type* out_tok_type);
+static bool elf_lexer_try_get_punct_type(char c, elf_token_type* out_tok_type);
+static bool elf_lexer_try_get_cmpd_punct_type(char left, char right, elf_token_type* out_tok_type);
+
+static char elf_lexer_consume(elf_lexer* lexer);
+static char elf_lexer_peek(elf_lexer* lexer);
+static char elf_lexer_peek_prev(elf_lexer* lexer);
+static char elf_lexer_peek_next(elf_lexer* lexer);
 
 elf_lexer* elf_lexer_create(const char* source)
 {
@@ -431,17 +472,6 @@ bool elf_lexer_try_scan_whitespace(elf_lexer* lexer)
         return true;
     }
     return false;
-}
-
-char elf_lexer_peek_prev(elf_lexer* lexer)
-{
-    size_t prev = lexer->cursor - 1;
-    if(prev < 0)
-    {
-        printf("wrn: cannot peek prev while at cursor = 0\n");
-        return NULL_TERM;
-    }
-    return lexer->source[prev];
 }
 
 char elf_lexer_peek_next(elf_lexer* lexer)
