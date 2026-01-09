@@ -52,7 +52,7 @@ const char* elf_token_type_str(elf_token_type type)
 {
     switch(type)
     {
-        default:            return "unknown";
+        default:            return "no_str_conv";
         case TOK_INV:       return "TOK_INV";
         case TOK_EOF:       return "TOK_EOF";
         

@@ -7,9 +7,8 @@
 #include <elf_token.h>
 #include <elf_utils.h>
 
-#define KWD_COUNT (sizeof(kwd_table) / sizeof(kwd_table[0]))
-#define PUNCT_COUNT (sizeof(punct_table) / sizeof(punct_table[0]))
-#define CMPD_PUNCT_COUNT (sizeof(cmpd_punct_table) / sizeof(cmpd_punct_table[0]))
+#define STRING_QUOTE '"'
+#define CHAR_QUOTE '\''
 
 typedef struct 
 {
@@ -141,13 +140,14 @@ bool elf_lexer_tokenize(elf_lexer* lexer)
 
     while(elf_lexer_peek(lexer) != NULL_TERM)
     {
-        if      (elf_lexer_try_scan_whitespace(lexer))  continue;         
+        if      (elf_lexer_try_scan_whitespace(lexer))  continue;
+        else if (elf_lexer_try_scan_string(lexer))      continue;
         else if (elf_lexer_try_scan_line_com(lexer))    continue;    
         else if (elf_lexer_try_scan_block_com(lexer))   continue;     
         else if (elf_lexer_try_scan_ident(lexer))       continue;   
         else if (elf_lexer_try_scan_punct(lexer))       continue;   
         else if (elf_lexer_try_scan_num(lexer))         continue;
-        
+
         elf_lexer_emit_token(lexer, lexer->cursor, 1, TOK_INV);
         elf_lexer_consume(lexer);
     } 
@@ -213,7 +213,7 @@ bool elf_lexer_try_get_kwd_type(const char* s, size_t len, elf_token_type* out_t
     char token_str[len + 1];
     memcpy(token_str, (void*)s, len);
     token_str[len] = NULL_TERM;
-    for(size_t i = 0; i < KWD_COUNT; i++)
+    for(size_t i = 0; i < ARRAY_LEN(kwd_table); i++)
     {
        if(strcmp(token_str, kwd_table[i].tok_value) == 0)
        {
@@ -233,7 +233,7 @@ bool elf_lexer_try_get_punct_type(char c, elf_token_type* out_tok_type)
         return false;
     }
     
-    for(size_t i = 0; i < PUNCT_COUNT; i++)
+    for(size_t i = 0; i < ARRAY_LEN(punct_table); i++)
     {
         if(punct_table[i].tok_value == c)
         {
@@ -252,7 +252,7 @@ bool elf_lexer_try_get_cmpd_punct_type(char left, char right, elf_token_type* ou
         return false;
     }
     
-    for(size_t i = 0; i < CMPD_PUNCT_COUNT; i++)
+    for(size_t i = 0; i < ARRAY_LEN(cmpd_punct_table); i++)
     {
         if(cmpd_punct_table[i].tok_value_right == right && 
            cmpd_punct_table[i].tok_value_left == left)
@@ -262,6 +262,28 @@ bool elf_lexer_try_get_cmpd_punct_type(char left, char right, elf_token_type* ou
         }
     }
     return false; 
+}
+
+bool elf_lexer_try_scan_string(elf_lexer* lexer)
+{
+    if(elf_lexer_peek(lexer) != STRING_QUOTE)
+        return false;
+
+    elf_lexer_consume(lexer);
+    size_t origin = lexer->cursor;
+    
+    while(elf_lexer_peek(lexer) != NULL_TERM)
+    {
+        elf_lexer_consume(lexer);
+        if(elf_lexer_peek(lexer) == STRING_QUOTE)
+        {
+            elf_lexer_emit_token(lexer, origin, lexer->cursor - origin, TOK_STR_LIT);
+            elf_lexer_consume(lexer);
+            return true;
+        }
+    }
+    return false;
+
 }
 
 bool elf_lexer_try_scan_ident(elf_lexer* lexer)

@@ -23,6 +23,7 @@ bool elf_lexer_is_digit(char c);
 bool elf_lexer_is_ident(char c);
 bool elf_lexer_is_whitespace(char c);
 
+bool elf_lexer_try_scan_string(elf_lexer* lexer);
 bool elf_lexer_try_scan_ident(elf_lexer* lexer);
 bool elf_lexer_try_scan_punct(elf_lexer* lexer);
 bool elf_lexer_try_scan_num(elf_lexer* lexer);
