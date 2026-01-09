@@ -141,12 +141,12 @@ bool elf_lexer_tokenize(elf_lexer* lexer)
 
     while(elf_lexer_peek(lexer) != NULL_TERM)
     {
-            if (elf_lexer_try_scan_whitespace(lexer))       continue;         
-            else if (elf_lexer_try_scan_line_com(lexer))    continue;    
-            else if (elf_lexer_try_scan_block_com(lexer))   continue;     
-            else if (elf_lexer_try_scan_ident(lexer))       continue;   
-            else if (elf_lexer_try_scan_char(lexer))        continue;   
-            else if (elf_lexer_try_scan_num(lexer))         continue;
+        if      (elf_lexer_try_scan_whitespace(lexer))  continue;         
+        else if (elf_lexer_try_scan_line_com(lexer))    continue;    
+        else if (elf_lexer_try_scan_block_com(lexer))   continue;     
+        else if (elf_lexer_try_scan_ident(lexer))       continue;   
+        else if (elf_lexer_try_scan_punct(lexer))       continue;   
+        else if (elf_lexer_try_scan_num(lexer))         continue;
         
         elf_lexer_emit_token(lexer, lexer->cursor, 1, TOK_INV);
         elf_lexer_consume(lexer);
@@ -241,7 +241,6 @@ bool elf_lexer_try_get_punct_type(char c, elf_token_type* out_tok_type)
             return true;
         }
     }
-
     return false; 
 }
 
@@ -252,24 +251,17 @@ bool elf_lexer_try_get_cmpd_punct_type(char left, char right, elf_token_type* ou
         fprintf(stderr, "error: invalid output pointer\n");
         return false;
     }
-
-    if (right == '=') 
+    
+    for(size_t i = 0; i < CMPD_PUNCT_COUNT; i++)
     {
-        if       (left == '=')  {  *out_tok_type = TOK_EQ;     }
-        else if  (left == '!')  {  *out_tok_type = TOK_NEQ;    }
-        else if  (left == '+')  {  *out_tok_type = TOK_PLUSEQ; }
-        else if  (left == '-')  {  *out_tok_type = TOK_MINEQ;  }
-        else if  (left == '*')  {  *out_tok_type = TOK_MULEQ;  }
-        else if  (left == '/')  {  *out_tok_type = TOK_DIVEQ;  }
-        else if  (left == '%')  {  *out_tok_type = TOK_MODEQ;  }
-        else if  (left == '>')  {  *out_tok_type = TOK_GTE;    }
-        else if  (left == '<')  {  *out_tok_type = TOK_LTE;    }
+        if(cmpd_punct_table[i].tok_value_right == right && 
+           cmpd_punct_table[i].tok_value_left == left)
+        {
+            *out_tok_type = cmpd_punct_table[i].tok_type;
+            return true;
+        }
     }
-    else if  (left == '|' && right == '|') { *out_tok_type = TOK_OR; }
-    else if  (left == '&' && right == '&') { *out_tok_type = TOK_AND; }
-    else if  (left == '*' && right == '*') { *out_tok_type = TOK_POW; }  
-    else return false;
-    return true;
+    return false; 
 }
 
 bool elf_lexer_try_scan_ident(elf_lexer* lexer)
@@ -283,7 +275,7 @@ bool elf_lexer_try_scan_ident(elf_lexer* lexer)
     elf_lexer_consume(lexer);
 
     while(elf_lexer_is_ident(elf_lexer_peek(lexer))
-       || elf_lexer_is_digit(elf_lexer_peek(lexer)) )
+       || elf_lexer_is_digit(elf_lexer_peek(lexer)))
     {
         elf_lexer_consume(lexer);
     }
@@ -293,25 +285,22 @@ bool elf_lexer_try_scan_ident(elf_lexer* lexer)
     return true;
 }
 
-bool elf_lexer_try_scan_char(elf_lexer* lexer)
+bool elf_lexer_try_scan_punct(elf_lexer* lexer)
 {
     size_t origin = lexer->cursor;
-    char curr = elf_lexer_peek(lexer);
-    char next = elf_lexer_peek_next(lexer);
+    char left = elf_lexer_peek(lexer);
 
     elf_token_type emit_tok_type = TOK_INV;
-    if(!elf_lexer_try_get_punct_type(curr, &emit_tok_type))
+    if(!elf_lexer_try_get_punct_type(left, &emit_tok_type))
     {
         return false;
-    }
-
+    } 
     elf_lexer_consume(lexer);
-
-    if(elf_lexer_try_get_cmpd_punct_type(curr, next, &emit_tok_type))
+    char right = elf_lexer_peek(lexer);
+    if(elf_lexer_try_get_cmpd_punct_type(left, right, &emit_tok_type))
     {
         elf_lexer_consume(lexer);
     }
-
     elf_lexer_emit_token(lexer, origin, lexer->cursor - origin, emit_tok_type);
     return true;
 }
@@ -394,7 +383,9 @@ bool elf_lexer_try_scan_whitespace(elf_lexer* lexer)
     {
         elf_lexer_consume(lexer);
         while(elf_lexer_is_whitespace(elf_lexer_peek(lexer)) == true)
+        {
             elf_lexer_consume(lexer);
+        }
         return true;
     }
     return false;

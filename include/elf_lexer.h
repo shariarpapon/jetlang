@@ -24,7 +24,7 @@ bool elf_lexer_is_ident(char c);
 bool elf_lexer_is_whitespace(char c);
 
 bool elf_lexer_try_scan_ident(elf_lexer* lexer);
-bool elf_lexer_try_scan_char(elf_lexer* lexer);
+bool elf_lexer_try_scan_punct(elf_lexer* lexer);
 bool elf_lexer_try_scan_num(elf_lexer* lexer);
 bool elf_lexer_try_scan_line_com(elf_lexer* lexer);
 bool elf_lexer_try_scan_block_com(elf_lexer* lexer);
