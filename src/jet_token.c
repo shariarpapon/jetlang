@@ -1,16 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <elf_token.h>
-#include <elf_utils.h>
+#include <jet_token.h>
+#include <jet_utils.h>
 
-elf_token* elf_token_create(const char* source, size_t origin, size_t len, elf_token_type type)
+jet_token* jet_token_create(const char* source, size_t origin, size_t len, jet_token_type type)
 {
-    elf_token* token = (elf_token*)malloc(sizeof(elf_token));
+    jet_token* token = (jet_token*)malloc(sizeof(jet_token));
     if(!token)
     {
         fprintf(stderr, "error: couldn't allocate token memory.");
-        return (elf_token*){0};
+        return (jet_token*){0};
     }
 
     token->source = source;
@@ -21,7 +21,7 @@ elf_token* elf_token_create(const char* source, size_t origin, size_t len, elf_t
 }
 
 
-void elf_token_print_array(elf_token** tok_array, size_t len)
+void jet_token_print_array(jet_token** tok_array, size_t len)
 {
     if(!tok_array)
     {
@@ -40,15 +40,15 @@ void elf_token_print_array(elf_token** tok_array, size_t len)
     printf("%-7s %-17s %-10s %s\n\n", "len", "type", "enum-id", "value");        
     for(size_t i = 0; i < len; i++)
     {  
-        elf_token* token = *tok_array;
+        jet_token* token = *tok_array;
         tok_array++;
-        const char* type_str = elf_token_type_str(token->type);
+        const char* type_str = jet_token_type_str(token->type);
         printf("%-7zu %-17s %-10d %.*s\n",i+1, type_str,(int)token->type, (int)token->len, token->source + token->origin);        
     }
     printf("\n");
 }
 
-const char* elf_token_type_str(elf_token_type type)
+const char* jet_token_type_str(jet_token_type type)
 {
     switch(type)
     {

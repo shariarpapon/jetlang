@@ -73,7 +73,7 @@ typedef enum
     TOK_LBRK,  // [
     TOK_RBRK,  // ]
 
-} elf_token_type;
+} jet_token_type;
 
 
 typedef struct 
@@ -81,12 +81,12 @@ typedef struct
     const char* source;
     size_t origin;
     size_t len;
-    elf_token_type type;
-} elf_token;
+    jet_token_type type;
+} jet_token;
 
 
-elf_token* elf_token_create(const char* source, size_t origin, size_t len, elf_token_type type);
-const char* elf_token_type_str(elf_token_type type);
-void elf_token_print_array(elf_token** array, size_t len);
+jet_token* jet_token_create(const char* source, size_t origin, size_t len, jet_token_type type);
+const char* jet_token_type_str(jet_token_type type);
+void jet_token_print_array(jet_token** array, size_t len);
 
 

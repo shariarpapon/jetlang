@@ -6,12 +6,12 @@ CFLAGS = -Wall -std=c11 -g $(addprefix -I,$(HEADER_DIRS))
 
 SRC = $(wildcard src/*.c)
 OBJ = $(SRC:src/%.c=build/%.o)
-BIN = elf
+BIN = jet
 LIBS := $(shell find libs -name "*.a")
 
-ELF_FLAGS = pt
-ELF_CODE_FILE = *.ef
-TEST_EXEC = ./elf $(ELF_CODE_FILE) $(ELF_FLAGS)
+JET_FLAGS = pt
+JET_CODE_FILE = *.jet
+TEST_EXEC = ./jet $(JET_CODE_FILE) $(JET_FLAGS)
 
 all: run
 

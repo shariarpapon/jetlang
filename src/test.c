@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stddef.h>
-#include <elf_lexer.h>
-#include <elf_utils.h>
+#include <jet_lexer.h>
+#include <jet_utils.h>
 
 #define ARG_PRINT_TOKENS "pt"
 #define ARG_PRINT_SOURCE "ps"
@@ -44,7 +44,7 @@ int main(int argc, char** argv)
     if(find_arg(ARG_PRINT_ALL) == true || find_arg(ARG_PRINT_SOURCE) ==  true)
         print_source(source, src_len);
     
-    elf_lexer* lexer = elf_lexer_create(source);
+    jet_lexer* lexer = jet_lexer_create(source);
     
     if(!lexer)
     {
@@ -52,16 +52,16 @@ int main(int argc, char** argv)
         return 1;
     }
     
-    if(!elf_lexer_tokenize(lexer))
+    if(!jet_lexer_tokenize(lexer))
     {
         printf("could not tokenize, exiting...\n");
         return 1;
     }
      
     if(find_arg(ARG_PRINT_ALL) == true || find_arg(ARG_PRINT_TOKENS) == true)
-        elf_token_print_array((elf_token**)lexer->token_vec->elements, lexer->token_vec->count); 
+        jet_token_print_array((jet_token**)lexer->token_vec->elements, lexer->token_vec->count); 
     
-    elf_lexer_full_dispose(lexer); 
+    jet_lexer_full_dispose(lexer); 
     free((void*)source);
 
     printf("* all tests ran successfully\n");

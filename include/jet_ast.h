@@ -2,7 +2,7 @@
 
 #include <stdbool.h>
 
-typedef enum elf_ast_node_type
+typedef enum jet_ast_node_type
 {
     //root instruction container
     AST_ORIGIN, 
@@ -35,13 +35,13 @@ typedef enum elf_ast_node_type
     AST_LITERAL,
     AST_VAR_REF,
     
-} elf_ast_node_type;
+} jet_ast_node_type;
 
 
 
-typedef struct elf_ast_node
+typedef struct jet_ast_node
 {
-    elf_ast_node_type type;
+    jet_ast_node_type type;
     void*  value;
 
-} elf_ast_node;
+} jet_ast_node;
