@@ -9,7 +9,7 @@ OBJ = $(SRC:src/%.c=build/%.o)
 BIN = elf
 LIBS := $(shell find libs -name "*.a")
 
-ELF_FLAGS =
+ELF_FLAGS = pt
 ELF_CODE_FILE = *.ef
 TEST_EXEC = ./elf $(ELF_CODE_FILE) $(ELF_FLAGS)
 

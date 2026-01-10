@@ -7,7 +7,6 @@
 #define ARG_PRINT_TOKENS "pt"
 #define ARG_PRINT_SOURCE "ps"
 #define ARG_PRINT_ALL "pa"
-#define ARG_LEXER_EMIT_TOKENS "lec"
 
 static int arg_count;
 static char** args;
@@ -39,10 +38,8 @@ int main(int argc, char** argv)
         return 1;
     }
     
-    //skip the file path arg
     args++;
     arg_count--;
-
     
     if(find_arg(ARG_PRINT_ALL) == true || find_arg(ARG_PRINT_SOURCE) ==  true)
         print_source(source, src_len);
@@ -50,20 +47,19 @@ int main(int argc, char** argv)
     elf_lexer* lexer = elf_lexer_create(source);
     
     if(!lexer)
-        return 1;
-
-    if(!lexer->tokens)
-        return 1; 
-    
-    if(find_arg(ARG_LEXER_EMIT_TOKENS) == true)
     {
-        lexer->emit_comments = true;
+        printf("could not create lexer, exiting...\n");
+        return 1;
     }
-
-    elf_lexer_tokenize(lexer);
-   
+    
+    if(!elf_lexer_tokenize(lexer))
+    {
+        printf("could not tokenize, exiting...\n");
+        return 1;
+    }
+     
     if(find_arg(ARG_PRINT_ALL) == true || find_arg(ARG_PRINT_TOKENS) == true)
-        elf_token_print_vect((elf_token**)lexer->tokens->elements, lexer->tokens->count); 
+        elf_token_print_array((elf_token**)lexer->token_vec->elements, lexer->token_vec->count); 
     
     elf_lexer_full_dispose(lexer); 
     free((void*)source);

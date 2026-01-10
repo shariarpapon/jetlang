@@ -10,36 +10,17 @@
 #define STRING_QUOTE '"'
 #define DECIMAL_CHAR '.'
 
-struct elf_lexer
-{
-    size_t len; //including null terminal ('\0')
-    size_t cursor;
-    bool emit_comments; 
-    const char* source;
-    vec* tokens;
-};
+typedef struct elf_tok_def elf_tok_def; 
 
-typedef struct
+struct elf_tok_def 
 {
-    elf_token_type tok_type;
     union
     { 
-        const char character;
-        const char* string;
+        const char* str;
+        const char chr;
     } value;
-} tok_def;
-
-typedef struct 
-{
-    const char* tok_value;
     elf_token_type tok_type;
-} kwd_token_def;
-
-typedef struct
-{
-    const char tok_value;
-    elf_token_type tok_type;
-} punct_token_def;
+};
 
 typedef struct
 {
@@ -48,22 +29,39 @@ typedef struct
     elf_token_type tok_type;
 } cmpd_punct_token_def;
 
-static const punct_token_def punct_table[] = 
+static const elf_tok_def kwd_table[] = 
+{ 
+   { .value.str = "null"  ,  TOK_KWD_NULL   }, 
+   { .value.str = "bool"  ,  TOK_KWD_BOOL   },  
+   { .value.str = "true"  ,  TOK_KWD_TRUE   },
+   { .value.str = "false" ,  TOK_KWD_FALSE  },
+   { .value.str = "int"   ,  TOK_KWD_INT    },   
+   { .value.str = "float" ,  TOK_KWD_FLOAT  }, 
+   { .value.str = "str"   ,  TOK_KWD_STR    },  
+   { .value.str = "byte"  ,  TOK_KWD_BYTE   }, 
+   { .value.str = "if"    ,  TOK_KWD_IF     }, 
+   { .value.str = "else"  ,  TOK_KWD_ELSE   }, 
+   { .value.str = "for"   ,  TOK_KWD_FOR    }, 
+   { .value.str = "while" ,  TOK_KWD_WHILE  }, 
+};
+
+
+static const elf_tok_def punct_table[] = 
 {
-    {'=', TOK_ASG   },    
-    {'&', TOK_BAND  },
-    {'|', TOK_BOR   },
-    {'^', TOK_XOR   },
-    {'!', TOK_NOT   },
-    {'%', TOK_MOD   },
-    {'<', TOK_LT    },  {'>', TOK_GT    },      
-    {'+', TOK_PLUS  },  {'-', TOK_MINUS }, 
-    {'*', TOK_STAR  },  {'/', TOK_SLASH },  
-    {':', TOK_COLON },  {',', TOK_COMMA }, 
-    {';', TOK_SEMI  },  {'.', TOK_DOT   },
-    {'(', TOK_LPAR  },  {')', TOK_RPAR  },
-    {'{', TOK_LBRC  },  {'}', TOK_RBRC  },
-    {'[', TOK_LBRK  },  {']', TOK_RBRK  },
+    { .value.chr = '=' , TOK_ASG   },    
+    { .value.chr = '&' , TOK_BAND  },
+    { .value.chr = '|' , TOK_BOR   },
+    { .value.chr = '^' , TOK_XOR   },
+    { .value.chr = '!' , TOK_NOT   },
+    { .value.chr = '%' , TOK_MOD   },
+    { .value.chr = '<' , TOK_LT    },  { .value.chr = '>' , TOK_GT    },      
+    { .value.chr = '+' , TOK_PLUS  },  { .value.chr = '-' , TOK_MINUS }, 
+    { .value.chr = '*' , TOK_STAR  },  { .value.chr = '/' , TOK_SLASH },  
+    { .value.chr = ':' , TOK_COLON },  { .value.chr = ',' , TOK_COMMA }, 
+    { .value.chr = ';' , TOK_SEMI  },  { .value.chr = '.' , TOK_DOT   },
+    { .value.chr = '(' , TOK_LPAR  },  { .value.chr = ')' , TOK_RPAR  },
+    { .value.chr = '{' , TOK_LBRC  },  { .value.chr = '}' , TOK_RBRC  },
+    { .value.chr = '[' , TOK_LBRK  },  { .value.chr = ']' , TOK_RBRK  },
 };
 
 static const cmpd_punct_token_def cmpd_punct_table[] = 
@@ -74,22 +72,6 @@ static const cmpd_punct_token_def cmpd_punct_table[] =
     {'+', '=', TOK_PLUSEQ }, {'-', '=', TOK_MINEQ },
     {'*', '=', TOK_MULEQ  }, {'/', '=', TOK_DIVEQ },
     {'%', '=', TOK_MODEQ  }, {'*', '*', TOK_POW   },
-};
-
-static const kwd_token_def kwd_table[] = 
-{ 
-   { "null",   TOK_KWD_NULL    }, 
-   { "bool",   TOK_KWD_BOOL    },  
-   { "true",   TOK_KWD_TRUE    },
-   { "false",  TOK_KWD_FALSE   },
-   { "int",    TOK_KWD_INT     },   
-   { "float",  TOK_KWD_FLOAT   }, 
-   { "str",    TOK_KWD_STR  },  
-   { "byte",   TOK_KWD_BYTE    }, 
-   { "if",     TOK_KWD_IF      }, 
-   { "else",   TOK_KWD_ELSE    }, 
-   { "for",    TOK_KWD_FOR     }, 
-   { "while",  TOK_KWD_WHILE   }, 
 };
 
 static void elf_lexer_emit_token(elf_lexer* lexer, size_t origin, size_t len, elf_token_type type);
@@ -111,7 +93,6 @@ static bool elf_lexer_try_get_cmpd_punct_type(char left, char right, elf_token_t
 
 static char elf_lexer_consume(elf_lexer* lexer);
 static char elf_lexer_peek(elf_lexer* lexer);
-static char elf_lexer_peek_prev(elf_lexer* lexer);
 static char elf_lexer_peek_next(elf_lexer* lexer);
 
 elf_lexer* elf_lexer_create(const char* source)
@@ -129,14 +110,10 @@ elf_lexer* elf_lexer_create(const char* source)
     lexer->source = source;
     lexer->len = strlen(source) + 1;
     lexer->cursor = 0;
-    lexer->emit_comments = false;
-
-    const size_t tok_capacity = 64;
-    lexer->tokens = vec_create(tok_capacity);
-
-    if(!lexer->tokens)
+    lexer->token_vec = vec_create(64);
+    if(!lexer->token_vec)
     {
-        lexer->tokens = NULL;
+        lexer->token_vec = NULL;
         fprintf(stderr, "error: could not allocate token-array memory\n");
         return (elf_lexer*){0};
     }
@@ -148,12 +125,12 @@ elf_lexer* elf_lexer_create(const char* source)
 void elf_lexer_full_dispose(elf_lexer* lexer)
 {
     printf("full disposing lexer...");
-    for(int i = 0; i < lexer->tokens->count; i++)
+    for(int i = 0; i < lexer->token_vec->count; i++)
     {
-        elf_token* tok = vec_get(lexer->tokens, i);
+        elf_token* tok = vec_get(lexer->token_vec, i);
         if(tok) free(tok);
     }
-    vec_dispose(lexer->tokens);
+    vec_dispose(lexer->token_vec);
     free(lexer);
     printf("successful!\n");
 }
@@ -163,9 +140,9 @@ void elf_lexer_emit_token(elf_lexer* lexer, size_t origin, size_t len, elf_token
     static size_t call_count = 0;
     call_count++;
     elf_token* token = elf_token_create(lexer->source, origin, len, type); 
-    if(vec_append(lexer->tokens, token) == false)
+    if(vec_append(lexer->token_vec, token) == false)
     {
-        fprintf(stderr, "error: could not add new token to lexer->tokens.\n");
+        fprintf(stderr, "error: could not add new token to lexer->token_vec.\n");
         return;
     }
 }
@@ -173,9 +150,9 @@ void elf_lexer_emit_token(elf_lexer* lexer, size_t origin, size_t len, elf_token
 bool elf_lexer_tokenize(elf_lexer* lexer)
 {
     printf("tokenizing...\n");
-    if(!lexer || !lexer->tokens) 
+    if(!lexer || !lexer->token_vec) 
     {
-        fprintf(stderr, "error: cannot tokenize, lexer or lexer->tokens is invalid.\n");
+        fprintf(stderr, "error: cannot tokenize, lexer or lexer->token_vec is invalid.\n");
         return false;
     }
 
@@ -258,7 +235,7 @@ bool elf_lexer_try_get_kwd_type(const char* s, size_t len, elf_token_type* out_t
     token_str[len] = NULL_TERM;
     for(size_t i = 0; i < ARRAY_LEN(kwd_table); i++)
     {
-       if(strcmp(token_str, kwd_table[i].tok_value) == 0)
+       if(strcmp(token_str, kwd_table[i].value.str) == 0)
        {
             *out_tok_type = kwd_table[i].tok_type;
             return true;
@@ -278,7 +255,7 @@ bool elf_lexer_try_get_punct_type(char c, elf_token_type* out_tok_type)
     
     for(size_t i = 0; i < ARRAY_LEN(punct_table); i++)
     {
-        if(punct_table[i].tok_value == c)
+        if(punct_table[i].value.chr == c)
         {
             *out_tok_type = punct_table[i].tok_type;
             return true;
@@ -413,19 +390,13 @@ bool elf_lexer_try_scan_line_com(elf_lexer* lexer)
     {
         return false;
     }
-
-    size_t origin = lexer->cursor;
     elf_lexer_consume(lexer);
     elf_lexer_consume(lexer);
-
     while(elf_lexer_peek(lexer) != NULL_TERM)
     {
         if(elf_lexer_peek(lexer) == '\n')
         {
-            size_t len = lexer->cursor - origin;
             elf_lexer_consume(lexer);
-            if(lexer->emit_comments == true)
-                elf_lexer_emit_token(lexer, origin, len, TOK_LCOM);
             return true;        
         }
         elf_lexer_consume(lexer);
@@ -439,8 +410,6 @@ bool elf_lexer_try_scan_block_com(elf_lexer* lexer)
     {
         return false;
     }
-
-    size_t origin = lexer->cursor;
     elf_lexer_consume(lexer);
     elf_lexer_consume(lexer);
     while(elf_lexer_peek(lexer) != NULL_TERM)
@@ -449,9 +418,6 @@ bool elf_lexer_try_scan_block_com(elf_lexer* lexer)
         {
             elf_lexer_consume(lexer);
             elf_lexer_consume(lexer);
-            size_t len = lexer->cursor - origin; 
-            if(lexer->emit_comments == true)
-                elf_lexer_emit_token(lexer, origin, len, TOK_BCOM);
             return true;
         }
         elf_lexer_consume(lexer);

@@ -21,27 +21,27 @@ elf_token* elf_token_create(const char* source, size_t origin, size_t len, elf_t
 }
 
 
-void elf_token_print_vect(elf_token** tokens, size_t count)
+void elf_token_print_array(elf_token** tok_array, size_t len)
 {
-    if(!tokens)
+    if(!tok_array)
     {
-        fprintf(stderr, "error: cannot print tokens, token vect invalid.\n");
+        fprintf(stderr, "error: cannot print tokens, token tok_array null.\n");
         return;
     }
 
-    if(count == 0)
+    if(len == 0)
     {
         printf("# nothing to print, token vect is empty\n");
         return;
     }
     
-    printf("\ntoken vector [%zu]:\n\n", count);
+    printf("\ntoken vector [%zu]:\n\n", len);
     
-    printf("%-7s %-17s %-10s %s\n\n", "count", "type", "enum-id", "value");        
-    for(size_t i = 0; i < count; i++)
+    printf("%-7s %-17s %-10s %s\n\n", "len", "type", "enum-id", "value");        
+    for(size_t i = 0; i < len; i++)
     {  
-        elf_token* token = *tokens;
-        tokens++;
+        elf_token* token = *tok_array;
+        tok_array++;
         const char* type_str = elf_token_type_str(token->type);
         printf("%-7zu %-17s %-10d %.*s\n",i+1, type_str,(int)token->type, (int)token->len, token->source + token->origin);        
     }
