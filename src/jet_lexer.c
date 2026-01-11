@@ -73,12 +73,12 @@ static const cmpd_punct_token_def cmpd_punct_table[] =
     {'+', '=', TOK_PLUSEQ }, {'-', '=', TOK_MINEQ },
     {'*', '=', TOK_MULEQ  }, {'/', '=', TOK_DIVEQ },
     {'%', '=', TOK_MODEQ  }, {'*', '*', TOK_POW   },
+    {'+', '+', TOK_INCR   }, {'-', '-', TOK_DECR  },
 };
 
 static void jet_lexer_emit_token(jet_lexer* lexer, size_t origin, size_t len, jet_token_type tok_type);
 static bool jet_lexer_is_digit(char c);
 static bool jet_lexer_is_ident(char c);
-static bool jet_lexer_is_whitespace(char c);
 
 static bool jet_lexer_try_scan_str_lit(jet_lexer* lexer);
 static bool jet_lexer_try_scan_num_lit(jet_lexer* lexer);
@@ -110,11 +110,11 @@ jet_lexer* jet_lexer_create(const char* source)
     lexer->source = source;
     lexer->len = strlen(source) + 1;
     lexer->cursor = 0;
-    lexer->token_vec = vec_create(64);
+    lexer->token_vec = jet_vector_create(64, sizeof(jet_token));
     if(!lexer->token_vec)
     {
         lexer->token_vec = NULL;
-        fprintf(stderr, "error: could not allocate token-array memory\n");
+        fprintf(stderr, "error: could not allocate token-vector memory\n");
         return NULL;
     }
 
@@ -122,32 +122,25 @@ jet_lexer* jet_lexer_create(const char* source)
     return lexer;
 }
 
-void jet_lexer_full_dispose(jet_lexer* lexer)
+void jet_lexer_dispose(jet_lexer* lexer)
 {
     printf("full disposing lexer...");
-    for(int i = 0; i < lexer->token_vec->count; i++)
+    if(!lexer) 
     {
-        jet_token* tok = vec_get(lexer->token_vec, i);
-        if(tok) free(tok);
+        perror("error: attempting to free invalid lexer pointer.\n");
+        return;
     }
-    vec_dispose(lexer->token_vec);
+    if(!lexer->token_vec)
+    {
+        free(lexer);
+        return;
+    }
+    jet_vector_dispose(lexer->token_vec);
     free(lexer);
     printf("successful!\n");
 }
 
-void jet_lexer_emit_token(jet_lexer* lexer, size_t origin, size_t len, jet_token_type tok_type)
-{
-    static size_t call_count = 0;
-    call_count++;
-    jet_token* token = jet_token_create(lexer->source, origin, len, tok_type); 
-    if(vec_append(lexer->token_vec, token) == false)
-    {
-        fprintf(stderr, "error: could not add new token to lexer->token_vec.\n");
-        return;
-    }
-}
-
-bool jet_lexer_tokenize(jet_lexer* lexer)
+bool jet_lexer_analyze(jet_lexer* lexer)
 {
     printf("tokenizing...\n");
     if(!lexer || !lexer->token_vec) 
@@ -174,7 +167,23 @@ bool jet_lexer_tokenize(jet_lexer* lexer)
     return true;
 }
 
-bool jet_lexer_is_ident(char c)
+static void jet_lexer_emit_token(jet_lexer* lexer, size_t origin, size_t len, jet_token_type tok_type)
+{
+    static size_t call_count = 0;
+    call_count++;
+    jet_token tok;
+    tok.source = lexer->source;
+    tok.origin = origin;
+    tok.len = len;
+    tok.type = tok_type;
+    if(jet_vector_append(lexer->token_vec, (const void*)&tok) == false)
+    {
+        fprintf(stderr, "error: could not add new token to lexer->token_vec.\n");
+        return;
+    }
+}
+
+static bool jet_lexer_is_ident(char c)
 {
     switch (c)
     {
@@ -196,7 +205,7 @@ bool jet_lexer_is_ident(char c)
     return false;
 }
 
-bool jet_lexer_is_digit(char c)
+static bool jet_lexer_is_digit(char c)
 {
     switch (c)
     {
@@ -209,19 +218,7 @@ bool jet_lexer_is_digit(char c)
     return false;
 }
 
-bool jet_lexer_is_whitespace(char c)
-{
-    bool is_whitespace =  
-            c == ' ' || 
-            c == '\n' || 
-            c == '\t' || 
-            c == '\f' || 
-            c == '\r' || 
-            c == '\v';
-    return is_whitespace;
-}
-
-bool jet_lexer_try_get_kwd_type(const char* s, size_t len, jet_token_type* out_tok_type)
+static bool jet_lexer_try_get_kwd_type(const char* s, size_t len, jet_token_type* out_tok_type)
 { 
     if(!out_tok_type)
     {
@@ -244,7 +241,7 @@ bool jet_lexer_try_get_kwd_type(const char* s, size_t len, jet_token_type* out_t
     return false;
 }
 
-bool jet_lexer_try_get_punct_type(char c, jet_token_type* out_tok_type) 
+static bool jet_lexer_try_get_punct_type(char c, jet_token_type* out_tok_type) 
 {
     if(!out_tok_type)
     {
@@ -263,7 +260,7 @@ bool jet_lexer_try_get_punct_type(char c, jet_token_type* out_tok_type)
     return false; 
 }
 
-bool jet_lexer_try_get_cmpd_punct_type(char left, char right, jet_token_type* out_tok_type) 
+static bool jet_lexer_try_get_cmpd_punct_type(char left, char right, jet_token_type* out_tok_type) 
 {
     if(!out_tok_type)
     {
@@ -283,7 +280,7 @@ bool jet_lexer_try_get_cmpd_punct_type(char left, char right, jet_token_type* ou
     return false; 
 }
 
-bool jet_lexer_try_scan_str_lit(jet_lexer* lexer)
+static bool jet_lexer_try_scan_str_lit(jet_lexer* lexer)
 {
     if(jet_lexer_peek(lexer) != STRING_QUOTE)
         return false;
@@ -308,7 +305,7 @@ bool jet_lexer_try_scan_str_lit(jet_lexer* lexer)
     return false;
 }
 
-bool jet_lexer_try_scan_num_lit(jet_lexer* lexer)
+static bool jet_lexer_try_scan_num_lit(jet_lexer* lexer)
 {
     bool float_flag = false;
     size_t origin = lexer->cursor;
@@ -367,7 +364,7 @@ bool jet_lexer_try_scan_ident(jet_lexer* lexer)
     return true;
 }
 
-bool jet_lexer_try_scan_punct(jet_lexer* lexer)
+static bool jet_lexer_try_scan_punct(jet_lexer* lexer)
 {
     size_t origin = lexer->cursor;
     char left = jet_lexer_peek(lexer);
@@ -387,7 +384,7 @@ bool jet_lexer_try_scan_punct(jet_lexer* lexer)
     return true;
 }
 
-bool jet_lexer_try_scan_line_com(jet_lexer* lexer)
+static bool jet_lexer_try_scan_line_com(jet_lexer* lexer)
 {
     if(jet_lexer_peek(lexer) != '/' || jet_lexer_peek_next(lexer) != '/')
     {
@@ -407,7 +404,7 @@ bool jet_lexer_try_scan_line_com(jet_lexer* lexer)
     return false;
 }
 
-bool jet_lexer_try_scan_block_com(jet_lexer* lexer)
+static bool jet_lexer_try_scan_block_com(jet_lexer* lexer)
 {
     if(jet_lexer_peek(lexer) != '/' || jet_lexer_peek_next(lexer) != '*')
     {
@@ -429,21 +426,27 @@ bool jet_lexer_try_scan_block_com(jet_lexer* lexer)
     return false;
 }
 
-bool jet_lexer_try_scan_whitespace(jet_lexer* lexer)
+static bool jet_lexer_try_scan_whitespace(jet_lexer* lexer)
 {
-    if(jet_lexer_is_whitespace(jet_lexer_peek(lexer)) == true)
+    switch(jet_lexer_peek(lexer))
     {
-        jet_lexer_consume(lexer);
-        while(jet_lexer_is_whitespace(jet_lexer_peek(lexer)) == true)
-        {
-            jet_lexer_consume(lexer);
-        }
-        return true;
+        case ' ' :
+        case '\n': 
+        case '\t':
+        case '\v':
+        case '\f':
+            break;
+        case '\r':
+            if(jet_lexer_peek_next(lexer) == '\n')
+                jet_lexer_consume(lexer);
+        break;
+        default: return false;
     }
-    return false;
+    jet_lexer_consume(lexer);
+    return true;
 }
 
-char jet_lexer_peek_next(jet_lexer* lexer)
+static char jet_lexer_peek_next(jet_lexer* lexer)
 {
     size_t next = lexer->cursor + 1;
     if(next >= lexer->len - 1)
@@ -454,12 +457,12 @@ char jet_lexer_peek_next(jet_lexer* lexer)
     return lexer->source[next];
 }
 
-char jet_lexer_peek(jet_lexer* lexer)
+static char jet_lexer_peek(jet_lexer* lexer)
 {
     return lexer->source[lexer->cursor];
 }
 
-char jet_lexer_consume(jet_lexer* lexer)
+static char jet_lexer_consume(jet_lexer* lexer)
 {
     char c = jet_lexer_peek(lexer);
     lexer->cursor++;

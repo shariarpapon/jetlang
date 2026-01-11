@@ -5,7 +5,7 @@
 
 #define UPSIZE_FAC 2
 
-struct jet_vector_t
+struct jet_vector
 {
     size_t capacity;
     size_t count;
@@ -13,11 +13,11 @@ struct jet_vector_t
     void* data_array;
 };
 
-void jet_vector_grow(jet_vector_t* v);
+static void jet_vector_grow(jet_vector* v);
 
-jet_vector_t* jet_vector_create(size_t capacity, size_t elm_size)
+jet_vector* jet_vector_create(size_t capacity, size_t elm_size)
 {
-    jet_vector_t* v = (jet_vector_t*)malloc(sizeof(jet_vector_t));
+    jet_vector* v = (jet_vector*)malloc(sizeof(jet_vector));
     if(!v)
     {
         perror("cannot create jet_vector, memory allocation failed.\n");
@@ -46,7 +46,7 @@ jet_vector_t* jet_vector_create(size_t capacity, size_t elm_size)
     return v;
 }
 
-bool jet_vector_dispose(jet_vector_t* v)
+bool jet_vector_dispose(jet_vector* v)
 {
     if(!v) return false;
     if(v->data_array)
@@ -58,7 +58,7 @@ bool jet_vector_dispose(jet_vector_t* v)
     return true;
 }
 
-bool jet_vector_append(jet_vector_t* v, const void* data)
+bool jet_vector_append(jet_vector* v, const void* data)
 {
     if(!v) 
     {
@@ -74,7 +74,7 @@ bool jet_vector_append(jet_vector_t* v, const void* data)
     return true;
 }
 
-bool jet_vector_remove(jet_vector_t* v, size_t i)
+bool jet_vector_remove(jet_vector* v, size_t i)
 {
     if(i >= v->count)
     {
@@ -96,7 +96,7 @@ bool jet_vector_remove(jet_vector_t* v, size_t i)
     return true;
 }
 
-bool jet_vector_clear(jet_vector_t* v)
+bool jet_vector_clear(jet_vector* v)
 {
     if(!v || !v->data_array)
     {
@@ -107,7 +107,7 @@ bool jet_vector_clear(jet_vector_t* v)
     return true;
 }
 
-void* jet_vector_get(jet_vector_t* v, size_t i)
+void* jet_vector_get(jet_vector* v, size_t i)
 {
     if(i >= v->count)
     {
@@ -117,7 +117,7 @@ void* jet_vector_get(jet_vector_t* v, size_t i)
     return (char*)v->data_array + v->elm_size * i;
 }
 
-size_t jet_vector_count(jet_vector_t* v)
+size_t jet_vector_count(jet_vector* v)
 {
     if(!v)
     {
@@ -127,7 +127,7 @@ size_t jet_vector_count(jet_vector_t* v)
     return v->count;
 }
 
-void jet_vector_grow(jet_vector_t* v)
+static void jet_vector_grow(jet_vector* v)
 {
     v->capacity *= UPSIZE_FAC;
     void* new_array = malloc(v->capacity * v->elm_size);

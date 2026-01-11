@@ -1,5 +1,5 @@
 #pragma once
-#include <stdlib.h>
+#include <jet_vector.h>
 
 typedef enum
 {
@@ -60,6 +60,8 @@ typedef enum
     TOK_DIVEQ,      // /=
     TOK_MODEQ,      // %=
     TOK_POW,        // **
+    TOK_INCR,
+    TOK_DECR,
 
     //Delimiters
     TOK_COLON,  // :
@@ -87,6 +89,6 @@ typedef struct
 
 jet_token* jet_token_create(const char* source, size_t origin, size_t len, jet_token_type type);
 const char* jet_token_type_str(jet_token_type type);
-void jet_token_print_array(jet_token** array, size_t len);
+void jet_token_print_vector(jet_vector* v);
 
 

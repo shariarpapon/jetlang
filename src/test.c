@@ -51,20 +51,18 @@ int main(int argc, char** argv)
     {
         printf("could not create lexer, exiting...\n");
         return 1;
-    }
-   
+    } 
 
-
-    if(!jet_lexer_tokenize(lexer))
+    if(!jet_lexer_analyze(lexer))
     {
         printf("could not tokenize, exiting...\n");
         return 1;
     }
      
     if(find_arg(ARG_PRINT_ALL) == true || find_arg(ARG_PRINT_TOKENS) == true)
-        jet_token_print_array((jet_token**)lexer->token_vec->elements, lexer->token_vec->count); 
+        jet_token_print_vector(lexer->token_vec); 
     
-    jet_lexer_full_dispose(lexer); 
+    jet_lexer_dispose(lexer); 
     free((void*)source);
 
     printf("* all tests ran successfully\n");

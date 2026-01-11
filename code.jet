@@ -5,6 +5,12 @@ object player
     byte tag = 'a';
     float pi = 3.14.;
     flaot halg = .5;
+    
+    void increment()
+    {
+        value++;
+    }
+
     decl to_string()
     {
         if(name == null || age <= 0)

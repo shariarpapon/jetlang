@@ -21,27 +21,28 @@ jet_token* jet_token_create(const char* source, size_t origin, size_t len, jet_t
 }
 
 
-void jet_token_print_array(jet_token** tok_array, size_t len)
+void jet_token_print_vector(jet_vector* tokens)
 {
-    if(!tok_array)
+    if(!tokens)
     {
-        fprintf(stderr, "error: cannot print tokens, token tok_array null.\n");
+        fprintf(stderr, "error: cannot print tokens, token tokens null.\n");
         return;
     }
+    
+    size_t len = jet_vector_count(tokens);
 
     if(len == 0)
     {
-        printf("# nothing to print, token vect is empty\n");
+        printf("# nothing to print, token vector is empty\n");
         return;
     }
     
     printf("\ntoken vector [%zu]:\n\n", len);
-    
     printf("%-7s %-17s %-10s %s\n\n", "len", "type", "enum-id", "value");        
+   
     for(size_t i = 0; i < len; i++)
     {  
-        jet_token* token = *tok_array;
-        tok_array++;
+        jet_token* token = jet_vector_get(tokens, i);
         const char* type_str = jet_token_type_str(token->type);
         printf("%-7zu %-17s %-10d %.*s\n",i+1, type_str,(int)token->type, (int)token->len, token->source + token->origin);        
     }
@@ -53,7 +54,7 @@ const char* jet_token_type_str(jet_token_type type)
 {
     switch(type)
     {
-        default:            return "no_str_conv";
+        default:            return "unknown_str_conv";
         case TOK_INV:       return "TOK_INV";
         case TOK_EOF:       return "TOK_EOF";
         
@@ -61,7 +62,7 @@ const char* jet_token_type_str(jet_token_type type)
         case TOK_KWD_NULL:  return "TOK_KWD_NULL";
         case TOK_KWD_INT:   return "TOK_KWD_INT";
         case TOK_KWD_FLOAT: return "TOK_KWD_FLOAT";
-        case TOK_KWD_STR:return "TOK_KWD_STR";
+        case TOK_KWD_STR:   return "TOK_KWD_STR";
         case TOK_KWD_BYTE:  return "TOK_KWD_BYTE";
         case TOK_KWD_BOOL:  return "TOK_KWD_BOOL";
         case TOK_KWD_TRUE:  return "TOK_KWD_TRUE";
@@ -103,7 +104,9 @@ const char* jet_token_type_str(jet_token_type type)
         case TOK_MULEQ:     return "TOK_MULEQ";
         case TOK_DIVEQ:     return "TOK_DIVEQ";
         case TOK_POW:       return "TOK_POW";
-        
+        case TOK_INCR:      return "TOK_INCR";
+        case TOK_DECR:      return "TOK_DECR";
+
         case TOK_COLON:     return "TOK_COLON";
         case TOK_COMMA:     return "TOK_COMMA";
         case TOK_SEMI:      return "TOK_SEMI";
