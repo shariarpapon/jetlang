@@ -9,6 +9,7 @@
 
 #define STRING_QUOTE '"'
 #define DECIMAL_CHAR '.'
+#define ESCAPE_CHAR '\\'
 
 typedef struct jet_tok_def jet_tok_def; 
 
@@ -161,7 +162,6 @@ bool jet_lexer_tokenize(jet_lexer* lexer)
         if      (jet_lexer_try_scan_whitespace(lexer))  continue; 
         else if (jet_lexer_try_scan_line_com(lexer))    continue;    
         else if (jet_lexer_try_scan_block_com(lexer))   continue;      
-        
         else if (jet_lexer_try_scan_ident(lexer))       continue;   
         else if (jet_lexer_try_scan_num_lit(lexer))     continue; 
         else if (jet_lexer_try_scan_str_lit(lexer))     continue;
@@ -290,16 +290,20 @@ bool jet_lexer_try_scan_str_lit(jet_lexer* lexer)
 
     jet_lexer_consume(lexer);
     size_t origin = lexer->cursor;
-    
+    bool escaped = false;
     while(jet_lexer_peek(lexer) != NULL_TERM)
     {
         jet_lexer_consume(lexer);
-        if(jet_lexer_peek(lexer) == STRING_QUOTE)
+        
+        if(jet_lexer_peek(lexer) == STRING_QUOTE && !escaped)
         {
             jet_lexer_emit_token(lexer, origin, lexer->cursor - origin, TOK_STR_LIT);
             jet_lexer_consume(lexer);
             return true;
         }
+        
+        if(escaped) escaped = false;
+        else if(jet_lexer_peek(lexer) == ESCAPE_CHAR) escaped = true;    
     }
     return false;
 }
