@@ -74,7 +74,7 @@ static const cmpd_punct_token_def cmpd_punct_table[] =
     {'%', '=', TOK_MODEQ  }, {'*', '*', TOK_POW   },
 };
 
-static void jet_lexer_emit_token(jet_lexer* lexer, size_t origin, size_t len, jet_token_type type);
+static void jet_lexer_emit_token(jet_lexer* lexer, size_t origin, size_t len, jet_token_type tok_type);
 static bool jet_lexer_is_digit(char c);
 static bool jet_lexer_is_ident(char c);
 static bool jet_lexer_is_whitespace(char c);
@@ -102,9 +102,8 @@ jet_lexer* jet_lexer_create(const char* source)
     jet_lexer* lexer = (jet_lexer*)malloc(sizeof(jet_lexer));
     if(!lexer)
     {
-        lexer = NULL;
         fprintf(stderr, "error: could not allocate lexer memory\n");
-        return (jet_lexer*){0};
+        return NULL;
     }
 
     lexer->source = source;
@@ -115,7 +114,7 @@ jet_lexer* jet_lexer_create(const char* source)
     {
         lexer->token_vec = NULL;
         fprintf(stderr, "error: could not allocate token-array memory\n");
-        return (jet_lexer*){0};
+        return NULL;
     }
 
     printf("successful!\n");
@@ -135,11 +134,11 @@ void jet_lexer_full_dispose(jet_lexer* lexer)
     printf("successful!\n");
 }
 
-void jet_lexer_emit_token(jet_lexer* lexer, size_t origin, size_t len, jet_token_type type)
+void jet_lexer_emit_token(jet_lexer* lexer, size_t origin, size_t len, jet_token_type tok_type)
 {
     static size_t call_count = 0;
     call_count++;
-    jet_token* token = jet_token_create(lexer->source, origin, len, type); 
+    jet_token* token = jet_token_create(lexer->source, origin, len, tok_type); 
     if(vec_append(lexer->token_vec, token) == false)
     {
         fprintf(stderr, "error: could not add new token to lexer->token_vec.\n");
@@ -167,7 +166,7 @@ bool jet_lexer_tokenize(jet_lexer* lexer)
         else if (jet_lexer_try_scan_num_lit(lexer))     continue; 
         else if (jet_lexer_try_scan_str_lit(lexer))     continue;
         else if (jet_lexer_try_scan_punct(lexer))       continue;   
-
+        
         jet_lexer_emit_token(lexer, lexer->cursor, 1, TOK_INV);
         jet_lexer_consume(lexer);
     } 

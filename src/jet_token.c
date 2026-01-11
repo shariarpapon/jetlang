@@ -46,6 +46,7 @@ void jet_token_print_array(jet_token** tok_array, size_t len)
         printf("%-7zu %-17s %-10d %.*s\n",i+1, type_str,(int)token->type, (int)token->len, token->source + token->origin);        
     }
     printf("\n");
+    printf("* generated %zu tokens\n\n", len);
 }
 
 const char* jet_token_type_str(jet_token_type type)
