@@ -1,7 +1,7 @@
 #pragma once
 #include <stdlib.h>
 #include <jet_token.h>
-#include <jet_utils.h>
+#include <jet_io.h>
 #include <ctoolbox/vec.h>
 
 typedef struct jet_lexer

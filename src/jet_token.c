@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <jet_token.h>
-#include <jet_utils.h>
+#include <jet_io.h>
 
 jet_token* jet_token_create(const char* source, size_t origin, size_t len, jet_token_type type)
 {

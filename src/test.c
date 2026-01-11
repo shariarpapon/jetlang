@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stddef.h>
 #include <jet_lexer.h>
-#include <jet_utils.h>
+#include <utils/jet_io.h>
 #include <utils/jet_vector.h>
 
 #define ARG_PRINT_TOKENS "pt"
