@@ -3,7 +3,6 @@ CC = gcc
 
 HEADER_DIRS := $(shell find include libs -type d)
 CFLAGS = -Wall -std=c11 -g $(addprefix -I,$(HEADER_DIRS))
-
 SRC = $(wildcard src/*.c)
 OBJ = $(SRC:src/%.c=build/%.o)
 BIN = jet

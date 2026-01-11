@@ -13,20 +13,20 @@ struct jet_vector_t
     void* data_array;
 };
 
-typedef void jet_vector_grow(jet_vector* v);
+void jet_vector_grow(jet_vector_t* v);
 
 jet_vector_t* jet_vector_create(size_t capacity, size_t elm_size)
 {
     jet_vector_t* v = (jet_vector_t*)malloc(sizeof(jet_vector_t));
     if(!v)
     {
-        perror("Cannot create jet_vector, memory allocation failed.");
+        perror("cannot create jet_vector, memory allocation failed.\n");
         return NULL;
     }
 
     if(elm_size == 0)
     {
-        perror("Cannot initialize vector with element size of 0");
+        perror("cannot initialize vector with element size of 0\n");
         free(v);
         return NULL;
     }
@@ -39,7 +39,7 @@ jet_vector_t* jet_vector_create(size_t capacity, size_t elm_size)
     v->data_array = malloc(v->capacity * v->elm_size);
     if(!v->data_array)
     {
-        perror("Cannot to resize vector, memory allocation failed.");
+        perror("cannot to resize vector, memory allocation failed.\n");
         free(v);
         return NULL;
     }
@@ -58,19 +58,19 @@ bool jet_vector_dispose(jet_vector_t* v)
     return true;
 }
 
-bool jet_vector_append(jet_vetor_t* v, const void* data)
+bool jet_vector_append(jet_vector_t* v, const void* data)
 {
     if(!v) 
     {
-        perror("invalid jet_vector provided."); 
+        perror("invalid jet_vector provided.\n"); 
         return false;
     }
 
     if(v->count >= v->capacity)
         jet_vector_grow(v);
 
-    size_t index = v->count + 1;
-    memcpy((char*)v->data_array + v->elm_size  * v->count, data, v->elm_size);
+    memcpy((char*)v->data_array + v->elm_size * v->count, data, v->elm_size);
+    v->count++;
     return true;
 }
 
@@ -78,7 +78,7 @@ bool jet_vector_remove(jet_vector_t* v, size_t i)
 {
     if(i >= v->count)
     {
-        perror("cannot remove element from jet_vector, index out of bounds.");
+        perror("cannot remove element from jet_vector, index out of bounds.\n");
         return false;
     }
     if(i < v->count - 1)
@@ -107,20 +107,39 @@ bool jet_vector_clear(jet_vector_t* v)
     return true;
 }
 
-void jet_vector_grow(jet_vector* v)
+void* jet_vector_get(jet_vector_t* v, size_t i)
+{
+    if(i >= v->count)
+    {
+        perror("Cannot retrive jet_vector element, index out of bounds.\n");
+        return NULL;
+    }
+    return (char*)v->data_array + v->elm_size * i;
+}
+
+size_t jet_vector_count(jet_vector_t* v)
+{
+    if(!v)
+    {
+        perror("Provided jet_vector is invalid.");
+        return 0;
+    }
+    return v->count;
+}
+
+void jet_vector_grow(jet_vector_t* v)
 {
     v->capacity *= UPSIZE_FAC;
     void* new_array = malloc(v->capacity * v->elm_size);
     if(!new_array)
     {
-        perror("Cannot to resize vector, memory allocation failed.");
+        perror("Cannot to resize vector, memory allocation failed.\n");
         return;
     }
     memcpy(new_array, v->data_array, v->count * v->elm_size); 
     free(v->data_array);
     v->data_array = new_array;
 }
-
 
 
 

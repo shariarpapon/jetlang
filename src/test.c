@@ -3,6 +3,7 @@
 #include <stddef.h>
 #include <jet_lexer.h>
 #include <jet_utils.h>
+#include <utils/jet_vector.h>
 
 #define ARG_PRINT_TOKENS "pt"
 #define ARG_PRINT_SOURCE "ps"
@@ -51,7 +52,9 @@ int main(int argc, char** argv)
         printf("could not create lexer, exiting...\n");
         return 1;
     }
-    
+   
+
+
     if(!jet_lexer_tokenize(lexer))
     {
         printf("could not tokenize, exiting...\n");
