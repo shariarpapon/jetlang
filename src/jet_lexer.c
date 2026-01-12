@@ -112,11 +112,11 @@ jet_lexer* jet_lexer_create(const char* source)
     lexer->source = source;
     lexer->len = strlen(source) + 1;
     lexer->cursor = 0;
-    lexer->token_vec = jet_vector_create(64, sizeof(jet_token));
-    if(!lexer->token_vec)
+    lexer->token_list = jet_list_create(64, sizeof(jet_token));
+    if(!lexer->token_list)
     {
-        lexer->token_vec = NULL;
-        fprintf(stderr, "error: could not allocate token-vector memory\n");
+        lexer->token_list = NULL;
+        fprintf(stderr, "error: could not allocate token-list memory\n");
         return NULL;
     }
 
@@ -132,12 +132,12 @@ void jet_lexer_dispose(jet_lexer* lexer)
         perror("error: attempting to free invalid lexer pointer.\n");
         return;
     }
-    if(!lexer->token_vec)
+    if(!lexer->token_list)
     {
         free(lexer);
         return;
     }
-    jet_vector_dispose(lexer->token_vec);
+    jet_list_dispose(lexer->token_list);
     free(lexer);
     printf("successful!\n");
 }
@@ -145,9 +145,9 @@ void jet_lexer_dispose(jet_lexer* lexer)
 bool jet_lexer_tokenize(jet_lexer* lexer)
 {
     printf("tokenizing...\n");
-    if(!lexer || !lexer->token_vec) 
+    if(!lexer || !lexer->token_list) 
     {
-        fprintf(stderr, "error: cannot tokenize, lexer or lexer->token_vec is invalid.\n");
+        fprintf(stderr, "error: cannot tokenize, lexer or lexer->token_list is invalid.\n");
         return false;
     }
 
@@ -177,9 +177,9 @@ static void jet_lexer_emit_token(jet_lexer* lexer, size_t origin, size_t len, je
     tok.origin = origin;
     tok.len = len;
     tok.type = tok_type;
-    if(jet_vector_append(lexer->token_vec, (const void*)&tok) == false)
+    if(jet_list_append(lexer->token_list, (const void*)&tok) == false)
     {
-        fprintf(stderr, "error: could not add new token to lexer->token_vec.\n");
+        fprintf(stderr, "error: could not add new token to lexer->token_list.\n");
         return;
     }
 }

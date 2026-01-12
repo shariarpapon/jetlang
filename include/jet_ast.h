@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdbool.h>
-#include <jet_vector.h>
+#include <jet_list.h>
 #include <jet_lexer.h>
 
 // {{{ decl
@@ -86,8 +86,7 @@ enum jet_ast_binop_type
 
 struct jet_ast
 {
-    // define
-    jet_vector* token_vec;
+    jet_ast_node* prog;
 };
 
 struct jet_ast_node
@@ -123,7 +122,7 @@ struct jet_ast_node
 
 struct jet_ast_node_prog
 {
-    jet_vector* stmt_vec;
+    jet_list* stmt_list;
 }; 
 
 struct jet_ast_node_ident
@@ -146,7 +145,7 @@ struct jet_ast_node_param
 
 struct jet_ast_node_block
 {
-    jet_vector* stmts_vec;
+    jet_list* stmts_list;
 };
 
 struct jet_ast_node_dot_access
@@ -231,25 +230,25 @@ struct jet_ast_node_func_def
    jet_ast_node* name_id;
    jet_ast_node* ret_type_decl;
    jet_ast_node* body_block;
-   jet_vector*   params_vec;
+   jet_list*   params_list;
 };
 
 struct jet_ast_node_func_decl 
 {
     jet_ast_node* name_id;
     jet_ast_node* ret_type_decl;
-    jet_vector*   params_vec;
+    jet_list*   params_list;
 };
 
 struct jet_ast_node_func_call 
 {
     jet_ast_node* callee;
-    jet_vector*   args_vec;
+    jet_list*   args_list;
 };
 
 // }}}
 
-jet_ast* jet_ast_create(jet_vector* token_vec);
+jet_ast* jet_ast_create(jet_list* token_list);
 bool jet_ast_dispose(jet_ast* ast);
 
 

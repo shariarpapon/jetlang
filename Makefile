@@ -8,7 +8,7 @@ OBJ = $(SRC:src/%.c=build/%.o)
 BIN = jet
 LIBS := $(shell find libs -name "*.a")
 
-JET_FLAGS = pt
+JET_FLAGS =
 JET_CODE_FILE = *.jet
 TEST_EXEC = ./jet $(JET_CODE_FILE) $(JET_FLAGS)
 

@@ -1,14 +1,14 @@
 #pragma once
 #include <stdlib.h>
 #include <jet_token.h>
-#include <jet_vector.h>
+#include <jet_list.h>
 
 typedef struct jet_lexer
 {
     size_t len;
     size_t cursor;
     const char* source;
-    jet_vector* token_vec;
+    jet_list* token_list;
 } jet_lexer;
 
 

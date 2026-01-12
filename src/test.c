@@ -3,7 +3,7 @@
 #include <stddef.h>
 #include <jet_lexer.h>
 #include <jet_io.h>
-#include <jet_vector.h>
+#include <jet_list.h>
 
 #define ARG_PRINT_TOKENS "pt"
 #define ARG_PRINT_SOURCE "ps"
@@ -60,7 +60,7 @@ int main(int argc, char** argv)
     }
      
     if(find_arg(ARG_PRINT_ALL) == true || find_arg(ARG_PRINT_TOKENS) == true)
-        jet_token_print_vector(lexer->token_vec); 
+        jet_token_print_list(lexer->token_list); 
     
     jet_lexer_dispose(lexer); 
     free((void*)source);

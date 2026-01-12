@@ -21,7 +21,7 @@ jet_token* jet_token_create(const char* source, size_t origin, size_t len, jet_t
 }
 
 
-void jet_token_print_vector(jet_vector* tokens)
+void jet_token_print_list(jet_list* tokens)
 {
     if(!tokens)
     {
@@ -29,20 +29,20 @@ void jet_token_print_vector(jet_vector* tokens)
         return;
     }
     
-    size_t len = jet_vector_count(tokens);
+    size_t len = jet_list_count(tokens);
 
     if(len == 0)
     {
-        printf("# nothing to print, token vector is empty\n");
+        printf("# nothing to print, token list is empty\n");
         return;
     }
     
-    printf("\ntoken vector [%zu]:\n\n", len);
+    printf("\ntoken list [%zu]:\n\n", len);
     printf("%-7s %-17s %-10s %s\n\n", "len", "type", "enum-id", "value");        
    
     for(size_t i = 0; i < len; i++)
     {  
-        jet_token* token = jet_vector_get(tokens, i);
+        jet_token* token = jet_list_get(tokens, i);
         const char* type_str = jet_token_type_str(token->type);
         printf("%-7zu %-17s %-10d %.*s\n",i+1, type_str,(int)token->type, (int)token->len, token->source + token->origin);        
     }

@@ -1,5 +1,5 @@
 #pragma once
-#include <jet_vector.h>
+#include <jet_list.h>
 
 typedef enum
 {
@@ -95,6 +95,6 @@ typedef struct
 
 jet_token* jet_token_create(const char* source, size_t origin, size_t len, jet_token_type type);
 const char* jet_token_type_str(jet_token_type type);
-void jet_token_print_vector(jet_vector* v);
+void jet_token_print_list(jet_list* v);
 
 
