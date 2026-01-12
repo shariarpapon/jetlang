@@ -47,6 +47,12 @@ typedef enum
     TOK_XOR,       // ^
     TOK_NOT,       // !
     
+    TOK_SHL,       // <<
+    TOK_SHR,       // >>
+    TOK_BANDEQ,    // &=
+    TOK_BOREQ,     // |=
+    TOK_XOREQ,     // ^=
+
     //Arithmetic operators
     TOK_PLUS,       // + 
     TOK_MINUS,      // -

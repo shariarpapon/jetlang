@@ -92,6 +92,11 @@ const char* jet_token_type_str(jet_token_type type)
         case TOK_OR:        return "TOK_OR";
         case TOK_XOR:       return "TOK_XOR";
         case TOK_NOT:       return "TOK_NOT";
+        case TOK_SHL:       return "TOK_SHL";
+        case TOK_SHR:       return "TOK_SHR";
+        case TOK_BANDEQ:    return "TOK_BANDEQ";
+        case TOK_BOREQ:     return "TOK_BOREQ";
+        case TOK_XOREQ:     return "TOK_XOREQ";
 
         case TOK_PLUS:      return "TOK_PLUS";
         case TOK_MINUS:     return "TOK_MINUS";

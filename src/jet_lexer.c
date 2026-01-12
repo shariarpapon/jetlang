@@ -46,7 +46,6 @@ static const jet_tok_def kwd_table[] =
    { .value.str = "while" ,  TOK_KWD_WHILE  }, 
 };
 
-
 static const jet_tok_def punct_table[] = 
 {
     { .value.chr = '=' , TOK_ASG   },    
@@ -73,7 +72,10 @@ static const cmpd_punct_token_def cmpd_punct_table[] =
     {'+', '=', TOK_PLUSEQ }, {'-', '=', TOK_MINEQ },
     {'*', '=', TOK_MULEQ  }, {'/', '=', TOK_DIVEQ },
     {'%', '=', TOK_MODEQ  }, {'*', '*', TOK_POW   },
-    {'+', '+', TOK_INCR   }, {'-', '-', TOK_DECR  },
+    {'+', '+', TOK_INCR   }, {'-', '-', TOK_DECR  }, 
+    {'<', '<', TOK_SHL    }, {'>', '>', TOK_SHR   },
+    {'&', '=', TOK_BANDEQ }, {'|', '=', TOK_BOREQ },
+    {'^', '=', TOK_XOREQ  },
 };
 
 static void jet_lexer_emit_token(jet_lexer* lexer, size_t origin, size_t len, jet_token_type tok_type);
@@ -140,7 +142,7 @@ void jet_lexer_dispose(jet_lexer* lexer)
     printf("successful!\n");
 }
 
-bool jet_lexer_analyze(jet_lexer* lexer)
+bool jet_lexer_tokenize(jet_lexer* lexer)
 {
     printf("tokenizing...\n");
     if(!lexer || !lexer->token_vec) 
@@ -151,7 +153,6 @@ bool jet_lexer_analyze(jet_lexer* lexer)
 
     while(jet_lexer_peek(lexer) != NULL_TERM)
     {
-        //omissions : scan-prio > all
         if      (jet_lexer_try_scan_whitespace(lexer))  continue; 
         else if (jet_lexer_try_scan_line_com(lexer))    continue;    
         else if (jet_lexer_try_scan_block_com(lexer))   continue;      
