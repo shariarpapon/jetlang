@@ -89,14 +89,12 @@ bool jet_list_insert(jet_list* list, size_t i, const void* data)
     }
     
     if(i > list->count)
-    {   jet_list_shr_n(list, list->count, i - list->count);
-        memcpy((char*)list->data_array + list->elm_size * list->count, data, list->elm_size);
-    }
-    else
     {
-        jet_list_shr(list, i);
-        memcpy((char*)list->data_array + list->elm_size  * i, data, list->elm_size); 
+        i = list->count;
     }
+
+    jet_list_shr(list, i);
+    memcpy((char*)list->data_array + list->elm_size  * i, data, list->elm_size); 
     return true;
 }
 
@@ -150,7 +148,7 @@ bool jet_list_shl_n(jet_list* list, size_t start, size_t n)
         return false;
     }    
     if(start >= n)
-    memcpy(
+    memmove(
         //dest
         (char*)list->data_array + list->elm_size * (start - n),
         //src
