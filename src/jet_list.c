@@ -149,12 +149,12 @@ bool jet_list_shl_n(jet_list* list, size_t start, size_t n)
         fprintf(stderr, "error: cannot shift left, arg list invalid.\n");
         return false;
     }    
-
+    if(start >= n)
     memcpy(
         //dest
         (char*)list->data_array + list->elm_size * (start - n),
         //src
-        (char*)list->data_array + list->elm_size * (start + 1),
+        (char*)list->data_array + list->elm_size * start,
         //stride
         list->elm_size * (list->count - start - 1)
     );
@@ -164,6 +164,11 @@ bool jet_list_shl_n(jet_list* list, size_t start, size_t n)
 
 bool jet_list_remove(jet_list* list, size_t i)
 { 
+    if(!list)
+    {
+        fprintf(stderr, "error: cannot remove, invalid arg list.\n");
+        return false;
+    }
     return jet_list_shl(list, i);
 }
 
@@ -195,7 +200,7 @@ bool jet_list_remove_bottom(jet_list* list)
 
 bool jet_list_pinch(jet_list* list, size_t from, size_t qt, jet_list* out_list)
 {
-    if(!list)
+    if(!list || !out_list)
     {
          fprintf(stderr, "error: cannot pinch jet_list, arg list and/or arg out_list is invalid.\n");
          return false;
@@ -215,9 +220,9 @@ bool jet_list_pinch(jet_list* list, size_t from, size_t qt, jet_list* out_list)
          return false;
     }
   
-    for(size_t i = 0; i < qt; i++) 
+    if(out_list)
     {
-        if(out_list)
+        for(size_t i = 0; i < qt; i++) 
         {
             void* data = jet_list_get(list, from + i);
             if(!jet_list_append(out_list, (const void*)data))
@@ -226,13 +231,8 @@ bool jet_list_pinch(jet_list* list, size_t from, size_t qt, jet_list* out_list)
                 return false;
             }
         }
-
-        if(!jet_list_remove(list, from))
-        {
-            fprintf(stderr, "error: cannot pinch jet_list, failed to remove from arg list.\n");
-            return false;
-        }
     }
+    jet_list_shl_n(list, from, qt);
     return true;
 }
 
@@ -258,14 +258,19 @@ size_t jet_list_count(jet_list* v)
 
 static bool jet_list_ensure_capacity(jet_list* list, size_t min_cap)
 {
-    if(list->capacity > min_cap)
+    if(list->capacity >= min_cap)
         return false;
-    void* new_array = malloc(min_cap * UPSIZE_FAC * list->elm_size);
+    size_t new_cap = list->capacity;
+    while(new_cap <= min_cap)
+        new_cap *= UPSIZE_FAC;
+
+    void* new_array = malloc(new_cap * list->elm_size);
     if(!new_array)
     {
         fprintf(stderr, "error: cannot to resize list, memory allocation failed.\n");
         return false;
     }
+    list->capacity = new_cap;
     memcpy(new_array, list->data_array, list->count * list->elm_size); 
     free(list->data_array);
     list->data_array = new_array;
