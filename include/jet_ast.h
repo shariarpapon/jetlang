@@ -170,6 +170,7 @@ struct jet_ast_node_lit
         float       f;
         bool        b;
         const char* s;
+        void*       n;
     } value;
 };
 

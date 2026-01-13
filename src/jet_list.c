@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 
 #define UPSIZE_FAC 2
 
@@ -13,20 +14,21 @@ struct jet_list
     void* data_array;
 };
 
-static void jet_list_grow(jet_list* v);
+// returns true if list memroy was re-allocated
+static bool jet_list_ensure_capacity(jet_list* list, size_t min_cap);
 
 jet_list* jet_list_create(size_t capacity, size_t elm_size)
 {
     jet_list* v = (jet_list*)malloc(sizeof(jet_list));
     if(!v)
     {
-        perror("cannot create jet_list, memory allocation failed.\n");
+        fprintf(stderr, "cannot create jet_list, memory allocation failed.\n");
         return NULL;
     }
 
     if(elm_size == 0)
     {
-        perror("cannot initialize list with element size of 0\n");
+        fprintf(stderr, "cannot initialize list with element size of 0\n");
         free(v);
         return NULL;
     }
@@ -39,7 +41,7 @@ jet_list* jet_list_create(size_t capacity, size_t elm_size)
     v->data_array = malloc(v->capacity * v->elm_size);
     if(!v->data_array)
     {
-        perror("cannot to resize list, memory allocation failed.\n");
+        fprintf(stderr, "cannot to resize list, memory allocation failed.\n");
         free(v);
         return NULL;
     }
@@ -57,45 +59,6 @@ bool jet_list_dispose(jet_list* v)
     free(v);    
     return true;
 }
-
-bool jet_list_append(jet_list* v, const void* data)
-{
-    if(!v) 
-    {
-        perror("invalid jet_list provided.\n"); 
-        return false;
-    }
-
-    if(v->count >= v->capacity)
-        jet_list_grow(v);
-
-    memcpy((char*)v->data_array + v->elm_size * v->count, data, v->elm_size);
-    v->count++;
-    return true;
-}
-
-bool jet_list_remove(jet_list* v, size_t i)
-{
-    if(i >= v->count)
-    {
-        perror("cannot remove element from jet_list, index out of bounds.\n");
-        return false;
-    }
-    if(i < v->count - 1)
-    {
-        char* dest = (char*)v->data_array + v->elm_size * i;
-        char* from = (char*)v->data_array + v->elm_size * (i + 1); 
-        size_t size = v->elm_size * (v->count - i - 1); 
-        memcpy(dest, from, size);
-    }
-    else
-    {
-        memset((char*)v->data_array + v->count * v->elm_size, 0, v->elm_size);
-    }
-    v->count--;
-    return true;
-}
-
 bool jet_list_clear(jet_list* v)
 {
     if(!v || !v->data_array)
@@ -107,42 +70,213 @@ bool jet_list_clear(jet_list* v)
     return true;
 }
 
-void* jet_list_get(jet_list* v, size_t i)
+void* jet_list_pop_first(jet_list* list)
 {
-    if(i >= v->count)
+    void* data = jet_list_peek_first(list);
+    if(!jet_list_remove(list, 0))
     {
-        perror("Cannot retrive jet_list element, index out of bounds.\n");
+        fprintf(stderr, "error: cannot pop first from jet_list, unable to remove from index from\n");
         return NULL;
     }
-    return (char*)v->data_array + v->elm_size * i;
+    return data;
+}
+
+void* jet_list_pop_last(jet_list* list)
+{
+    void* data = jet_list_peek_last(list);
+    if(!jet_list_remove(list, list->count - 1))
+    {
+        fprintf(stderr, "error: cannot pop last from jet_list, unable to remove from index %zu\n", list->count - 1);
+        return NULL;
+    }
+    return data;
+}
+
+void* jet_list_peek_first(jet_list* list)
+{
+    return jet_list_get(list, 0);
+}
+
+void* jet_list_peek_last(jet_list* list)
+{
+    return jet_list_get(list, list->count - 1);
+}
+
+bool jet_list_insert(jet_list* list, size_t i, const void* data)
+{
+    if(!list)
+    {
+        fprintf(stderr, "error: cannot insert element, invalid arg list.\n");
+        return false;
+    }
+    
+    jet_list_ensure_capacity(list, list->count + 1);
+    
+    if(i == list->count)
+    {   
+        memcpy((char*)list->data_array + list->elm_size * list->count, data, list->elm_size);
+    }
+    else
+    {
+        jet_list_shr(list, i);
+        memcpy((char*)list->data_array + list->elm_size  * i, data, list->elm_size); 
+    }
+    list->count++;
+    return true;
+}
+
+
+bool jet_list_prepend(jet_list* list, const void* data)
+{
+    return jet_list_insert(list, 0, data);
+}
+
+
+bool jet_list_append(jet_list* list, const void* data)
+{
+    return jet_list_insert(list, list->count, data);
+}
+
+bool jet_list_shl(jet_list* list, size_t start)
+{
+    return jet_list_shl_n(list, start, 1);
+}
+
+bool jet_list_shr(jet_list* list, size_t start)
+{
+    return jet_list_shr_n(list, start, 1);
+}
+
+bool jet_list_shr_n(jet_list* list, size_t start, size_t n)
+{
+    if(!list)
+    {
+        fprintf(stderr, "error: cannot shift-right, arg list invalid.\n");
+        return false;
+    }
+    jet_list_ensure_capacity(list, list->count + n);
+    memmove(
+        //dest
+        (char*)list->data_array + list->elm_size * (start + n),
+        //src
+        (char*)list->data_array + list->elm_size * start, 
+        //stride          
+        list->elm_size * (list->count - start)
+    );
+    list->count += n;
+    return true;
+}
+
+bool jet_list_shl_n(jet_list* list, size_t start, size_t n)
+{
+    if(!list)
+    {
+        fprintf(stderr, "error: cannot shift left, arg list invalid.\n");
+        return false;
+    }
+    
+    if(start - n < 0)
+    {
+        fprintf(stderr, "wrn: cannot shift left %zu indices starting at %zu, goes out of bounds.\n", n, start);
+        return true;
+    }
+
+    memcpy(
+        //dest
+        (char*)list->data_array + list->elm_size * (start - n),
+        //src
+        (char*)list->data_array + list->elm_size * (start + 1),
+        //stride
+        list->elm_size * (list->count - start - 1)
+    );
+    list->count -= n;
+    return true;
+}
+
+bool jet_list_remove(jet_list* list, size_t i)
+{ 
+    return jet_list_shl(list, i);
+}
+
+bool jet_list_pinch(jet_list* list, size_t from, size_t qt, jet_list* out_list)
+{
+    if(!list)
+    {
+         fprintf(stderr, "error: cannot pinch jet_list, arg list and/or arg out_list is invalid.\n");
+         return false;
+    }
+   
+    if(qt == 0) return true;
+    
+    if(out_list && list->elm_size != out_list->elm_size)
+    {
+        fprintf(stderr, "error: cannot pinch jet_list, out_list elm_size mis-match.\n");
+        return false;
+    }
+
+    if(from >= list->count || from + qt > list->count)
+    {
+         fprintf(stderr, "wrn: cannot pinch jet_list, arg from and/or qt is greater than list.count.\n");
+         return false;
+    }
+  
+    for(size_t i = 0; i < qt; i++) 
+    {
+        if(out_list)
+        {
+            void* data = jet_list_get(list, from + i);
+            if(!jet_list_append(out_list, (const void*)data))
+            {
+                fprintf(stderr, "error: cannot pinch jet_list, failed to append to arg out_list.\n");
+                return false;
+            }
+        }
+
+        if(!jet_list_remove(list, from))
+        {
+            fprintf(stderr, "error: cannot pinch jet_list, failed to remove from arg list.\n");
+            return false;
+        }
+    }
+    return true;
+}
+
+void* jet_list_get(jet_list* list, size_t i)
+{
+    if(i >= list->count)
+    {
+        fprintf(stderr, "error: cannot retrive jet_list element, index out of bounds.\n");
+        return NULL;
+    }
+    return (char*)list->data_array + list->elm_size * i;
 }
 
 size_t jet_list_count(jet_list* v)
 {
     if(!v)
     {
-        perror("Provided jet_list is invalid.");
+        fprintf(stderr, "error: provided jet_list is invalid.\n");
         return 0;
     }
     return v->count;
 }
 
-static void jet_list_grow(jet_list* v)
+static bool jet_list_ensure_capacity(jet_list* list, size_t min_cap)
 {
-    v->capacity *= UPSIZE_FAC;
-    void* new_array = malloc(v->capacity * v->elm_size);
+    if(list->capacity > min_cap)
+        return false;
+    
+    void* new_array = malloc(min_cap * UPSIZE_FAC * list->elm_size);
     if(!new_array)
     {
-        perror("Cannot to resize list, memory allocation failed.\n");
-        return;
+        fprintf(stderr, "error: cannot to resize list, memory allocation failed.\n");
+        return false;
     }
-    memcpy(new_array, v->data_array, v->count * v->elm_size); 
-    free(v->data_array);
-    v->data_array = new_array;
+    memcpy(new_array, list->data_array, list->count * list->elm_size); 
+    free(list->data_array);
+    list->data_array = new_array;
+    return true;       
 }
-
-
-
 
 
 
