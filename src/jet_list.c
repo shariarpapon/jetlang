@@ -93,8 +93,8 @@ bool jet_list_insert(jet_list* list, size_t i, const void* data)
             list->elm_size * (list->count - (i + 1))//size
         );
     }
-
     memcpy((char*)list->data_array + list->elm_size  * i, data, list->elm_size); 
+    list->count++;
     return true;
 }
 
@@ -115,7 +115,16 @@ bool jet_list_remove(jet_list* list, size_t i)
         fprintf(stderr, "error: cannot remove, invalid arg list.\n");
         return false;
     }
-    if(i >= list->count )
+    else if(list->count == 0)
+    {
+        return true;
+    }
+    else if(i == list->count - 1)
+    {
+        list->count--;
+        return true;
+    }
+    else if(i >= list->count)
     {
         fprintf(stderr, "error: cannot remove, index %zu is out of bounds", i);
         return false;
@@ -125,31 +134,17 @@ bool jet_list_remove(jet_list* list, size_t i)
         (char*)list->data_array + list->elm_size * (i + 1),//src
         list->elm_size * (list->count - (i + 1))//size
     );
+    list->count--;
     return true;
 }
 
 bool jet_list_remove_first(jet_list* list)
 {
-    if(!list)
-    {
-        fprintf(stderr, "error: cannot remove first, invalid arg list.\n");
-        return false;
-    }
-    
-    if(list->count == 0) return true;    
     return jet_list_remove(list, 0); 
 }
 
 bool jet_list_remove_last(jet_list* list)
 {
-    if(!list)
-    {
-        fprintf(stderr, "error: cannot remove last, invalid arg list.\n");
-        return false;
-    }
-    
-    if(list->count == 0) return true;
-    
     return jet_list_remove(list, list->count - 1); 
 }
 
