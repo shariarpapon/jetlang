@@ -8,8 +8,9 @@ OBJ = $(SRC:src/%.c=build/%.o)
 BIN = jet
 LIBS := $(shell find libs -name "*.a")
 
+JET_SRC_FILE_EXT = jt
 JET_FLAGS =
-JET_CODE_FILE = *.jet
+JET_CODE_FILE = *.$(JET_SRC_FILE_EXT)
 TEST_EXEC = ./jet $(JET_CODE_FILE) $(JET_FLAGS)
 
 all: run

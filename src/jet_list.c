@@ -70,16 +70,6 @@ bool jet_list_clear(jet_list* v)
     return true;
 }
 
-void* jet_list_top(jet_list* list)
-{
-    return jet_list_get(list, list->count - 1);
-}
-
-void* jet_list_bottom(jet_list* list)
-{
-    return jet_list_get(list, 0);
-}
-
 bool jet_list_insert(jet_list* list, size_t i, const void* data)
 {
     if(!list)
@@ -90,10 +80,20 @@ bool jet_list_insert(jet_list* list, size_t i, const void* data)
     
     if(i > list->count)
     {
+        fprintf(stderr, "wrn: attempted to insert past list.count\n");
         i = list->count;
     }
+    jet_list_ensure_capacity(list, list->count + 1);
+    if(i != list->count)
+    {
+        //shift right: map [i, count - 1] --> [i + 1, count]
+        memmove(
+            (char*)list->data_array + list->elm_size * i,//dest
+            (char*)list->data_array + list->elm_size * (i + 1),//src
+            list->elm_size * (list->count - (i + 1))//size
+        );
+    }
 
-    jet_list_shr(list, i);
     memcpy((char*)list->data_array + list->elm_size  * i, data, list->elm_size); 
     return true;
 }
@@ -108,58 +108,6 @@ bool jet_list_append(jet_list* list, const void* data)
     return jet_list_insert(list, list->count, data);
 }
 
-bool jet_list_shl(jet_list* list, size_t start)
-{
-    return jet_list_shl_n(list, start, 1);
-}
-
-bool jet_list_shr(jet_list* list, size_t start)
-{
-    return jet_list_shr_n(list, start, 1);
-}
-
-bool jet_list_shr_n(jet_list* list, size_t start, size_t n)
-{
-    if(n == 0) return true;
-    if(!list)
-    {
-        fprintf(stderr, "error: cannot shift-right, arg list invalid.\n");
-        return false;
-    }
-    jet_list_ensure_capacity(list, list->count + n);
-    memmove(
-        //dest
-        (char*)list->data_array + list->elm_size * (start + n),
-        //src
-        (char*)list->data_array + list->elm_size * start, 
-        //stride          
-        list->elm_size * (list->count - start)
-    );
-    list->count += n;
-    return true;
-}
-
-bool jet_list_shl_n(jet_list* list, size_t start, size_t n)
-{
-    if(n == 0) return true;
-    if(!list)
-    {
-        fprintf(stderr, "error: cannot shift left, arg list invalid.\n");
-        return false;
-    }    
-    if(start >= n)
-    memmove(
-        //dest
-        (char*)list->data_array + list->elm_size * (start - n),
-        //src
-        (char*)list->data_array + list->elm_size * start,
-        //stride
-        list->elm_size * (list->count - start - 1)
-    );
-    list->count -= n;
-    return true;
-}
-
 bool jet_list_remove(jet_list* list, size_t i)
 { 
     if(!list)
@@ -167,14 +115,36 @@ bool jet_list_remove(jet_list* list, size_t i)
         fprintf(stderr, "error: cannot remove, invalid arg list.\n");
         return false;
     }
-    return jet_list_shl(list, i);
+    if(i >= list->count )
+    {
+        fprintf(stderr, "error: cannot remove, index %zu is out of bounds", i);
+        return false;
+    }
+    memmove(
+        (char*)list->data_array + list->elm_size * i,//dest
+        (char*)list->data_array + list->elm_size * (i + 1),//src
+        list->elm_size * (list->count - (i + 1))//size
+    );
+    return true;
 }
 
-bool jet_list_remove_top(jet_list* list)
+bool jet_list_remove_first(jet_list* list)
 {
     if(!list)
     {
-        fprintf(stderr, "error: cannot remove top, invalid arg list.\n");
+        fprintf(stderr, "error: cannot remove first, invalid arg list.\n");
+        return false;
+    }
+    
+    if(list->count == 0) return true;    
+    return jet_list_remove(list, 0); 
+}
+
+bool jet_list_remove_last(jet_list* list)
+{
+    if(!list)
+    {
+        fprintf(stderr, "error: cannot remove last, invalid arg list.\n");
         return false;
     }
     
@@ -183,55 +153,8 @@ bool jet_list_remove_top(jet_list* list)
     return jet_list_remove(list, list->count - 1); 
 }
 
-bool jet_list_remove_bottom(jet_list* list)
-{
-    if(!list)
-    {
-        fprintf(stderr, "error: cannot remove bottom, invalid arg list.\n");
-        return false;
-    }
-    
-    if(list->count == 0) return true;    
-    return jet_list_remove(list, 0); 
-}
-
-
 bool jet_list_pinch(jet_list* list, size_t from, size_t qt, jet_list* out_list)
 {
-    if(!list || !out_list)
-    {
-         fprintf(stderr, "error: cannot pinch jet_list, arg list and/or arg out_list is invalid.\n");
-         return false;
-    }
-   
-    if(qt == 0) return true;
-    
-    if(out_list && list->elm_size != out_list->elm_size)
-    {
-        fprintf(stderr, "error: cannot pinch jet_list, out_list elm_size mis-match.\n");
-        return false;
-    }
-
-    if(from >= list->count || from + qt > list->count)
-    {
-         fprintf(stderr, "wrn: cannot pinch jet_list, arg from and/or qt is greater than list.count.\n");
-         return false;
-    }
-  
-    if(out_list)
-    {
-        for(size_t i = 0; i < qt; i++) 
-        {
-            void* data = jet_list_get(list, from + i);
-            if(!jet_list_append(out_list, (const void*)data))
-            {
-                fprintf(stderr, "error: cannot pinch jet_list, failed to append to arg out_list.\n");
-                return false;
-            }
-        }
-    }
-    jet_list_shl_n(list, from, qt);
-    return true;
 }
 
 void* jet_list_get(jet_list* list, size_t i)
@@ -242,6 +165,16 @@ void* jet_list_get(jet_list* list, size_t i)
         return NULL;
     }
     return (char*)list->data_array + list->elm_size * i;
+}
+
+void* jet_list_first(jet_list* list)
+{
+    return jet_list_get(list, 0);
+}
+
+void* jet_list_last(jet_list* list)
+{
+    return jet_list_get(list, list->count - 1);
 }
 
 size_t jet_list_count(jet_list* v)

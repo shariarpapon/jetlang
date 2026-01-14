@@ -1,0 +1,37 @@
+needs jet.io;
+
+object student
+{
+    str name = "John Doe";
+    float gpa = 3.5;
+    bool hasGraduated = true;
+}
+
+program
+{
+    student s = new student;
+    out("name: " + s.name);
+    out("gpa: " + s.gpa);
+    out("graduated: " + s.hasGraduated);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
