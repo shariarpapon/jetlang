@@ -201,7 +201,7 @@ size_t jet_list_count(jet_list* v)
 static bool jet_list_ensure_capacity(jet_list* list, size_t min_cap)
 {
     if(list->capacity >= min_cap)
-        return false;
+        return true;
     size_t new_cap = list->capacity;
     while(new_cap < min_cap)
         new_cap *= UPSIZE_FAC;
