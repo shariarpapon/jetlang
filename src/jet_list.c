@@ -88,9 +88,9 @@ bool jet_list_insert(jet_list* list, size_t i, const void* data)
     {
         //shift right: map [i, count - 1] --> [i + 1, count]
         memmove(
-            (char*)list->data_array + list->elm_size * i,//dest
-            (char*)list->data_array + list->elm_size * (i + 1),//src
-            list->elm_size * (list->count - (i + 1))//size
+            (char*)list->data_array + list->elm_size * (i + 1), // dest
+            (char*)list->data_array + list->elm_size * i,       // src
+            list->elm_size * (list->count - i)            // size
         );
     }
     memcpy((char*)list->data_array + list->elm_size  * i, data, list->elm_size); 
