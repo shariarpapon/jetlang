@@ -83,7 +83,12 @@ bool jet_list_insert(jet_list* list, size_t i, const void* data)
         fprintf(stderr, "wrn: attempted to insert past list.count\n");
         i = list->count;
     }
-    jet_list_ensure_capacity(list, list->count + 1);
+    
+    if(!jet_list_ensure_capacity(list, list->count + 1))
+    {
+        return false;
+    }
+    
     if(i != list->count)
     {
         //shift right: map [i, count - 1] --> [i + 1, count]
@@ -154,9 +159,20 @@ bool jet_list_pinch(jet_list* list, size_t from, size_t qt, jet_list* out_list)
 
 void* jet_list_get(jet_list* list, size_t i)
 {
+    if(!list)
+    {
+        fprintf(stderr, "error: cannot get element, invalid arg list.\n");
+        return NULL;
+    }
+
+    if(list->count == 0)
+    {
+        fprintf("wrn: cannot get element, list is empty.\n");
+    }
+
     if(i >= list->count)
     {
-        fprintf(stderr, "error: cannot retrive jet_list element, index out of bounds.\n");
+        fprintf(stderr, "error: cannot get element, index out of bounds.\n");
         return NULL;
     }
     return (char*)list->data_array + list->elm_size * i;
@@ -187,7 +203,7 @@ static bool jet_list_ensure_capacity(jet_list* list, size_t min_cap)
     if(list->capacity >= min_cap)
         return false;
     size_t new_cap = list->capacity;
-    while(new_cap <= min_cap)
+    while(new_cap < min_cap)
         new_cap *= UPSIZE_FAC;
 
     void* new_array = malloc(new_cap * list->elm_size);
