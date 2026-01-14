@@ -1,6 +1,7 @@
 #include <jet_ast.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 static bool jet_ast_try_generate(jet_list* token_list, jet_ast* out_ast); 
 

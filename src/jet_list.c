@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
 
 #define UPSIZE_FAC 2
 
@@ -64,7 +63,7 @@ bool jet_list_clear(jet_list* v)
     {
        return false;
     }
-    memset((char*)v->data_array, 0, v->elm_size * v->count);
+    memset(v->data_array, 0, v->elm_size * v->count);
     v->count = 0;
     return true;
 }
@@ -199,6 +198,7 @@ bool jet_list_remove_last(jet_list* list)
 
 bool jet_list_pinch(jet_list* list, size_t from, size_t qt, jet_list* out_list)
 {
+    return false;
 }
 
 void* jet_list_get(jet_list* list, size_t i)
