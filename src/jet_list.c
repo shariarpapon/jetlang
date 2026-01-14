@@ -14,7 +14,6 @@ struct jet_list
     void* data_array;
 };
 
-// returns true if list memroy was re-allocated
 static bool jet_list_ensure_capacity(jet_list* list, size_t min_cap);
 
 jet_list* jet_list_create(size_t capacity, size_t elm_size)
@@ -70,6 +69,17 @@ bool jet_list_clear(jet_list* v)
     return true;
 }
 
+bool jet_list_is_empty(jet_list* list)
+{
+    if(!list)
+    {
+        fprintf(stderr, "error: invalid arg list.\n");
+        return true;
+    }
+    if(list->count == 0) return true;
+    return false;
+}
+
 bool jet_list_insert(jet_list* list, size_t i, const void* data)
 {
     if(!list)
@@ -122,17 +132,18 @@ bool jet_list_remove(jet_list* list, size_t i)
     }
     else if(list->count == 0)
     {
-        return true;
+        fprintf(stderr, "error: cannot remove, list is empty.\n");
+        return false;
+    }
+    else if(i >= list->count)
+    {
+        fprintf(stderr, "error: cannot remove, index %zu is out of bounds.\n", i);
+        return false;
     }
     else if(i == list->count - 1)
     {
         list->count--;
         return true;
-    }
-    else if(i >= list->count)
-    {
-        fprintf(stderr, "error: cannot remove, index %zu is out of bounds", i);
-        return false;
     }
     memmove(
         (char*)list->data_array + list->elm_size * i,//dest
@@ -140,6 +151,39 @@ bool jet_list_remove(jet_list* list, size_t i)
         list->elm_size * (list->count - (i + 1))//size
     );
     list->count--;
+    return true;
+}
+
+bool jet_list_remove_range(jet_list* list, size_t start, size_t end)
+{ 
+    if(!list)
+    {
+        fprintf(stderr, "error: cannot remove range, invalid arg list.\n");
+        return false;
+    }
+    else if(list->count == 0)
+    {
+        fprintf(stderr, "error: cannot remove range, list is empty.\n");
+        return false;
+    }
+    else if(end >= list->count || start > end)
+    {
+        fprintf(stderr, "error: cannot remove range [%zu, %zu], invalid bounds.\n", start, end);
+        return false;
+    }
+    
+    size_t len = end - start  + 1;
+    if(end == list->count - 1)
+    {
+        list->count -= len;
+        return true;
+    }
+    memmove(
+        (char*)list->data_array + list->elm_size * start,//dest
+        (char*)list->data_array + list->elm_size * (end + 1),//src
+        list->elm_size * (list->count - (end + 1))//size
+    );
+    list->count -= len;
     return true;
 }
 
@@ -167,7 +211,7 @@ void* jet_list_get(jet_list* list, size_t i)
 
     if(list->count == 0)
     {
-        fprintf("wrn: cannot get element, list is empty.\n");
+        fprintf(stderr, "wrn: cannot get element, list is empty.\n");
     }
 
     if(i >= list->count)
