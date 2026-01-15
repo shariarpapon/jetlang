@@ -5,7 +5,7 @@
 
 char* jet_io_read_text(const char* path, size_t* out_len)
 {
-    FILE* file = fopen(path, "r");
+    FILE* file = fopen(path, "rb");
     if(!file)
     {
         fprintf(stderr, "error: could not open file at path %s\n", path);
