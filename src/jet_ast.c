@@ -6,26 +6,26 @@
 
 static bool jet_ast_generate_tree(jet_ast* ast); 
 
-static bool jet_ast_node_dispose              (jet_ast_node            *node);
-static bool jet_ast_node_root_dispose         (jet_ast_node_root       *node);
-static bool jet_ast_node_block_dispose        (jet_ast_node_block      *node);
-static bool jet_ast_node_dot_access_dispose   (jet_ast_node_dot_access *node);
-static bool jet_ast_node_binop_dispose        (jet_ast_node_binop      *node);
-static bool jet_ast_node_return_dispose       (jet_ast_node_return     *node);
-static bool jet_ast_node_while_dispose        (jet_ast_node_while      *node);
-static bool jet_ast_node_var_ref_dispose      (jet_ast_node_var_ref    *node);
-static bool jet_ast_node_func_def_dispose     (jet_ast_node_func_def   *node);
-static bool jet_ast_node_func_call_dispose    (jet_ast_node_func_call  *node);
-static bool jet_ast_node_lit_dispose          (jet_ast_node_lit        *node);
-static bool jet_ast_node_ident_dispose        (jet_ast_node_ident      *node);
-static bool jet_ast_node_param_dispose        (jet_ast_node_param      *node);
-static bool jet_ast_node_type_decl_dispose    (jet_ast_node_type_decl  *node);
-static bool jet_ast_node_unop_dispose         (jet_ast_node_unop       *node);
-static bool jet_ast_node_if_dispose           (jet_ast_node_if         *node);
-static bool jet_ast_node_for_dispose          (jet_ast_node_for        *node);
-static bool jet_ast_node_var_decl_dispose     (jet_ast_node_var_decl   *node);
-static bool jet_ast_node_func_decl_dispose    (jet_ast_node_func_decl  *node);
-static bool jet_ast_node_expr_stmt_dispose    (jet_ast_node_expr_stmt  *node);
+static bool jet_ast_node_dispose            (jet_ast_node            *node);
+static bool jet_ast_node_root_dispose       (jet_ast_node_root       *node);
+static bool jet_ast_node_block_dispose      (jet_ast_node_block      *node);
+static bool jet_ast_node_dot_access_dispose (jet_ast_node_dot_access *node);
+static bool jet_ast_node_binop_dispose      (jet_ast_node_binop      *node);
+static bool jet_ast_node_return_dispose     (jet_ast_node_return     *node);
+static bool jet_ast_node_while_dispose      (jet_ast_node_while      *node);
+static bool jet_ast_node_var_ref_dispose    (jet_ast_node_var_ref    *node);
+static bool jet_ast_node_func_def_dispose   (jet_ast_node_func_def   *node);
+static bool jet_ast_node_func_call_dispose  (jet_ast_node_func_call  *node);
+static bool jet_ast_node_lit_dispose        (jet_ast_node_lit        *node);
+static bool jet_ast_node_ident_dispose      (jet_ast_node_ident      *node);
+static bool jet_ast_node_param_dispose      (jet_ast_node_param      *node);
+static bool jet_ast_node_type_decl_dispose  (jet_ast_node_type_decl  *node);
+static bool jet_ast_node_unop_dispose       (jet_ast_node_unop       *node);
+static bool jet_ast_node_if_dispose         (jet_ast_node_if         *node);
+static bool jet_ast_node_for_dispose        (jet_ast_node_for        *node);
+static bool jet_ast_node_var_decl_dispose   (jet_ast_node_var_decl   *node);
+static bool jet_ast_node_func_decl_dispose  (jet_ast_node_func_decl  *node);
+static bool jet_ast_node_expr_stmt_dispose  (jet_ast_node_expr_stmt  *node);
 
 jet_ast* jet_ast_create(jet_list* token_list)
 {
@@ -84,8 +84,8 @@ static bool jet_ast_generate_tree(jet_ast* ast)
     assert(ast != NULL);
     jet_ast_node* node = (jet_ast_node*)malloc(sizeof(jet_ast_node));
     assert(node != NULL);
-    node->value.root = (jet_ast_node_root*)malloc(sizeof(jet_ast_node_root));
-    assert(node->value.root != NULL);
+    node->as.root = (jet_ast_node_root*)malloc(sizeof(jet_ast_node_root));
+    assert(node->as.root != NULL);
     ast->root_node = node;
     puts("ast generated successfully!");
     return true;
@@ -98,43 +98,43 @@ static bool jet_ast_node_dispose(jet_ast_node* node)
     switch(node->node_type)
     {
         case AST_ROOT:
-            return jet_ast_node_root_dispose(node->value.root);
+            return jet_ast_node_root_dispose(node->as.root);
         case AST_BLOCK:
-            return jet_ast_node_block_dispose(node->value.block);
+            return jet_ast_node_block_dispose(node->as.block);
         case AST_DOT_ACCESS:
-            return jet_ast_node_dot_access_dispose(node->value.dot_access);
+            return jet_ast_node_dot_access_dispose(node->as.dot_access);
         case AST_BINOP: 
-            return jet_ast_node_binop_dispose(node->value.binop);
+            return jet_ast_node_binop_dispose(node->as.binop);
         case AST_RETURN:    
-            return jet_ast_node_return_dispose(node->value.return_);
+            return jet_ast_node_return_dispose(node->as.return_);
         case AST_WHILE:     
-            return jet_ast_node_while_dispose(node->value.while_);
+            return jet_ast_node_while_dispose(node->as.while_);
         case AST_VAR_REF:   
-            return jet_ast_node_var_ref_dispose(node->value.var_ref);
+            return jet_ast_node_var_ref_dispose(node->as.var_ref);
         case AST_FUNC_DEF:  
-            return jet_ast_node_func_def_dispose(node->value.func_def);
+            return jet_ast_node_func_def_dispose(node->as.func_def);
         case AST_FUNC_CALL: 
-            return jet_ast_node_func_call_dispose(node->value.func_call);
+            return jet_ast_node_func_call_dispose(node->as.func_call);
         case AST_LIT:   
-            return jet_ast_node_lit_dispose(node->value.lit);
+            return jet_ast_node_lit_dispose(node->as.lit);
         case AST_IDENT:   
-            return jet_ast_node_ident_dispose(node->value.ident);
+            return jet_ast_node_ident_dispose(node->as.ident);
         case AST_PARAM:
-            return jet_ast_node_param_dispose(node->value.param);
+            return jet_ast_node_param_dispose(node->as.param);
         case AST_TYPE_DECL:
-            return jet_ast_node_type_decl_dispose(node->value.type_decl);
+            return jet_ast_node_type_decl_dispose(node->as.type_decl);
         case AST_UNOP:
-            return jet_ast_node_unop_dispose(node->value.unop);
+            return jet_ast_node_unop_dispose(node->as.unop);
         case AST_IF: 
-            return jet_ast_node_if_dispose(node->value.if_);
+            return jet_ast_node_if_dispose(node->as.if_);
         case AST_FOR:       
-            return jet_ast_node_for_dispose(node->value.for_);
+            return jet_ast_node_for_dispose(node->as.for_);
         case AST_VAR_DECL:  
-            return jet_ast_node_var_decl_dispose(node->value.var_decl);
+            return jet_ast_node_var_decl_dispose(node->as.var_decl);
         case AST_FUNC_DECL: 
-            return jet_ast_node_func_decl_dispose(node->value.func_decl);
+            return jet_ast_node_func_decl_dispose(node->as.func_decl);
         case AST_EXPR_STMT:
-            return jet_ast_node_expr_stmt_dispose(node->value.expr_stmt);
+            return jet_ast_node_expr_stmt_dispose(node->as.expr_stmt);
         default:
             fprintf(stderr, "wrn: cannot dispose node, unable to find type-corresponding dispose function. (ast_node_type: %d)", (int)node->node_type);
             return false;

@@ -5,8 +5,9 @@
 #include <jet_lexer.h>
 
 // {{{ decl
+typedef enum   jet_ast_mem_region      jet_ast_mem_region;
 typedef enum   jet_ast_node_type       jet_ast_node_type;
-typedef enum   jet_ast_lit_type        jet_ast_lit_type;
+typedef enum   jet_ast_native_type     jet_ast_native_type;
 typedef enum   jet_ast_unop_type       jet_ast_unop_type;
 typedef enum   jet_ast_binop_type      jet_ast_binop_type;
 
@@ -34,6 +35,12 @@ typedef struct jet_ast_node_func_call  jet_ast_node_func_call;
 // }}}
 
 // {{{ def 
+enum jet_ast_mem_region
+{
+    MEM_STACK,
+    MEM_HEAP,
+};
+
 enum jet_ast_node_type 
 {
     AST_ROOT,       AST_IDENT,    
@@ -48,13 +55,13 @@ enum jet_ast_node_type
     AST_LIT,
 };
 
-enum jet_ast_lit_type
+enum jet_ast_native_type
 {
-    LIT_NULL,
-    LIT_INT,
-    LIT_BOOL,
-    LIT_STR,
-    LIT_FLOAT,
+   AST_NATIVE_NULL,
+   AST_NATIVE_INT,
+   AST_NATIVE_BOOL,
+   AST_NATIVE_STR,
+   AST_NATIVE_FLOAT,
 }; 
 
 enum jet_ast_unop_type
@@ -66,17 +73,17 @@ enum jet_ast_unop_type
 
 enum jet_ast_binop_type
 {
-    BINOP_ADD,     BINOP_SUB, 
-    BINOP_MUL,     BINOP_DIV, 
-    BINOP_MOD,     BINOP_XOR,
-    BINOP_SHL,     BINOP_SHR,
+    BINOP_ADD, BINOP_SUB, 
+    BINOP_MUL, BINOP_DIV, 
+    BINOP_MOD, BINOP_XOR,
+    BINOP_SHL, BINOP_SHR,
 
-    BINOP_EQ,      BINOP_NEQ, 
-    BINOP_LT,      BINOP_GT, 
-    BINOP_LTE,     BINOP_GTE,
+    BINOP_EQ,  BINOP_NEQ, 
+    BINOP_LT,  BINOP_GT, 
+    BINOP_LTE, BINOP_GTE,
 
-    BINOP_AND,     BINOP_BAND,
-    BINOP_OR,      BINOP_BOR, 
+    BINOP_AND, BINOP_BAND,
+    BINOP_OR,  BINOP_BOR, 
 
     BINOP_ADD_ASG, BINOP_SUB_ASG,
     BINOP_MUL_ASG, BINOP_DIV_ASG,
@@ -114,7 +121,7 @@ struct jet_ast_node
         jet_ast_node_func_def*   func_def;
         jet_ast_node_func_decl*  func_decl;
         jet_ast_node_func_call*  func_call;
-    } value;
+    } as;
 };
 
 struct jet_ast_node_root
@@ -134,10 +141,7 @@ struct jet_ast_node_expr_stmt
 
 struct jet_ast_node_param 
 {
-    jet_ast_node* name_id;
-    jet_ast_node* data_type;
-    jet_ast_node* value_expr;
-    jet_ast_node* def_value_expr;
+    jet_ast_node* var_decl;
 }; 
 
 struct jet_ast_node_block
@@ -153,14 +157,14 @@ struct jet_ast_node_dot_access
 
 struct jet_ast_node_type_decl
 {
-    const char* name;
+    const char* type_id;
     bool is_native;
 };
 
 struct jet_ast_node_lit
 { 
-    jet_ast_node*    type_def;
-    jet_ast_lit_type lit_type;
+    jet_ast_native_type native_type;
+    jet_ast_node* type_decl;
     union
     {
         int         i;
@@ -168,7 +172,7 @@ struct jet_ast_node_lit
         bool        b;
         const char* s;
         void*       n;
-    } value;
+    } as;
 };
 
 struct jet_ast_node_unop
@@ -212,36 +216,36 @@ struct jet_ast_node_for
 
 struct jet_ast_node_var_ref 
 {
-    jet_ast_node* name_id;
+    jet_ast_node* ident;
     jet_ast_node* type_decl;
+    jet_ast_mem_region mem_region;
 };
 
 struct jet_ast_node_var_decl 
 {
-    jet_ast_node* name_id;
+    jet_ast_node* ident;
     jet_ast_node* type_decl; 
     jet_ast_node* def_value_expr;
+    jet_ast_mem_region mem_region;
 };
 
 struct jet_ast_node_func_def 
 {
-   jet_ast_node* name_id;
-   jet_ast_node* ret_type_decl;
-   jet_ast_node* body_block;
-   jet_list*   params_list;
+    jet_ast_node* func_decl;
+    jet_ast_node* block;
 };
 
 struct jet_ast_node_func_decl 
 {
-    jet_ast_node* name_id;
-    jet_ast_node* ret_type_decl;
-    jet_list*   params_list;
+    jet_ast_node* ident;
+    jet_ast_node* type_decl;
+    jet_list* param_list;
 };
 
 struct jet_ast_node_func_call 
 {
     jet_ast_node* callee;
-    jet_list*   args_list;
+    jet_list* arg_expr_list;
 };
 
 // }}}
