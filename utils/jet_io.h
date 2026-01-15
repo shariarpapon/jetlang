@@ -5,7 +5,7 @@
 
 #define ARRAY_LEN(a) (sizeof(a) / sizeof(a[0]))
 
-char* load_text_file(const char* file_path, size_t* out_len);
+char* jet_io_read_text(const char* file_path, size_t* out_len);
 
 
 

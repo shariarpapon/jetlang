@@ -7,12 +7,10 @@ object student
     bool hasGraduated = true;
 }
 
-program
+prog
 {
     student s = new student;
     out("name: " + s.name);
-    out("gpa: " + s.gpa);
-    out("graduated: " + s.hasGraduated);
 }
 
 

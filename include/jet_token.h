@@ -7,8 +7,10 @@ typedef enum
     TOK_EOF,      // End of file
 
     TOK_IDENT,   // identifiers
-    
+        
     //native reserved identifiers / keywords
+    TOK_KWD_PROG, // program entry point
+    TOK_KWD_NEEDS,// dependency module specifier
     TOK_KWD_NULL, // placeholder asignment
     TOK_KWD_TRUE, // boolean value: true
     TOK_KWD_FALSE,// boolean value: false

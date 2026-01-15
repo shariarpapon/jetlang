@@ -12,7 +12,7 @@ typedef enum   jet_ast_binop_type      jet_ast_binop_type;
 
 typedef struct jet_ast                 jet_ast;
 typedef struct jet_ast_node            jet_ast_node;
-typedef struct jet_ast_node_prog       jet_ast_node_prog;
+typedef struct jet_ast_node_root       jet_ast_node_root;
 typedef struct jet_ast_node_ident      jet_ast_node_ident;
 typedef struct jet_ast_node_expr_stmt  jet_ast_node_expr_stmt;
 typedef struct jet_ast_node_block      jet_ast_node_block;
@@ -36,10 +36,10 @@ typedef struct jet_ast_node_func_call  jet_ast_node_func_call;
 // {{{ def 
 enum jet_ast_node_type 
 {
-    AST_PROG,       AST_IDENT,    
+    AST_ROOT,       AST_IDENT,    
     AST_BLOCK,      AST_PARAM,    
     AST_DOT_ACCESS, AST_TYPE_DECL,
-    AST_BINARY_OP,  AST_UNARY_OP,
+    AST_BINOP,      AST_UNOP,
     AST_RETURN,     AST_IF,
     AST_WHILE,      AST_FOR,    
     AST_VAR_REF,    AST_VAR_DECL,
@@ -86,7 +86,8 @@ enum jet_ast_binop_type
 
 struct jet_ast
 {
-    jet_ast_node* prog;
+    jet_list* token_list;
+    jet_ast_node* root_node;
 };
 
 struct jet_ast_node
@@ -94,35 +95,31 @@ struct jet_ast_node
     jet_ast_node_type node_type;
     union
     {
-        jet_ast_node_prog*       prog;
+        jet_ast_node_root*       root;
+        jet_ast_node_block*      block;
+        jet_ast_node_dot_access* dot_access;
         jet_ast_node_ident*      ident;
         jet_ast_node_expr_stmt*  expr_stmt;
         jet_ast_node_param*      param;
-        jet_ast_node_block*      block;
         jet_ast_node_lit*        lit;
-        jet_ast_node_dot_access* dot_access;
         jet_ast_node_type_decl*  type_decl;
-
-        jet_ast_node_unop*       unop;
         jet_ast_node_binop*      binop;
-        
+        jet_ast_node_unop*       unop;
         jet_ast_node_return*     return_;
         jet_ast_node_if*         if_;
         jet_ast_node_while*      while_;
         jet_ast_node_for*        for_;
-        
         jet_ast_node_var_ref*    var_ref;
         jet_ast_node_var_decl*   var_decl;
-
         jet_ast_node_func_def*   func_def;
         jet_ast_node_func_decl*  func_decl;
         jet_ast_node_func_call*  func_call;
     } value;
 };
 
-struct jet_ast_node_prog
+struct jet_ast_node_root
 {
-    jet_list* stmt_list;
+    jet_ast_node_block* entry_block;
 }; 
 
 struct jet_ast_node_ident
@@ -251,7 +248,6 @@ struct jet_ast_node_func_call
 
 jet_ast* jet_ast_create(jet_list* token_list);
 bool jet_ast_dispose(jet_ast* ast);
-
 
 
 

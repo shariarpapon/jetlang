@@ -32,6 +32,8 @@ typedef struct
 
 static const jet_tok_def kwd_table[] = 
 { 
+   { .value.str = "prog"  ,  TOK_KWD_PROG   }, 
+   { .value.str = "needs" ,  TOK_KWD_NEEDS  },  
    { .value.str = "null"  ,  TOK_KWD_NULL   }, 
    { .value.str = "bool"  ,  TOK_KWD_BOOL   },  
    { .value.str = "true"  ,  TOK_KWD_TRUE   },

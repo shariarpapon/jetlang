@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
-char* load_text_file(const char* path, size_t* out_len)
+char* jet_io_read_text(const char* path, size_t* out_len)
 {
     FILE* file = fopen(path, "r");
     if(!file)

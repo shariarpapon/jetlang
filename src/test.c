@@ -32,7 +32,7 @@ int main(int argc, char** argv)
     
     size_t src_len = 0;
     //now *arg should point to the source file path (the 2nd arg)
-    const char* source = (const char*)load_text_file(*args, &src_len);
+    const char* source = (const char*)jet_io_read_text(*args, &src_len);
     if(!source)
     {
         fprintf(stderr, "error: could not load source text\n");
