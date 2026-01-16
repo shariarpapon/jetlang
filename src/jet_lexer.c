@@ -8,6 +8,7 @@
 #include <jet_io.h>
 
 #define STRING_QUOTE '"'
+#define CHAR_QUOTE '\''
 #define DECIMAL_CHAR '.'
 #define ESCAPE_CHAR '\\'
 
@@ -89,6 +90,7 @@ static bool jet_lexer_is_ident(char c);
 
 static bool jet_lexer_try_scan_str_lit(jet_lexer* lexer);
 static bool jet_lexer_try_scan_num_lit(jet_lexer* lexer);
+static bool jet_lexer_try_scan_char_lit(jet_lexer* lexer);
 static bool jet_lexer_try_scan_ident(jet_lexer* lexer);
 static bool jet_lexer_try_scan_punct(jet_lexer* lexer);
 static bool jet_lexer_try_scan_line_com(jet_lexer* lexer);
@@ -169,6 +171,7 @@ bool jet_lexer_tokenize(jet_lexer* lexer)
         else if (jet_lexer_try_scan_block_com(lexer))   continue;      
         else if (jet_lexer_try_scan_ident(lexer))       continue;   
         else if (jet_lexer_try_scan_num_lit(lexer))     continue; 
+        else if (jet_lexer_try_scan_char_lit(lexer))    continue;
         else if (jet_lexer_try_scan_str_lit(lexer))     continue;
         else if (jet_lexer_try_scan_punct(lexer))       continue;   
         
@@ -354,8 +357,22 @@ static bool jet_lexer_try_scan_num_lit(jet_lexer* lexer)
     return true;
 }
 
+static bool jet_lexer_try_scan_char_lit(jet_lexer* lexer)
+{
+    if(jet_lexer_peek(lexer) != CHAR_QUOTE) 
+        return false;
+    
+    jet_lexer_consume(lexer);
+    if(jet_lexer_peek_next(lexer) != CHAR_QUOTE) 
+        return false;
 
-bool jet_lexer_try_scan_ident(jet_lexer* lexer)
+    jet_lexer_emit_token(lexer, lexer->cursor, 1, TOK_CHAR_LIT);
+    jet_lexer_consume(lexer);
+    jet_lexer_consume(lexer);
+    return true;
+}
+
+static bool jet_lexer_try_scan_ident(jet_lexer* lexer)
 {
     if(jet_lexer_is_ident(jet_lexer_peek(lexer)) == false)
     {

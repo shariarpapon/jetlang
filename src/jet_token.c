@@ -81,6 +81,7 @@ const char* jet_token_type_str(jet_token_type type)
         case TOK_INT_LIT:   return "TOK_INT_LIT";
         case TOK_FLOAT_LIT: return "TOK_FLOAT_LIT";
         case TOK_STR_LIT:   return "TOK_STR_LIT";
+        case TOK_CHAR_LIT:  return "TOK_CHAR_LIT";
         case TOK_BCOM:      return "TOK_BCOM";
         case TOK_LCOM:      return "TOK_LCOM";
         

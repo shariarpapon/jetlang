@@ -32,7 +32,7 @@ typedef enum
     TOK_INT_LIT,   // 0..9 (numeric literal)
     TOK_FLOAT_LIT,  // decimal point numbers (e.g. 3.1415)
     TOK_STR_LIT,   // "string literal"
-    TOK_CHAR_LIT,
+    TOK_CHAR_LIT,  // 'a'
     TOK_BCOM,      // /*block comment*/
     TOK_LCOM,      // //line comment
 
