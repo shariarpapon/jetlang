@@ -146,7 +146,7 @@ bool jet_list_remove(jet_list* list, size_t i)
     }
     else if(i >= list->count)
     {
-        fprintf(stderr, "error: cannot remove, index %zu is out of bounds.\n", i);
+        fprintf(stderr, "error: cannot remove, index %llu is out of bounds.\n", (unsigned long long)i);
         return false;
     }
     else if(i == list->count - 1)
@@ -177,7 +177,7 @@ bool jet_list_remove_range(jet_list* list, size_t start, size_t end)
     }
     else if(end >= list->count || start > end)
     {
-        fprintf(stderr, "error: cannot remove range [%zu, %zu], invalid bounds.\n", start, end);
+        fprintf(stderr, "error: cannot remove range [%llu, %llu], invalid bounds.\n", (unsigned long long)start, (unsigned long long)end);
         return false;
     }
     

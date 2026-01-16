@@ -72,7 +72,7 @@ int main(int argc, char** argv)
 void print_source(const char* source, size_t src_len)
 {   
     puts("\n*****************************************************\n");
-    printf("source text loaded (len: %zu):\n\n%s", src_len, source);
+    printf("source text loaded (len: %llu):\n\n%s", (unsigned long long)src_len, source);
     puts("\n*****************************************************\n");
 }
 
