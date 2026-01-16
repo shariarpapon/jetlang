@@ -59,6 +59,8 @@ const char* jet_token_type_str(jet_token_type type)
         case TOK_EOF:       return "TOK_EOF";
         
         case TOK_IDENT:     return "TOK_IDENT";
+        case TOK_KWD_MEM:   return "TOK_KWD_MEM";
+        case TOK_KWD_CHAR:  return "TOK_KWD_CHAR";
         case TOK_KWD_NULL:  return "TOK_KWD_NULL";
         case TOK_KWD_INT:   return "TOK_KWD_INT";
         case TOK_KWD_FLOAT: return "TOK_KWD_FLOAT";
@@ -69,6 +71,7 @@ const char* jet_token_type_str(jet_token_type type)
         case TOK_KWD_FALSE: return "TOK_KWD_FALSE";
         case TOK_KWD_PROG:  return "TOK_KWD_PROG";
         case TOK_KWD_NEEDS: return "TOK_KWD_NEEDS";
+        case TOK_KWD_VOID:  return "TOK_KWD_VOID";
 
         case TOK_KWD_IF:    return "TOK_KWD_IF";
         case TOK_KWD_ELSE:  return "TOK_KWD_ELSE";

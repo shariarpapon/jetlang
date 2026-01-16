@@ -42,6 +42,9 @@ static const jet_tok_def kwd_table[] =
    { .value.str = "float" ,  TOK_KWD_FLOAT  }, 
    { .value.str = "str"   ,  TOK_KWD_STR    },  
    { .value.str = "byte"  ,  TOK_KWD_BYTE   }, 
+   { .value.str = "void"  ,  TOK_KWD_VOID   }, 
+   { .value.str = "char"  ,  TOK_KWD_CHAR   }, 
+   { .value.str = "mem"   ,  TOK_KWD_MEM    }, 
    { .value.str = "if"    ,  TOK_KWD_IF     }, 
    { .value.str = "else"  ,  TOK_KWD_ELSE   }, 
    { .value.str = "for"   ,  TOK_KWD_FOR    }, 
@@ -152,10 +155,16 @@ bool jet_lexer_tokenize(jet_lexer* lexer)
         fprintf(stderr, "error: cannot tokenize, lexer or lexer->token_list is invalid.\n");
         return false;
     }
-
-    while(jet_lexer_peek(lexer) != NULL_TERM)
+    //TEST
+    while(true)
     {
-        if      (jet_lexer_try_scan_whitespace(lexer))  continue; 
+        if(jet_lexer_peek(lexer) == NULL_TERM)
+        {
+            jet_lexer_emit_token(lexer, lexer->cursor, 1, TOK_EOF);
+            jet_lexer_consume(lexer);
+            break;
+        }
+        else if (jet_lexer_try_scan_whitespace(lexer))  continue; 
         else if (jet_lexer_try_scan_line_com(lexer))    continue;    
         else if (jet_lexer_try_scan_block_com(lexer))   continue;      
         else if (jet_lexer_try_scan_ident(lexer))       continue;   
@@ -467,6 +476,11 @@ static char jet_lexer_peek(jet_lexer* lexer)
 
 static char jet_lexer_consume(jet_lexer* lexer)
 {
+    if(lexer->cursor >= lexer->len - 1)
+    {
+        fprintf(stderr, "wrn: cannot consume, EOF reached.\n");
+        return NULL_TERM;
+    }
     char c = jet_lexer_peek(lexer);
     lexer->cursor++;
     return c;

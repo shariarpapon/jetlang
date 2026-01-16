@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 
 #define UPSIZE_FAC 2
 
@@ -44,6 +45,15 @@ jet_list* jet_list_create(size_t capacity, size_t elm_size)
         return NULL;
     }
     return v;
+}
+
+jet_list* jet_list_create_copy(jet_list* list)
+{
+    assert(list != NULL);
+    jet_list* new_list = jet_list_create(list->capacity, list->elm_size);
+    assert(new_list != NULL);
+    memcpy((void*)new_list->data_array, (const void*)list->data_array, list->elm_size * list->count);
+    return new_list;
 }
 
 bool jet_list_dispose(jet_list* v)

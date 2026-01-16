@@ -6,6 +6,7 @@
 typedef struct jet_list jet_list;
 
 jet_list* jet_list_create(size_t capacity, size_t elm_size);
+jet_list* jet_list_create_copy(jet_list* list);
 
 bool jet_list_dispose(jet_list* list);
 bool jet_list_clear(jet_list* list);
