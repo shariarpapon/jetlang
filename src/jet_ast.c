@@ -63,7 +63,7 @@ bool jet_ast_dispose(jet_ast* ast)
 
 static bool jet_ast_generate_tree(jet_ast* ast)
 {
-    ast->root_node = jet_ast_node_create(AST_ROOT);
+    ast->root_node = jet_ast_node_create(AST_NODE_ROOT);
     if(!ast->root_node) return false;
     return true;
 }

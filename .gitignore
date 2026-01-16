@@ -1,4 +1,17 @@
 /[Bb]uild/
 /[Bb]uilds/
+/[Tt]emp/
+/[Ll]ibs/
+
+Makefile
+jet
+[Tt]emp
+*.swp
+
+
+
+
+
+
 
 

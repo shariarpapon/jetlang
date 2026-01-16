@@ -3,17 +3,17 @@
 
 typedef enum jet_ast_node_type 
 {
-    AST_ROOT,       AST_IDENT,    
-    AST_BLOCK,      AST_PARAM,    
-    AST_DOT_ACCESS, AST_TYPE_DECL,
-    AST_BINOP,      AST_UNOP,
-    AST_RETURN,     AST_IF,
-    AST_WHILE,      AST_FOR,    
-    AST_VAR_REF,    AST_VAR_DECL,
-    AST_FUNC_DEF,   AST_FUNC_DECL, 
-    AST_FUNC_CALL,  AST_EXPR_STMT,
-    AST_LIT,
-    AST_EXPR,
+    AST_NODE_ROOT,       AST_NODE_IDENT,    
+    AST_NODE_BLOCK,      AST_NODE_PARAM,    
+    AST_NODE_DOT_ACCESS, AST_NODE_TYPE_DECL,
+    AST_NODE_BINOP,      AST_NODE_UNOP,
+    AST_NODE_RETURN,     AST_NODE_IF,
+    AST_NODE_WHILE,      AST_NODE_FOR,    
+    AST_NODE_VAR_REF,    AST_NODE_VAR_DECL,
+    AST_NODE_FUNC_DEF,   AST_NODE_FUNC_DECL, 
+    AST_NODE_FUNC_CALL,  AST_NODE_EXPR_STMT,
+    AST_NODE_LIT,
+    AST_NODE_EXPR,
 } jet_ast_node_type;
 
 
