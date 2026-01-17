@@ -3,7 +3,6 @@
 /[Tt]emp/
 /[Ll]ibs/
 
-Makefile
 jet
 [Tt]emp
 *.exe
