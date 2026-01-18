@@ -1,18 +1,6 @@
+char = 'a'
+char = 'b'
 needs jet.io;
-
-object student
-{
-    str addr name = mem[256]; // allocates 256 bytes of memory and returns the memory;
-    float gpa = 3.5;
-    bool hasGraduated = true;
-}
-
-prog
-{
-    student s = new student;
-    out("name: " + s.name);
-}
-
 
 
 
