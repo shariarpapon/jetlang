@@ -36,8 +36,8 @@ int isPalindrome(char s[STRING_LENGTH]);
 void initializeStrings(char strings[NUM_STRINGS][STRING_LENGTH])
 {
 	char *p = &strings[0][0];
-	size_t full_len = NUM_STRINGS + STRING_LENGTH;
-	for(size_t i = 0; i < full_len; i++)
+	int full_len = NUM_STRINGS * STRING_LENGTH;
+	for(int i = 0; i < full_len; i++)
 	{
 		*p = '\0';
 		p++;
@@ -78,6 +78,7 @@ char* reverseOneString(char s[STRING_LENGTH])
 	char* last = s;
 	while(*last != '\0')
 		last++;
+	last--;
 	while(p < last)
 	{
 		char c = *p;
@@ -97,7 +98,7 @@ void reverseStrings(char strings[NUM_STRINGS][STRING_LENGTH])
 {
 	char *p = &strings[0][0];
 	// enter code here
-	for(size_t i = 0; i < NUM_STRINGS; i++)
+	for(int i = 0; i < NUM_STRINGS; i++)
 	{
 		reverseOneString(p);
 		while(*p != '\0')
