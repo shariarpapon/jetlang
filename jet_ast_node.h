@@ -2,7 +2,7 @@
 #include <jet_list.h>
 #include <jnode_type.h>
 
-// PROGRAM ENTRY POINT
+// PROGRAM ENTRY POINT`:vs 
 typedef struct jnode_prog 
 {
   jnode* block;
@@ -12,6 +12,24 @@ typedef struct jnode_ident
 {
   const char* value;
 } jnode_ident;
+ 
+ typedef struct jnode_lit
+ {
+     /*
+        -1       0       1       2       3       4
+        void    int     float   bool    char    str
+     */
+     int lit_type;
+     union
+     {
+         void* n;
+         int i;
+         float f;
+         bool b;
+         char c;
+         const char* s;
+     } as;
+ } jnode_lit;
 
 typedef struct jnode_block
 {
@@ -63,6 +81,7 @@ typedef struct jnode
     {
         jnode_prog* prog;
         jnode_ident* ident;
+        jnode_lit* lit;
         jnode_block* block; 
         jnode_var_ref* var_ref;
         jnode_var_decl* var_decl;

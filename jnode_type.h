@@ -4,6 +4,7 @@ typedef enum jnode_type
 {
   jnode_PROG,  
   jnode_IDENT,
+  jnode_LIT,
   jnode_BLOCK,
   jnode_VAR_REF,
   jnode_VAR_DECL,
