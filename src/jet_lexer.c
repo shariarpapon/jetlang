@@ -133,7 +133,7 @@ jet_lexer* jet_lexer_create(const char* source)
 
 void jet_lexer_dispose(jet_lexer* lexer)
 {
-    printf("full disposing lexer...");
+    printf("disposing lexer...");
     if(!lexer) 
     {
         perror("error: attempting to free invalid lexer pointer.\n");

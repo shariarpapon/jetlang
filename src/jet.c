@@ -65,7 +65,7 @@ int main(int argc, char** argv)
     jet_lexer_dispose(lexer); 
     free((void*)source);
 
-    printf("* all tests ran successfully\n");
+    printf("all tests ran successfully!\n");
     return 0;
 }
 
