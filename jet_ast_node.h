@@ -5,7 +5,7 @@
 
 typedef struct jet_ast_node jet_ast_node;
 
-// PROGRAM ENTRY POINT`:vs 
+// PROGRAM ENTRY POINT
 typedef struct jet_ast_node_prog 
 {
   jet_ast_node* block;
@@ -16,27 +16,27 @@ typedef struct jet_ast_node_ident
   const char* value;
 } jet_ast_node_ident;
  
- typedef struct jet_ast_node_lit
- {
-     /*
-        -1       0       1       2       3       4
-        void/n  int/i  float/f  bool/b  char/c  str/s
-     */
-     int lit_type;
-     union
-     {
-         void* n;
-         int i;
-         float f;
-         bool b;
-         char c;
-         const char* s;
-     } as;
- } jet_ast_node_lit;
+typedef struct jet_ast_node_lit
+{
+   /*
+      -1       0       1       2       3       4
+      void/n  int/i  float/f  bool/b  char/c  str/s
+   */
+   int lit_type;
+   union
+   {
+       void* n;
+       int i;
+       float f;
+       bool b;
+       char c;
+       const char* s;
+   } as;
+} jet_ast_node_lit;
 
 typedef struct jet_ast_node_block
 {
-  jet_list* nodes;
+  jet_list* node_list;
 } jet_ast_node_block;
 
 typedef struct jet_ast_node_var_ref 
@@ -74,6 +74,7 @@ typedef struct jet_ast_node_func_def
 typedef struct jet_ast_node_func_call
 {
   jet_ast_node* func_binding_ident;
+  jet_list* arg_nodes;
 } jet_ast_node_func_call;
 
 // NODE BASE STRUCT
@@ -95,6 +96,7 @@ struct jet_ast_node
     } as;
 };
 
+jet_ast_node* jet_ast_node_create(jet_ast_node_type node_type);
 bool jet_ast_node_dispose(jet_ast_node* node);
 
 
