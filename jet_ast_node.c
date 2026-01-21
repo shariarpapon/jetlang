@@ -6,7 +6,7 @@
 // NOTE: Returns a zero intialized node. 
 // however, 
 // the type union struct is not created since paramters are unknown.
-jet_ast_node* jet_ast_node_create(jet_ast_node_type node_type)
+jet_ast_node* jet_ast_node_create_base(jet_ast_node_type node_type)
 {
     jet_ast_node* node = (jet_ast_node*)malloc(sizeof(jet_ast_node));
     if(!node)

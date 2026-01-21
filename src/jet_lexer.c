@@ -12,9 +12,7 @@
 #define DECIMAL_CHAR '.'
 #define ESCAPE_CHAR '\\'
 
-typedef struct jet_tok_def jet_tok_def; 
-
-struct jet_tok_def 
+typedef struct jet_tok_def 
 {
     union
     { 
@@ -22,7 +20,7 @@ struct jet_tok_def
         const char chr;
     } value;
     jet_token_type tok_type;
-};
+} jet_tok_def;
 
 typedef struct
 {

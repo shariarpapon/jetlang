@@ -96,7 +96,7 @@ struct jet_ast_node
     } as;
 };
 
-jet_ast_node* jet_ast_node_create(jet_ast_node_type node_type);
+jet_ast_node* jet_ast_node_create_base(jet_ast_node_type node_type);
 bool jet_ast_node_dispose(jet_ast_node* node);
 
 
