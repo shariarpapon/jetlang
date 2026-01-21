@@ -13,19 +13,19 @@ typedef struct jet_ast_node_prog
 
 typedef struct jet_ast_node_ident
 {
-  const char* value;
+  const char* str;
 } jet_ast_node_ident;
  
 typedef struct jet_ast_node_lit
 {
    /*
       -1       0       1       2       3       4
-      void/n  int/i  float/f  bool/b  char/c  str/s
+      void/v  int/i  float/f  bool/b  char/c  str/s
    */
    int lit_type;
    union
    {
-       void* n;
+       void* v;
        int i;
        float f;
        bool b;

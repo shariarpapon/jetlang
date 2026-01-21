@@ -4,14 +4,14 @@
 jet_ast_node_prog* 
    jet_astn_prog_create(jet_ast_node* block);
 
+jet_ast_node_block* 
+   jet_astn_block_create(jet_list* node_list);
 jet_ast_node_ident* 
    jet_astn_ident_create(const char* ident);
 
 jet_ast_node_lit* 
    jet_astn_lit_create(int lit_type, void* value);
 
-jet_ast_node_block* 
-   jet_astn_block_create(jet_list* node_list);
 
 jet_ast_node_var_ref* 
    jet_astn_vref_create(jet_ast_node* var_binding_ident);
