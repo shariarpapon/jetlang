@@ -15,6 +15,8 @@ struct jet_ast
 };
 
 static jet_ast_node* jet_ast_get_next_node(jet_ast* ast);
+static bool jet_ast_generate(jet_ast* ast);
+static void jet_ast_add_top_node(jet_ast* ast, jet_ast_node* node);
 static void jet_ast_parse_primary(jet_ast* ast);
 static void jet_ast_parse_expr(jet_ast* ast);
 
@@ -73,6 +75,35 @@ bool jet_ast_dispose(jet_ast* ast)
     return true;
 }
 
+static bool jet_ast_generate(jet_ast* ast)
+{
+    assert(ast != NULL);
+    assert(ast->tok_list != NULL);
+    if(jet_list_count(ast->tok_list) == 0)
+    {
+        fprintf(stderr, "erorr: cannot generate AST, token-list is empty.\n");
+        return false;
+    }
+
+    jet_ast_node* cur_node = jet_ast_get_next_node(ast);
+    while(cur_node  != NULL)
+    {
+        if(cur_node->node_type == AST_PROG)
+        {
+            if(ast->prog_node != NULL)
+            {
+                fprintf(stderr, "error: cannot generate AST, more than 1 program entry point found.\n");
+                return false;
+            }
+            ast->prog_node = cur_node;
+        }
+        else jet_ast_add_top_node(ast, cur_node);
+        
+        cur_node = jet_ast_get_next_node(ast);
+    }
+    return true;
+}
+
 static jet_ast_node* jet_ast_get_next_node(jet_ast* ast)
 {
     assert(ast != NULL);
@@ -89,6 +120,13 @@ static void jet_ast_parse_expr(jet_ast* ast)
     assert(ast != NULL);
 }
 
+static void jet_ast_add_top_node(jet_ast* ast, jet_ast_node* node)
+{
+    assert(ast != NULL);
+    assert(node != NULL);
+    assert(ast->top_node_list != NULL);
+    jet_list_append(ast->top_node_list, (const void*)node);
+}
 
 static jet_token* jet_ast_expect_tok(jet_ast* ast, jet_token_type tok_type)
 {
