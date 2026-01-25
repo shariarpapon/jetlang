@@ -17,8 +17,6 @@ struct jet_ast
 static jet_ast_node* jet_ast_get_next_node(jet_ast* ast);
 static bool jet_ast_generate(jet_ast* ast);
 static void jet_ast_add_top_node(jet_ast* ast, jet_ast_node* node);
-static void jet_ast_parse_primary(jet_ast* ast);
-static void jet_ast_parse_expr(jet_ast* ast);
 
 static jet_token* jet_ast_expect_tok(jet_ast* ast, jet_token_type tok_type);
 static jet_token* jet_ast_peek_tok(jet_ast* ast);
@@ -97,8 +95,7 @@ static bool jet_ast_generate(jet_ast* ast)
             }
             ast->prog_node = cur_node;
         }
-        else jet_ast_add_top_node(ast, cur_node);
-        
+        else jet_ast_add_top_node(ast, cur_node);        
         cur_node = jet_ast_get_next_node(ast);
     }
     return true;
@@ -107,19 +104,36 @@ static bool jet_ast_generate(jet_ast* ast)
 static jet_ast_node* jet_ast_get_next_node(jet_ast* ast)
 {
     assert(ast != NULL);
-    return NULL;
-}
+    assert(ast->tok_list != NULL);
+    size_t tok_count = jet_list_count(ast->tok_list);
+    if(tok_count == 0)
+    {
+        fprintf(stderr, "wrn: cannot eval node, token-list is empty.\n");
+        return NULL;
+    }
+    if(ast->tok_cursor >= tok_count)
+    {
+        printf("end of token-list reached\n");
+        return NULL;
+    }
 
-static void jet_ast_parse_primary(jet_ast* ast)
-{    
-    assert(ast != NULL);
-}
+    jet_token* cur_tok = jet_ast_peek_tok(ast);
+    if(cur_tok == TOK_EOF)
+    {
+        jet_ast_consume_tok(ast);
+        return NULL;
+    }
 
-static void jet_ast_parse_expr(jet_ast* ast)
-{
-    assert(ast != NULL);
+    switch(cur_tok->type)
+    {
+        default:
+            fprintf(stderr, "error: could not evaluate valid node.");
+            return NULL;
+        case TOK_IDENT:
+            break;
+    }
 }
-
+    
 static void jet_ast_add_top_node(jet_ast* ast, jet_ast_node* node)
 {
     assert(ast != NULL);

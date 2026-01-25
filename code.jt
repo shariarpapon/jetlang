@@ -1,9 +1,15 @@
-char = 'a'
-char = 'b'
-needs jet.io;
+decl void print(str text);
 
+void print(str text)
+{
+    out(text);
+}
 
-
+prog
+{
+    str message = "hello world!"
+    print(message);
+}
 
 
 
