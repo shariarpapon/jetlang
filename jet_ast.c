@@ -5,6 +5,7 @@
 
 #include <jet_ast.h>
 #include <jet_ast_node.h>
+#include <jet_ast_node_create.h>
 
 struct jet_ast 
 {
@@ -14,9 +15,10 @@ struct jet_ast
    size_t tok_cursor;
 };
 
-static jet_ast_node* jet_ast_get_next_node(jet_ast* ast);
-static bool jet_ast_generate(jet_ast* ast);
 static void jet_ast_add_top_node(jet_ast* ast, jet_ast_node* node);
+static bool jet_ast_generate(jet_ast* ast);
+static jet_ast_node* jet_ast_get_next_node(jet_ast* ast);
+static jet_ast_node* jet_ast_node_block_gen(jet_ast* ast);
 
 static jet_token* jet_ast_expect_tok(jet_ast* ast, jet_token_type tok_type);
 static jet_token* jet_ast_peek_tok(jet_ast* ast);
@@ -118,22 +120,53 @@ static jet_ast_node* jet_ast_get_next_node(jet_ast* ast)
     }
 
     jet_token* cur_tok = jet_ast_peek_tok(ast);
-    if(cur_tok == TOK_EOF)
+    if(cur_tok->type == TOK_EOF)
     {
         jet_ast_consume_tok(ast);
         return NULL;
     }
 
+    jet_ast_node* node = NULL;
+
     switch(cur_tok->type)
     {
         default:
+        case TOK_INV:
             fprintf(stderr, "error: could not evaluate valid node.");
             return NULL;
-        case TOK_IDENT:
+        case TOK_EOF:
+            printf("EOF token reached.\n");
+            return NULL;
+        case TOK_KWD_PROG:
+            node = jet_ast_node_create_base(AST_PROG);
+            jet_ast_node* block = jet_ast_node_block_gen(ast);
+            jet_ast_node_prog* prog = jet_astn_prog_create(block); 
+            assert(block != NULL);
+            assert(prog != NULL);
+            node->as.prog = prog;
             break;
     }
+
+    if(node == NULL)
+    {
+        fprintf(stderr, "error: could not generate AST node.\n");
+    }
+    return node;
 }
+
+static jet_ast_node* jet_ast_node_block_gen(jet_ast* ast)
+{
+    jet_list* node_list = jet_list_create(4, sizeof(jet_ast_node));
+    assert(node_list != NULL);
     
+    //TODO: populate node_list
+    jet_ast_node_block* block = jet_astn_block_create(node_list);
+    assert(block != NULL);
+    jet_ast_node* node = jet_ast_node_create_base(AST_BLOCK);
+    node->as.block = block;
+    return node;
+}
+
 static void jet_ast_add_top_node(jet_ast* ast, jet_ast_node* node)
 {
     assert(ast != NULL);
