@@ -38,13 +38,13 @@ void jet_token_print_list(jet_list* tokens)
     }
     
     printf("\ntoken list [%llu]:\n\n", (unsigned long long)len);
-    printf("%-7s %-17s %-10s %s\n\n", "len", "type", "enum-id", "value");        
+    printf("%-7s %-17s %-10s %s\n\n", "index", "type", "enum-id", "value");        
    
     for(size_t i = 0; i < len; i++)
     {  
         jet_token* token = jet_list_get(tokens, i);
         const char* type_str = jet_token_type_str(token->type);
-        printf("%-7llu %-17s %-10d %.*s\n",(unsigned long long)(i+1), type_str,(int)token->type, (int)token->len, token->source + token->origin);        
+        printf("%-7llu %-17s %-10d %.*s\n",(unsigned long long)(i), type_str,(int)token->type, (int)token->len, token->source + token->origin);        
     }
     printf("\n");
     printf("* generated %llu tokens\n\n", (unsigned long long)len);
