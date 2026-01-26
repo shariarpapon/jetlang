@@ -138,13 +138,37 @@ static jet_ast_node* jet_ast_get_next_node(jet_ast* ast)
             printf("EOF token reached.\n");
             return NULL;
         case TOK_KWD_PROG:
-            node = jet_ast_node_create_base(AST_PROG);
             jet_ast_node* block = jet_ast_node_block_gen(ast);
             jet_ast_node_prog* prog = jet_astn_prog_create(block); 
             assert(block != NULL);
             assert(prog != NULL);
+            node = jet_ast_node_create_base(AST_PROG);
             node->as.prog = prog;
             break;
+        case TOK_KWD_MEM:
+            break;
+        case TOK_KWD_CHAR : 
+        case TOK_KWD_VOID : 
+        case TOK_KWD_INT  : 
+        case TOK_KWD_FLOAT: 
+        case TOK_KWD_STR  : 
+        case TOK_KWD_BOOL : 
+            //POTENTIAL: type_decl, func_decl, func_def
+            break;
+        case TOK_KWD_NULL:
+        case TOK_KWD_TRUE:
+        case TOK_KWD_FALSE:
+        case TOK_INT_LIT:
+        case TOK_FLOAT_LIT:
+        case TOK_CHAR_LIT:
+        case TOK_STR_LIT:
+            //IS: lit
+            break;
+
+        case TOK_IDENT:
+            //POTENTIAL: func_call, var_ref, expression_component
+            //possibly lit in the case of constant ref
+            break; 
     }
 
     if(node == NULL)

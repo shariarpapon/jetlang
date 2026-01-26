@@ -70,8 +70,8 @@ typedef enum
     TOK_DIVEQ,      // /=
     TOK_MODEQ,      // %=
     TOK_POW,        // **
-    TOK_INCR,
-    TOK_DECR,
+    TOK_INCR,       // ++
+    TOK_DECR,       // --
 
     //Delimiters
     TOK_COLON,  // :
