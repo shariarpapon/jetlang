@@ -163,7 +163,7 @@ static jet_ast_node* jet_ast_get_next_node(jet_ast* ast)
         case TOK_CHAR_LIT:
         case TOK_STR_LIT:
             jet_ast_node_lit* lit = jet_astn_lit_create(cur_tok); 
-            node = jet_ast_node_create_base(AST_LIT);
+            node = jet_ast_node_create_base(AST_LIT);  
             node->as.lit = lit;
             break;
         case TOK_IDENT:

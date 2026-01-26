@@ -1,8 +1,10 @@
 #include <jet_ast_node_create.h>
 #include <jet_token.h>
+#include <jet_conv.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <stdio.h>
+#include <string.h>
 
 jet_ast_node_prog* 
    jet_astn_prog_create(jet_ast_node* block) 
@@ -39,20 +41,24 @@ jet_ast_node_lit*
    jet_astn_lit_create(jet_token* tok) 
 {
     assert(tok != NULL);
-    void* value = NULL;
 
     jet_ast_node_lit* lit = (jet_ast_node_lit*)malloc(sizeof(jet_ast_node_lit));
     assert(lit != NULL);
     
     switch(tok->type)
     {
-        default: lit->as.v = NULL; break;
-        case TOK_INT_LIT: lit->as.i = *(int*)value; break; 
-        case TOK_FLOAT_LIT: lit->as.f = *(float*)value; break; 
-        case TOK_KWD_TRUE: 
-        case TOK_KWD_FALSE: lit->as.b = *(bool*)value; break; 
-        case TOK_CHAR_LIT: lit->as.c = *(char*)value; break; 
-        case TOK_STR_LIT: lit->as.s = (const char*)value; break;
+        default: lit->as.v            = NULL; break;
+        case TOK_INT_LIT:   lit->as.i = jet_conv_stoi(tok->source + tok->origin, tok->len); break; 
+        case TOK_FLOAT_LIT: lit->as.f = jet_conv_stof(tok->source + tok->origin, tok->len);  break; 
+        case TOK_KWD_TRUE:  lit->as.b = true; break;
+        case TOK_KWD_FALSE: lit->as.b = false; break;
+        case TOK_CHAR_LIT:  lit->as.c = *(tok->source + tok->origin); break; 
+        case TOK_STR_LIT:
+                 char* sub = (char*)malloc((tok->len + 1) * sizeof(char));
+                 assert(sub != NULL);
+                 memcpy(sub, tok->source + tok->origin, tok->len);
+                 sub[tok->len] = '\0';
+                 break;
     }
     return lit;
 }
