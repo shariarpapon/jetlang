@@ -1,4 +1,5 @@
 #include <jet_ast_node_create.h>
+#include <jet_token.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <stdio.h>
@@ -35,25 +36,23 @@ jet_ast_node_ident*
 
 
 jet_ast_node_lit* 
-   jet_astn_lit_create(int lit_type, void* value) 
+   jet_astn_lit_create(jet_token* tok) 
 {
-    if(!value)
-    {
-        fprintf(stderr, "error: cannot create literal_node, value invalid.\n");
-        return NULL;
-    }
-    
+    assert(tok != NULL);
+    void* value = NULL;
+
     jet_ast_node_lit* lit = (jet_ast_node_lit*)malloc(sizeof(jet_ast_node_lit));
     assert(lit != NULL);
-
-    switch(lit_type)
+    
+    switch(tok->type)
     {
         default: lit->as.v = NULL; break;
-        case 0: lit->as.i = *(int*)value; break; 
-        case 1: lit->as.f = *(float*)value; break; 
-        case 2: lit->as.b = *(bool*)value; break; 
-        case 3: lit->as.c = *(char*)value; break; 
-        case 4: lit->as.s = (const char*)value; break;
+        case TOK_INT_LIT: lit->as.i = *(int*)value; break; 
+        case TOK_FLOAT_LIT: lit->as.f = *(float*)value; break; 
+        case TOK_KWD_TRUE: 
+        case TOK_KWD_FALSE: lit->as.b = *(bool*)value; break; 
+        case TOK_CHAR_LIT: lit->as.c = *(char*)value; break; 
+        case TOK_STR_LIT: lit->as.s = (const char*)value; break;
     }
     return lit;
 }

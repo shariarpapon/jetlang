@@ -1,5 +1,6 @@
 #pragma once
 #include <jet_ast_node.h>
+#include <jet_token.h>
 
 jet_ast_node_prog* 
    jet_astn_prog_create(jet_ast_node* block);
@@ -10,7 +11,7 @@ jet_ast_node_ident*
    jet_astn_ident_create(const char* ident);
 
 jet_ast_node_lit* 
-   jet_astn_lit_create(int lit_type, void* value);
+   jet_astn_lit_create(jet_token* tok);
 
 
 jet_ast_node_var_ref* 

@@ -11,9 +11,6 @@ typedef enum
     //native reserved identifiers / keywords
     TOK_KWD_PROG, // program entry point
     TOK_KWD_NEEDS,// dependency module specifier
-    TOK_KWD_NULL, // placeholder asignment
-    TOK_KWD_TRUE, // boolean value: true
-    TOK_KWD_FALSE,// boolean value: false
     TOK_KWD_MEM,  // memory allocation keyword
     
     TOK_KWD_CHAR,   // type decl: char
@@ -29,10 +26,14 @@ typedef enum
     TOK_KWD_FOR,    // decl: loop-for
     TOK_KWD_WHILE,  // decl: loop-while
 
-    TOK_INT_LIT,   // 0..9 (numeric literal)
-    TOK_FLOAT_LIT,  // decimal point numbers (e.g. 3.1415)
-    TOK_STR_LIT,   // "string literal"
-    TOK_CHAR_LIT,  // 'a'
+    TOK_KWD_NULL = 1000, // placeholder asignment
+    TOK_KWD_TRUE = 2000, // boolean value: true
+    TOK_KWD_FALSE = 3000,// boolean value: false
+    TOK_INT_LIT = 4000,   // 0..9 (numeric literal)
+    TOK_FLOAT_LIT = 5000,  // decimal point numbers (e.g. 3.1415)
+    TOK_STR_LIT = 6000,   // "string literal"
+    TOK_CHAR_LIT = 7000,  // 'a'
+
     TOK_BCOM,      // /*block comment*/
     TOK_LCOM,      // //line comment
 
