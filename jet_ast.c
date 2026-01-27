@@ -18,7 +18,15 @@ struct jet_ast
 static void jet_ast_add_top_node(jet_ast* ast, jet_ast_node* node);
 static bool jet_ast_generate(jet_ast* ast);
 static jet_ast_node* jet_ast_get_next_node(jet_ast* ast);
-static jet_ast_node* jet_ast_node_block_gen(jet_ast* ast);
+
+static jet_ast_node* jet_ast_node_prog_parse(jet_ast* ast);
+static jet_ast_node* jet_ast_node_mem_parse(jet_ast* ast);
+static jet_ast_node* jet_ast_node_block_parse(jet_ast* ast);
+static jet_ast_node* jet_ast_node_lit_parse(jet_ast* ast);
+static jet_ast_node* jet_ast_node_func_parse(jet_ast* ast);
+static jet_ast_node* jet_ast_node_tdecl_parse(jet_ast* ast);
+static jet_ast_node* jet_ast_node_ident_parse(jet_ast* ast);
+static jet_ast_node* jet_ast_node_ctrl_stmt_parse(jet_ast* ast);
 
 static jet_token* jet_ast_expect_tok(jet_ast* ast, jet_token_type tok_type);
 static jet_token* jet_ast_peek_tok(jet_ast* ast);
@@ -138,14 +146,16 @@ static jet_ast_node* jet_ast_get_next_node(jet_ast* ast)
             printf("EOF token reached.\n");
             return NULL;
         case TOK_KWD_PROG:
-            jet_ast_node* block = jet_ast_node_block_gen(ast);
-            jet_ast_node_prog* prog = jet_astn_prog_create(block); 
-            assert(block != NULL);
-            assert(prog != NULL);
-            node = jet_ast_node_create_base(AST_PROG);
-            node->as.prog = prog;
+            node = jet_ast_node_prog_parse(ast);
             break;
         case TOK_KWD_MEM:
+            node = jet_ast_node_mem_parse(ast);
+            break;
+        case TOK_KWD_IF:
+        case TOK_KWD_WHILE:
+        case TOK_KWD_FOR:
+        case TOK_KWD_RETURN:
+            node = jet_ast_node_ctrl_stmt_parse(ast);
             break;
         case TOK_KWD_CHAR : 
         case TOK_KWD_VOID : 
@@ -154,6 +164,7 @@ static jet_ast_node* jet_ast_get_next_node(jet_ast* ast)
         case TOK_KWD_STR  : 
         case TOK_KWD_BOOL : 
             //POTENTIAL: type_decl, func_decl, func_def
+            node = jet_ast_node_tdecl_parse(ast);
             break;
         case TOK_KWD_NULL:
         case TOK_KWD_TRUE:
@@ -162,14 +173,14 @@ static jet_ast_node* jet_ast_get_next_node(jet_ast* ast)
         case TOK_FLOAT_LIT:
         case TOK_CHAR_LIT:
         case TOK_STR_LIT:
-            jet_ast_node_lit* lit = jet_astn_lit_create(cur_tok); 
-            node = jet_ast_node_create_base(AST_LIT);  
-            node->as.lit = lit;
+            node = jet_ast_node_lit_parse(ast);
             break;
         case TOK_IDENT:
             //POTENTIAL: func_call, var_ref, expression_component
             //possibly lit in the case of constant ref
+            node = jet_ast_node_ident_parse(ast);
             break; 
+
     }
 
     if(node == NULL)
@@ -179,17 +190,59 @@ static jet_ast_node* jet_ast_get_next_node(jet_ast* ast)
     return node;
 }
 
-static jet_ast_node* jet_ast_node_block_gen(jet_ast* ast)
+
+static jet_ast_node* jet_ast_node_prog_parse(jet_ast* ast)
 {
-    jet_list* node_list = jet_list_create(4, sizeof(jet_ast_node));
+    return NULL;
+}
+
+static jet_ast_node* jet_ast_node_mem_parse(jet_ast* ast)
+{
+    return NULL;
+} 
+
+static jet_ast_node* jet_ast_node_block_parse(jet_ast* ast)
+{
+    jet_list* node_list = jet_list_create(16, sizeof(jet_ast_node));
     assert(node_list != NULL);
     
     //TODO: populate node_list
+    
     jet_ast_node_block* block = jet_astn_block_create(node_list);
     assert(block != NULL);
     jet_ast_node* node = jet_ast_node_create_base(AST_BLOCK);
     node->as.block = block;
     return node;
+}
+
+static jet_ast_node* jet_ast_node_lit_parse(jet_ast* ast)
+{
+    jet_token* cur_tok = jet_ast_consume_tok(ast);
+    jet_ast_node_lit* lit = jet_astn_lit_create(cur_tok); 
+    assert(lit != NULL);
+    jet_ast_node* node = jet_ast_node_create_base(AST_LIT);  
+    node->as.lit = lit;
+    return node;
+}
+
+static jet_ast_node* jet_ast_node_func_parse(jet_ast* ast)
+{
+    return NULL;
+}
+
+static jet_ast_node* jet_ast_node_tdecl_parse(jet_ast* ast)
+{
+    return NULL; 
+}
+
+static jet_ast_node* jet_ast_node_ident_parse(jet_ast* ast)
+{
+    return NULL;
+}
+
+static jet_ast_node* jet_ast_node_ctrl_stmt_parse(jet_ast* ast)
+{
+    return NULL;
 }
 
 static void jet_ast_add_top_node(jet_ast* ast, jet_ast_node* node)

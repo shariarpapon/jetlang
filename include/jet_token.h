@@ -25,6 +25,8 @@ typedef enum
     TOK_KWD_ELSE,   // decl: conditional-else
     TOK_KWD_FOR,    // decl: loop-for
     TOK_KWD_WHILE,  // decl: loop-while
+    TOK_KWD_RETURN, // perform: return to last caller address
+    TOK_KWD_BREAK,  // perform: break out of loops
 
     TOK_KWD_NULL = 1000, // placeholder asignment
     TOK_KWD_TRUE = 2000, // boolean value: true

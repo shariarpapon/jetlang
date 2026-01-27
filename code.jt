@@ -1,7 +1,10 @@
-decl void print(str text);
+bool can_print = true;
 
 void print(str text)
 {
+    if(!can_print)
+        return;
+
     out(text);
 }
 

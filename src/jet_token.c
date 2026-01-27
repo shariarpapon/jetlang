@@ -77,6 +77,8 @@ const char* jet_token_type_str(jet_token_type type)
         case TOK_KWD_ELSE:  return "TOK_KWD_ELSE";
         case TOK_KWD_FOR:   return "TOK_KWD_FOR";
         case TOK_KWD_WHILE: return "TOK_KWD_WHILE";
+        case TOK_KWD_BREAK: return "TOK_KWD_BREAK";
+        case TOK_KWD_RETURN:return "TOK_KWD_RETURN";
         
         case TOK_INT_LIT:   return "TOK_INT_LIT";
         case TOK_FLOAT_LIT: return "TOK_FLOAT_LIT";
