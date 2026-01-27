@@ -180,7 +180,6 @@ static jet_ast_node* jet_ast_get_next_node(jet_ast* ast)
             //possibly lit in the case of constant ref
             node = jet_ast_node_ident_parse(ast);
             break; 
-
     }
 
     if(node == NULL)
@@ -190,10 +189,14 @@ static jet_ast_node* jet_ast_get_next_node(jet_ast* ast)
     return node;
 }
 
-
 static jet_ast_node* jet_ast_node_prog_parse(jet_ast* ast)
 {
-    return NULL;
+    jet_ast_expect_tok(ast, TOK_KWD_PROG);
+    jet_ast_node* block = jet_ast_node_block_parse(ast);
+    jet_ast_node_prog* prog_node = jet_astn_prog_create(block);
+    jet_ast_node* out_node = jet_ast_node_create_base(AST_PROG);
+    out_node->as.prog = prog_node;
+    return out_node;
 }
 
 static jet_ast_node* jet_ast_node_mem_parse(jet_ast* ast)
@@ -210,9 +213,9 @@ static jet_ast_node* jet_ast_node_block_parse(jet_ast* ast)
     
     jet_ast_node_block* block = jet_astn_block_create(node_list);
     assert(block != NULL);
-    jet_ast_node* node = jet_ast_node_create_base(AST_BLOCK);
-    node->as.block = block;
-    return node;
+    jet_ast_node* out_node = jet_ast_node_create_base(AST_BLOCK);
+    out_node->as.block = block;
+    return out_node;
 }
 
 static jet_ast_node* jet_ast_node_lit_parse(jet_ast* ast)
@@ -220,9 +223,9 @@ static jet_ast_node* jet_ast_node_lit_parse(jet_ast* ast)
     jet_token* cur_tok = jet_ast_consume_tok(ast);
     jet_ast_node_lit* lit = jet_astn_lit_create(cur_tok); 
     assert(lit != NULL);
-    jet_ast_node* node = jet_ast_node_create_base(AST_LIT);  
-    node->as.lit = lit;
-    return node;
+    jet_ast_node* out_node = jet_ast_node_create_base(AST_LIT);  
+    out_node->as.lit = lit;
+    return out_node;
 }
 
 static jet_ast_node* jet_ast_node_func_parse(jet_ast* ast)
