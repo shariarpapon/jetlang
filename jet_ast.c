@@ -18,7 +18,7 @@ struct jet_ast
 static void jet_ast_add_top_node(jet_ast* ast, jet_ast_node* node);
 static bool jet_ast_generate(jet_ast* ast);
 static jet_ast_node* jet_ast_get_next_node(jet_ast* ast);
-static size_t jet_ast_get_type_bytesize(jet_token_type tok_type);
+static size_t jet_ast_get_type_byte_size(jet_token_type tok_type);
 
 static jet_ast_node* jet_ast_node_prog_parse(jet_ast* ast);
 static jet_ast_node* jet_ast_node_mem_parse(jet_ast* ast);
@@ -27,9 +27,11 @@ static jet_ast_node* jet_ast_node_lit_parse(jet_ast* ast);
 static jet_ast_node* jet_ast_node_func_parse(jet_ast* ast);
 static jet_ast_node* jet_ast_node_tdecl_parse(jet_ast* ast);
 static jet_ast_node* jet_ast_node_ident_parse(jet_ast* ast);
-static jet_ast_node* jet_ast_node_ctrl_stmt_parse(jet_ast* ast);
 static jet_ast_node* jet_ast_node_vdecl_parse(jet_ast* ast);
-static jet_ast_node* jet_ast_node_ident_from_tok_type(jet_token_type tok_type);
+
+static jet_ast_node* jet_ast_node_parse_ctrl_stmt(jet_ast* ast);
+static jet_ast_node* jet_ast_node_parse_expr(jet_ast* ast);
+static jet_ast_node* jet_ast_node_tok_value_ident(jet_token* tok);
 
 static jet_token* jet_ast_expect_tok(jet_ast* ast, jet_token_type tok_type);
 static jet_token* jet_ast_peek_tok(jet_ast* ast);
@@ -158,7 +160,7 @@ static jet_ast_node* jet_ast_get_next_node(jet_ast* ast)
         case TOK_KWD_WHILE:
         case TOK_KWD_FOR:
         case TOK_KWD_RETURN:
-            node = jet_ast_node_ctrl_stmt_parse(ast);
+            node = jet_ast_node_parse_ctrl_stmt(ast);
             break;
         case TOK_KWD_CHAR : 
         case TOK_KWD_VOID : 
@@ -239,13 +241,13 @@ static jet_ast_node* jet_ast_node_func_parse(jet_ast* ast)
 static jet_ast_node* jet_ast_node_tdecl_parse(jet_ast* ast)
 {
     jet_token* type_tok = jet_ast_consume_tok(ast);
-    jet_ast_node* type_ident = jet_ast_node_ident_from_tok_type(type_tok->type)
+    jet_ast_node* type_ident = jet_ast_node_tok_value_ident(type_tok);
     if(!type_ident)
     {
         fprintf(stderr, "errro: type is not recognized.\n");
         return NULL;
     }
-    size_t byte_size = jet_ast_get_type_bytesize(type_tok->type);
+    size_t byte_size = jet_ast_get_type_byte_size(type_tok->type);
     bool is_native = true;
     jet_ast_node_type_decl* type_decl = jet_astn_tdecl_create(type_ident, byte_size, is_native);
     jet_ast_node* binding_ident = jet_ast_expect_tok(ast, TOK_IDENT);
@@ -254,6 +256,9 @@ static jet_ast_node* jet_ast_node_tdecl_parse(jet_ast* ast)
     jet_ast_node* out_node = NULL;
     switch(after_ident->type)
     {
+        default:
+            fprintf(stderr, "errro: invalid type decl.\n");
+            return NULL;
         //VAR_DECL
         case TOK_SEMI:
             jet_ast_consume_tok(ast);
@@ -277,14 +282,29 @@ static jet_ast_node* jet_ast_node_ident_parse(jet_ast* ast)
     return NULL;
 }
 
-static jet_ast_node* jet_ast_node_ctrl_stmt_parse(jet_ast* ast)
+static jet_ast_node* jet_ast_node_vdecl_parse(jet_ast* ast)
 {
     return NULL;
 }
 
-static jet_ast_node* jet_ast_node_vdecl_parse(jet_ast* ast)
+
+static jet_ast_node* jet_ast_node_parse_ctrl_stmt(jet_ast* ast)
 {
     return NULL;
+}
+
+static jet_ast_node* jet_ast_node_parse_expr(jet_ast* ast)
+{
+    return NULL;
+}
+
+static jet_ast_node* jet_ast_node_tok_value_ident(jet_token* tok)
+{
+    jet_ast_node_ident* ident = jet_astn_ident_create(tok->source + tok->origin, tok->len);
+    assert(ident != NULL);
+    jet_ast_node* out_node = jet_ast_node_create_base(AST_IDENT);
+    out_node->as.ident = ident;
+    return out_node;
 }
 
 static void jet_ast_add_top_node(jet_ast* ast, jet_ast_node* node)
@@ -350,35 +370,12 @@ static jet_token* jet_ast_consume_tok(jet_ast* ast)
         puts("end of token-list reached.");
         return NULL;
     }
-    
     ast->tok_cursor++;
     return (jet_token*)jet_list_get(ast->tok_list , ast->tok_cursor - 1);
 }
 
-static jet_ast_node* jet_ast_node_ident_from_tok_type(jet_token_type tok_type)
-{
-    switch(tok_type)
-    {
-        default:
-            fprintf(stderr, "wrn: token type doesnt have built native identifier.\n");
-            return NULL;
-        case TOK_KWD_VOID:V
-            return jet_astn_ident_create("void");
-        case TOK_KWD_INT:
-            return jet_astn_ident_create("int");
-        case TOK_KWD_FLOAT:
-            return jet_astn_ident_create("float");
-        case TOK_KWD_BOOL:
-            return jet_astn_ident_create("bool");
-        case TOK_KWD_CHAR:
-            return jet_astn_ident_create("char");
-        case TOK_KWD_STR:
-            return jet_astn_ident_create("str");
-
-    }
-}
     
-static size_t jet_ast_get_type_bytesize(jet_token_type tok_type)
+static size_t jet_ast_get_type_byte_size(jet_token_type tok_type)
 {
     switch(tok_type)
     {

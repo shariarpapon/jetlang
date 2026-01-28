@@ -16,6 +16,20 @@ jet_ast_node_prog*
     return prog;
 }
 
+jet_ast_node_mem* jet_astn_mem_create(size_t alloc_size)
+{
+    if(alloc_size == 0)
+    {
+
+        fprintf(stderr, "error: attempting to allocate zero bytes.\n");
+        return NULL;
+    }
+    jet_ast_node_mem* mem = (jet_ast_node_mem*)malloc(sizeof(jet_ast_node_mem));
+    assert(mem != NULL);
+    mem->alloc_size = alloc_size;
+    return mem;
+}
+
 jet_ast_node_block* 
    jet_astn_block_create(jet_list* node_list) 
 { 
@@ -27,12 +41,13 @@ jet_ast_node_block*
 }
 
 jet_ast_node_ident* 
-   jet_astn_ident_create(const char* str)
+   jet_astn_ident_create(const char* start, size_t len)
 {
-    assert(str != NULL);
+    assert(start != NULL);
     jet_ast_node_ident* ident = (jet_ast_node_ident*)malloc(sizeof(jet_ast_node_ident));
     assert(ident != NULL);
-    ident->str = str;
+    ident->start = start;
+    ident->len = len;
     return ident;
 }
 

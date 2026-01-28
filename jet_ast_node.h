@@ -11,9 +11,15 @@ typedef struct jet_ast_node_prog
   jet_ast_node* block;
 } jet_ast_node_prog;
 
+typedef struct jet_ast_node_mem
+{
+    size_t alloc_size;
+} jet_ast_node_mem;
+
 typedef struct jet_ast_node_ident
 {
-  const char* str;
+  const char* start;
+  size_t len;
 } jet_ast_node_ident;
  
 typedef struct jet_ast_node_lit
