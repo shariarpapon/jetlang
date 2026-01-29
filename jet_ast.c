@@ -240,55 +240,85 @@ static jet_ast_node* jet_ast_node_func_parse(jet_ast* ast)
 
 static jet_ast_node* jet_ast_node_tdecl_parse(jet_ast* ast)
 {
-    jet_token* type_tok = jet_ast_consume_tok(ast);
-    jet_ast_node* type_ident = jet_ast_node_tok_value_ident(type_tok);
+    //add multi return support
+    jet_token* tdecl_tok = jet_ast_consume_tok(ast);
+    jet_ast_node* type_ident = jet_ast_node_tok_value_ident(tdecl_tok);
     if(!type_ident)
     {
         fprintf(stderr, "errro: type is not recognized, make sure all files are binded.\n");
         return NULL;
     }
-    size_t byte_size = jet_ast_get_type_byte_size(type_tok->type);
-    bool is_native = true;
-    jet_ast_node_type_decl* type_decl = jet_astn_tdecl_create(type_ident, byte_size, is_native);
-    jet_token* binding_ident_tok = jet_ast_expect_tok(ast, TOK_IDENT);
 
+    //declare
+    //declared type_decl info
+    size_t byte_size = jet_ast_get_type_byte_size(tdecl_tok->type);
+    bool is_native = true;
+
+    jet_ast_node_type_decl* tdecl = jet_astn_tdecl_create(type_ident, byte_size, is_native);
+    jet_ast_node* tdecl_node = jet_ast_node_create_base(AST_TYPE_DECL);
+    tdecl_node->as.type_decl = tdecl;
+
+    jet_ast_node* binding_ident = jet_ast_node_ident_parse(ast);
     jet_token* after_ident = jet_ast_peek_tok(ast);
-    jet_ast_node* out_node = NULL;
+
+    jet_ast_node* vdecl_node = NULL;
+    jet_ast_node_var_decl* vdecl = NULL;
+
+    if(after_ident == NULL)
+    {
+        fprintf(stderr, "error: incomplete type decl, expected one or more tokens after identifier.\n");
+        return NULL;
+    }
     switch(after_ident->type)
     {
         default:
             fprintf(stderr, "error: expected ';', '=' or '(' after type-decleration.\n");
             return NULL;
         case TOK_SEMI:
-            //VAR_DECL
             jet_ast_consume_tok(ast);
-            out_node = jet_astn_vdecl_create(binding_ident, type_decl, NULL);
-            break;
+            vdecl = jet_astn_vdecl_create(binding_ident, tdecl_node, NULL);
+            vdecl_node = jet_ast_node_create_base(AST_VAR_DECL);
+            vdecl_node->as.var_decl = vdecl;
+            return vdecl_node;
         case TOK_EQ:
             jet_ast_consume_tok(ast);
             jet_ast_node* init_value = jet_ast_node_parse_expr(ast);
-            out_node = jet_astn_vdecl_create(binding_ident, type_decl, init_value);
-            break;
+            vdecl = jet_astn_vdecl_create(binding_ident, tdecl_node, init_value);
+            vdecl_node = jet_ast_node_create_base(AST_VAR_DECL);
+            vdecl_node->as.var_decl = vdecl;
+            return vdecl_node;
         case TOK_LPAR:
             //FUNC_DECL
-            bool has_def = false;
-            jet_list* param_node_list = jet_ast_node_func_parse_params(ast, &has_def);
-            break;
-    }
+            bool is_defined = false;
+            jet_list* params_list = jet_ast_node_func_parse_params(ast, &is_defined);   
+            if(!is_defined)
+            {
+                //TODO: add multi return type, support currently its supports only 1 return type.
+                jet_list* ret_type_list = jet_list_create(1, sizeof(jet_ast_node)); 
+                jet_list_append(ret_type_list, tdecl_node);
 
-    return out_node; 
+                jet_ast_node_func_decl* fdecl = jet_astn_fdecl_create(binding_ident, ret_type_list, params_list);
+                jet_ast_node* fdecl_node = jet_ast_node_create_base(AST_FUNC_DECL);
+                fdecl_node->as.func_decl = fdecl;
+                return fdecl_node;
+            }
+
+            return NULL;
+    }
 }
 
 static jet_ast_node* jet_ast_node_ident_parse(jet_ast* ast)
 {
-    return NULL;
+    jet_token* ident_tok = jet_ast_expect_tok(ast, TOK_IDENT);
+    jet_ast_node_ident* ident = jet_astn_ident_create(ident_tok->source + ident_tok->origin, ident_tok->len);
+    jet_ast_node* ident_node = jet_ast_node_create_base(AST_IDENT);
+    ident_node->as.ident = ident;
+    return ident_node;
 }
 
 static jet_ast_node* jet_ast_node_vdecl_parse(jet_ast* ast)
 {
-    return NULL;
 }
-
 
 static jet_ast_node* jet_ast_node_parse_ctrl_stmt(jet_ast* ast)
 {
