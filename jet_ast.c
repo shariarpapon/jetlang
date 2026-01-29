@@ -250,16 +250,16 @@ static jet_ast_node* jet_ast_node_tdecl_parse(jet_ast* ast)
 
     jet_ast_node* tdecl = jet_astn_tdecl_create(type_ident, byte_size, is_native);
     jet_ast_node* binding_ident = jet_ast_node_ident_parse(ast);
-    jet_token* after_ident = jet_ast_peek_tok(ast);
+    jet_token* tok_after_ident = jet_ast_peek_tok(ast);
 
     jet_ast_node* vdecl = NULL;
 
-    if(after_ident == NULL)
+    if(tok_after_ident == NULL)
     {
         fprintf(stderr, "error: incomplete type decl, expected one or more tokens after identifier.\n");
         return NULL;
     }
-    switch(after_ident->type)
+    switch(tok_after_ident->type)
     {
         default:
             fprintf(stderr, "error: expected ';', '=' or '(' after type-decleration.\n");
@@ -277,16 +277,17 @@ static jet_ast_node* jet_ast_node_tdecl_parse(jet_ast* ast)
             //FUNC_DECL
             bool is_defined = false;
             jet_list* params_list = jet_ast_node_func_parse_params(ast, &is_defined);   
+            
+            jet_list* ret_type_list = jet_list_create(1, sizeof(jet_ast_node)); 
+            jet_list_append(ret_type_list, tdecl);
+            jet_ast_node* fdecl = jet_astn_fdecl_create(binding_ident, ret_type_list, params_list); 
             if(!is_defined)
             {
-                //TODO: add multi return type, support currently its supports only 1 return type.
-                jet_list* ret_type_list = jet_list_create(1, sizeof(jet_ast_node)); 
-                jet_list_append(ret_type_list, tdecl);
-                jet_ast_node* fdecl = jet_astn_fdecl_create(binding_ident, ret_type_list, params_list);
                 return fdecl;
             }
-
-            return NULL;
+            jet_ast_node* block = jet_ast_node_block_parse(ast);
+            jet_ast_node* fdef = jet_astn_fdef_create(fdecl, block);
+            return fdef;
     }
 }
 
