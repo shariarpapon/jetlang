@@ -90,6 +90,7 @@ struct jet_ast_node
     union
     {
         jet_ast_node_prog* prog;
+        jet_ast_node_mem* mem;
         jet_ast_node_ident* ident;
         jet_ast_node_lit* lit;
         jet_ast_node_block* block; 

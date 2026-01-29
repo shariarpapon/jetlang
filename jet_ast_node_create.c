@@ -6,17 +6,20 @@
 #include <stdio.h>
 #include <string.h>
 
-jet_ast_node_prog* 
+jet_ast_node* 
    jet_astn_prog_create(jet_ast_node* block) 
 {  
     assert(block != NULL);
     jet_ast_node_prog* prog = (jet_ast_node_prog*)malloc(sizeof(jet_ast_node_prog));
     assert(prog != NULL);
     prog->block = block;
-    return prog;
+    jet_ast_node* node = jet_ast_node_create_base(AST_PROG);
+    assert(node != NULL);
+    node->as.prog = prog;
+    return node;
 }
 
-jet_ast_node_mem* jet_astn_mem_create(size_t alloc_size)
+jet_ast_node* jet_astn_mem_create(size_t alloc_size)
 {
     if(alloc_size == 0)
     {
@@ -27,20 +30,27 @@ jet_ast_node_mem* jet_astn_mem_create(size_t alloc_size)
     jet_ast_node_mem* mem = (jet_ast_node_mem*)malloc(sizeof(jet_ast_node_mem));
     assert(mem != NULL);
     mem->alloc_size = alloc_size;
-    return mem;
+    jet_ast_node* node = jet_ast_node_create_base(AST_MEM);
+    assert(node != NULL);
+    node->as.mem = mem;
+    return node;
 }
 
-jet_ast_node_block* 
+jet_ast_node* 
    jet_astn_block_create(jet_list* node_list) 
 { 
     assert(node_list != NULL);
     jet_ast_node_block* block = (jet_ast_node_block*)malloc(sizeof(jet_ast_node_block));
     assert(block != NULL);    
     block->node_list = node_list;
-    return block;
+    
+    jet_ast_node* node = jet_ast_node_create_base(AST_BLOCK);
+    assert(node != NULL);
+    node->as.block = block;
+    return node;
 }
 
-jet_ast_node_ident* 
+jet_ast_node* 
    jet_astn_ident_create(const char* start, size_t len)
 {
     assert(start != NULL);
@@ -48,11 +58,15 @@ jet_ast_node_ident*
     assert(ident != NULL);
     ident->start = start;
     ident->len = len;
-    return ident;
+    
+    jet_ast_node* node = jet_ast_node_create_base(AST_IDENT);
+    assert(node != NULL);
+    node->as.ident = ident;
+    return node;
 }
 
 
-jet_ast_node_lit* 
+jet_ast_node* 
    jet_astn_lit_create(jet_token* tok) 
 {
     assert(tok != NULL);
@@ -75,11 +89,14 @@ jet_ast_node_lit*
                  sub[tok->len] = '\0';
                  break;
     }
-    return lit;
+    jet_ast_node* node = jet_ast_node_create_base(AST_LIT);
+    assert(node != NULL);
+    node->as.lit = lit;
+    return node;
 }
 
 
-jet_ast_node_var_ref* 
+jet_ast_node* 
    jet_astn_vref_create(jet_ast_node* var_binding_ident) 
 {
     assert(var_binding_ident != NULL);
@@ -87,10 +104,14 @@ jet_ast_node_var_ref*
         (jet_ast_node_var_ref*)malloc(sizeof(jet_ast_node_var_ref));
     assert(vref != NULL);
     vref -> var_binding_ident = var_binding_ident;
-    return vref;
+    
+    jet_ast_node* node = jet_ast_node_create_base(AST_VAR_REF);
+    assert(node != NULL);
+    node->as.var_ref = vref;
+    return node;
 }
 
-jet_ast_node_var_decl* 
+jet_ast_node* 
    jet_astn_vdecl_create(
       jet_ast_node* binding_ident, 
       jet_ast_node* type_decl, 
@@ -103,10 +124,14 @@ jet_ast_node_var_decl*
     vdecl->binding_ident = binding_ident;
     vdecl->type_decl = type_decl;
     vdecl->init_value = init_value;
-    return vdecl;
+    
+    jet_ast_node* node = jet_ast_node_create_base(AST_VAR_DECL);
+    assert(node != NULL);
+    node->as.var_decl = vdecl;
+    return node;
 }
 
-jet_ast_node_type_decl*
+jet_ast_node*
    jet_astn_tdecl_create(
       jet_ast_node* type_ident, 
       size_t byte_size, 
@@ -118,10 +143,14 @@ jet_ast_node_type_decl*
     assert(tdecl != NULL);
     tdecl->type_ident = type_ident;
     tdecl->byte_size = byte_size;
-    return tdecl;
+    
+    jet_ast_node* node = jet_ast_node_create_base(AST_TYPE_DECL);
+    assert(node != NULL);
+    node->as.type_decl = tdecl;
+    return node;
 }
 
-jet_ast_node_func_decl* 
+jet_ast_node* 
    jet_astn_fdecl_create(
       jet_ast_node* binding_ident,
       jet_list* ret_type_decls,
@@ -133,10 +162,14 @@ jet_ast_node_func_decl*
     fdecl->binding_ident = binding_ident;
     fdecl->ret_type_decls = ret_type_decls;
     fdecl->param_var_decls = param_var_decls;
-    return fdecl;
+    
+    jet_ast_node* node = jet_ast_node_create_base(AST_FUNC_DECL);
+    assert(node != NULL);
+    node->as.func_decl = fdecl;
+    return node;
 }
 
-jet_ast_node_func_def* 
+jet_ast_node* 
    jet_astn_fdef_create(
       jet_ast_node* func_decl, 
       jet_ast_node* block) 
@@ -147,10 +180,14 @@ jet_ast_node_func_def*
     assert(fdef != NULL);
     fdef->func_decl = func_decl;
     fdef->block = block;
-    return fdef;
+    
+    jet_ast_node* node = jet_ast_node_create_base(AST_FUNC_DEF);
+    assert(node != NULL);
+    node->as.func_def = fdef;
+    return node;
 }
 
-jet_ast_node_func_call* 
+jet_ast_node* 
    jet_astn_fcall_create(
       jet_ast_node* func_binding_ident, 
       jet_list* arg_nodes) 
@@ -159,7 +196,11 @@ jet_ast_node_func_call*
     jet_ast_node_func_call* fcall = 
         (jet_ast_node_func_call*)malloc(sizeof(jet_ast_node_func_call));
     assert(fcall != NULL);
-    return fcall;
+
+    jet_ast_node* node = jet_ast_node_create_base(AST_FUNC_CALL);
+    assert(node != NULL);
+    node->as.func_call = fcall;
+    return node;
 }
 
 
