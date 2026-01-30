@@ -80,10 +80,10 @@ const char* jet_token_type_str(jet_token_type type)
         case TOK_KWD_BREAK: return "TOK_KWD_BREAK";
         case TOK_KWD_RETURN:return "TOK_KWD_RETURN";
         
-        case TOK_INT_LIT:   return "TOK_INT_LIT";
-        case TOK_FLOAT_LIT: return "TOK_FLOAT_LIT";
-        case TOK_STR_LIT:   return "TOK_STR_LIT";
-        case TOK_CHAR_LIT:  return "TOK_CHAR_LIT";
+        case TOK_LIT_INT:   return "TOK_LIT_INT";
+        case TOK_LIT_FLOAT: return "TOK_LIT_FLOAT";
+        case TOK_LIT_STR:   return "TOK_LIT_STR";
+        case TOK_LIT_CHAR:  return "TOK_LIT_CHAR";
         case TOK_BCOM:      return "TOK_BCOM";
         case TOK_LCOM:      return "TOK_LCOM";
         

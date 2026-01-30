@@ -309,7 +309,7 @@ static bool jet_lexer_try_scan_str_lit(jet_lexer* lexer)
         
         if(jet_lexer_peek(lexer) == STRING_QUOTE && !escaped)
         {
-            jet_lexer_emit_token(lexer, origin, lexer->cursor - origin, TOK_STR_LIT);
+            jet_lexer_emit_token(lexer, origin, lexer->cursor - origin, TOK_LIT_STR);
             jet_lexer_consume(lexer);
             return true;
         }
@@ -352,7 +352,7 @@ static bool jet_lexer_try_scan_num_lit(jet_lexer* lexer)
         else break;
 
     }
-    jet_token_type tok_type = float_flag ? TOK_FLOAT_LIT : TOK_INT_LIT;
+    jet_token_type tok_type = float_flag ? TOK_LIT_FLOAT : TOK_LIT_INT;
     jet_lexer_emit_token(lexer, origin, lexer->cursor - origin, tok_type);
     return true;
 }
@@ -366,7 +366,7 @@ static bool jet_lexer_try_scan_char_lit(jet_lexer* lexer)
     if(jet_lexer_peek_next(lexer) != CHAR_QUOTE) 
         return false;
 
-    jet_lexer_emit_token(lexer, lexer->cursor, 1, TOK_CHAR_LIT);
+    jet_lexer_emit_token(lexer, lexer->cursor, 1, TOK_LIT_CHAR);
     jet_lexer_consume(lexer);
     jet_lexer_consume(lexer);
     return true;

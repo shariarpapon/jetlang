@@ -77,12 +77,12 @@ jet_ast_node*
     switch(tok->type)
     {
         default: lit->as.v            = NULL; break;
-        case TOK_INT_LIT:   lit->as.i = jet_conv_stoi(tok->source + tok->origin, tok->len); break; 
-        case TOK_FLOAT_LIT: lit->as.f = jet_conv_stof(tok->source + tok->origin, tok->len);  break; 
+        case TOK_LIT_INT:   lit->as.i = jet_conv_stoi(tok->source + tok->origin, tok->len); break; 
+        case TOK_LIT_FLOAT: lit->as.f = jet_conv_stof(tok->source + tok->origin, tok->len);  break; 
         case TOK_KWD_TRUE:  lit->as.b = true; break;
         case TOK_KWD_FALSE: lit->as.b = false; break;
-        case TOK_CHAR_LIT:  lit->as.c = *(tok->source + tok->origin); break; 
-        case TOK_STR_LIT:
+        case TOK_LIT_CHAR:  lit->as.c = *(tok->source + tok->origin); break; 
+        case TOK_LIT_STR:
                  char* sub = (char*)malloc((tok->len + 1) * sizeof(char));
                  assert(sub != NULL);
                  memcpy(sub, tok->source + tok->origin, tok->len);

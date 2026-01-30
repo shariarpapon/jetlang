@@ -38,6 +38,37 @@ static jet_token* jet_ast_peek_tok(jet_ast* ast);
 static jet_token* jet_ast_peek_next_tok(jet_ast* ast);
 static jet_token* jet_ast_consume_tok(jet_ast* ast);
 
+static size_t jet_ast_get_op_prec(jet_token_type op_type)
+{
+    switch(op_type) {
+        case TOK_DOT: return 15;
+        case TOK_NOT: return 14;
+        
+        case TOK_STAR:
+        case TOK_SLASH:
+        case TOK_MOD: return 13;
+        
+        case TOK_PLUS:
+        case TOK_MINUS: return 12;
+        
+        case TOK_SHL:
+        case TOK_SHR: return 11;
+        
+        case TOK_BAND: return 10;
+        case TOK_BOR: return 9;
+        case TOK_AND: return 8;
+        case TOK_OR: return 7;
+        
+        case TOK_GTE:
+        case TOK_LTE:
+        case TOK_GT:
+        case TOK_LT: return 6;
+        
+        default: return 0; // not an operator
+    }
+}
+
+
 jet_ast* jet_ast_create(jet_list* tok_list)
 {    
     if(!tok_list)
@@ -174,10 +205,10 @@ static jet_ast_node* jet_ast_get_next_node(jet_ast* ast)
         case TOK_KWD_NULL:
         case TOK_KWD_TRUE:
         case TOK_KWD_FALSE:
-        case TOK_INT_LIT:
-        case TOK_FLOAT_LIT:
-        case TOK_CHAR_LIT:
-        case TOK_STR_LIT:
+        case TOK_LIT_INT:
+        case TOK_LIT_FLOAT:
+        case TOK_LIT_CHAR:
+        case TOK_LIT_STR:
             node = jet_ast_node_lit_parse(ast);
             break;
         case TOK_IDENT:
@@ -274,10 +305,9 @@ static jet_ast_node* jet_ast_node_tdecl_parse(jet_ast* ast)
             vdecl = jet_astn_vdecl_create(binding_ident, tdecl, init_value);
             return vdecl;
         case TOK_LPAR:
-            //FUNC_DECL
             bool is_defined = false;
             jet_list* params_list = jet_ast_node_func_parse_params(ast, &is_defined);   
-            
+
             jet_list* ret_type_list = jet_list_create(1, sizeof(jet_ast_node)); 
             jet_list_append(ret_type_list, tdecl);
             jet_ast_node* fdecl = jet_astn_fdecl_create(binding_ident, ret_type_list, params_list); 
@@ -310,16 +340,64 @@ static jet_ast_node* jet_ast_node_parse_ctrl_stmt(jet_ast* ast)
 
 static jet_ast_node* jet_ast_node_parse_expr(jet_ast* ast)
 {
-    return NULL;
+    /* schema
+     *  - int i = TOK_IDENT  + 42
+     *  - int i = TOK_LIT_INT + 42
+     *  - int i = TOK_MINUS 42 + ident
+     *  - int i = TOK_LPAR ident) + 42
+     *  - bool b = TOK_NOT ident
+     *  - bool b = TOK_KWD_TRUE
+     *  - str s = TOK_LIT_STR
+     *  - char c = TOK_LIT_CHAR
+     *
+     *  potential starts: 
+     *      TOK_IDENT
+     *      TOK_LIT_*
+     *      TOK_MINUS
+     *      TOK_NOT
+     *      TOK_LPAR
+     *      
+     *  ending:
+     *      TOK_SEMI
+     * */
+    jet_token* tok = jet_ast_peek_tok(ast);
+    if(tok == NULL)
+    {
+        printf("wrn: cannot parse expr, no tokens to peek.\n");
+        return NULL;
+    }
+
+    size_t op_prec = jet_ast_get_op_prec(tok->type);
+    if(op_prec == 0)
+    {
+        fprintf(stderr, "wrn: token is not an operator.\n");
+        return NULL;
+    }
+    switch(tok->type)
+    {
+        default:
+            fprintf(stderr, "unexpected token, could not parse expression.\n");
+            return NULL;
+        case TOK_IDENT:
+        case TOK_LIT_INT:
+        case TOK_LIT_FLOAT:
+        case TOK_LIT_STR:
+        case TOK_LIT_CHAR:
+        case TOK_KWD_TRUE:
+        case TOK_KWD_FALSE:
+        case TOK_LPAR:
+        case TOK_NOT:
+        case TOK_MINUS:
+    }
 }
 
 static jet_list* jet_ast_node_func_parse_params(jet_ast* ast, bool* out_defines_func)
 {
     jet_list* list = jet_list_create(4, sizeof(jet_ast_node));
     assert(list != NULL);
-    
+
     //TODO: populate params
-    
+
     if(out_defines_func)
     {
         jet_token* tok = jet_ast_peek_tok(ast);
