@@ -6,6 +6,7 @@
 #include <jet_ast.h>
 #include <jet_ast_node.h>
 #include <jet_ast_node_create.h>
+#include <jet_ast_op_prec.h>
 
 struct jet_ast 
 {
@@ -41,29 +42,41 @@ static jet_token* jet_ast_consume_tok(jet_ast* ast);
 static size_t jet_ast_get_op_prec(jet_token_type op_type)
 {
     switch(op_type) {
-        case TOK_DOT: return 15;
-        case TOK_NOT: return 14;
+        case TOK_DOT: return PREC_POSTFIX;
+        case TOK_NOT: return PREC_PREFIX;
         
         case TOK_STAR:
         case TOK_SLASH:
-        case TOK_MOD: return 13;
+        case TOK_MOD: return PREC_MULT;
         
         case TOK_PLUS:
-        case TOK_MINUS: return 12;
+        case TOK_MINUS: return PREC_ADDITIVE;
         
         case TOK_SHL:
-        case TOK_SHR: return 11;
+        case TOK_SHR: return PREC_BIT_SHIFT;
         
-        case TOK_BAND: return 10;
-        case TOK_BOR: return 9;
-        case TOK_AND: return 8;
-        case TOK_OR: return 7;
+        case TOK_BAND: return PREC_BAND;
+        case TOK_BOR: return PREC_BOR;
+        case TOK_AND: return PREC_AND;
+        case TOK_OR: return PREC_OR;
         
         case TOK_GTE:
         case TOK_LTE:
         case TOK_GT:
-        case TOK_LT: return 6;
+        case TOK_LT: return PREC_RELATIONAL;
+
+        case TOK_PLSUEQ:
+        case TOK_MINEQ:
+        case TOK_MULEQ:
+        case TOK_DIVEQ:
+        case TOK_MODEQ:
+        case TOK_XOREQ:
+        case TOK_BANDEQ:
+        case TOK_BOREQ: return PREC_ASG;
         
+        case TOK_POW: return PREC_POW;
+
+
         default: return 0; // not an operator
     }
 }

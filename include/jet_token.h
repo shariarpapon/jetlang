@@ -28,13 +28,13 @@ typedef enum
     TOK_KWD_RETURN, // perform: return to last caller address
     TOK_KWD_BREAK,  // perform: break out of loops
 
-    TOK_KWD_NULL = 1000, // placeholder asignment
-    TOK_KWD_TRUE = 2000, // boolean value: true
-    TOK_KWD_FALSE = 3000,// boolean value: false
-    TOK_LIT_INT = 4000,   // 0..9 (numeric literal)
-    TOK_LIT_FLOAT = 5000,  // decimal point numbers (e.g. 3.1415)
-    TOK_LIT_STR = 6000,   // "string literal"
-    TOK_LIT_CHAR = 7000,  // 'a'
+    TOK_KWD_NULL, // placeholder asignment
+    TOK_KWD_TRUE, // boolean value: true
+    TOK_KWD_FALSE,// boolean value: false
+    TOK_LIT_INT,   // 0..9 (numeric literal)
+    TOK_LIT_FLOAT,  // decimal point numbers (e.g. 3.1415)
+    TOK_LIT_STR,   // "string literal"
+    TOK_LIT_CHAR,  // 'a'
 
     TOK_BCOM,      // /*block comment*/
     TOK_LCOM,      // //line comment
@@ -56,9 +56,6 @@ typedef enum
     
     TOK_SHL,       // <<
     TOK_SHR,       // >>
-    TOK_BANDEQ,    // &=
-    TOK_BOREQ,     // |=
-    TOK_XOREQ,     // ^=
 
     //Arithmetic operators
     TOK_PLUS,       // + 
@@ -72,6 +69,9 @@ typedef enum
     TOK_MULEQ,      // *=
     TOK_DIVEQ,      // /=
     TOK_MODEQ,      // %=
+    TOK_BANDEQ,    // &=
+    TOK_BOREQ,     // |=
+    TOK_XOREQ,     // ^=
     TOK_POW,        // **
     TOK_INCR,       // ++
     TOK_DECR,       // --
