@@ -32,6 +32,7 @@ static jet_ast_node* jet_ast_node_vdecl_parse(jet_ast* ast);
 static jet_list* jet_ast_node_func_parse_params(jet_ast* ast, bool* out_defines_func);
 static jet_ast_node* jet_ast_node_parse_ctrl_stmt(jet_ast* ast);
 static jet_ast_node* jet_ast_node_parse_expr(jet_ast* ast);
+static jet_ast_node* jet_ast_node_parse_primary(jet_ast* ast);
 static jet_ast_node* jet_ast_node_tok_value_ident(jet_token* tok);
 
 static jet_token* jet_ast_expect_tok(jet_ast* ast, jet_token_type tok_type);
@@ -42,6 +43,9 @@ static jet_token* jet_ast_consume_tok(jet_ast* ast);
 static size_t jet_ast_get_op_prec(jet_token_type op_type)
 {
     switch(op_type) {
+
+        case TOK_INCR:
+        case TOK_DECR:
         case TOK_DOT: return PREC_POSTFIX;
         case TOK_NOT: return PREC_PREFIX;
         
@@ -312,7 +316,7 @@ static jet_ast_node* jet_ast_node_tdecl_parse(jet_ast* ast)
             jet_ast_consume_tok(ast);
             vdecl = jet_astn_vdecl_create(binding_ident, tdecl, NULL);
             return vdecl;
-        case TOK_EQ:
+        case TOK_ASG:
             jet_ast_consume_tok(ast);
             jet_ast_node* init_value = jet_ast_node_parse_expr(ast);
             vdecl = jet_astn_vdecl_create(binding_ident, tdecl, init_value);
@@ -402,6 +406,12 @@ static jet_ast_node* jet_ast_node_parse_expr(jet_ast* ast)
         case TOK_NOT:
         case TOK_MINUS:
     }
+}
+
+
+static jet_ast_node* jet_ast_node_parse_primary(jet_ast* ast)
+{
+    
 }
 
 static jet_list* jet_ast_node_func_parse_params(jet_ast* ast, bool* out_defines_func)
