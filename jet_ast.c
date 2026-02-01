@@ -31,7 +31,7 @@ static jet_ast_node* jet_ast_node_vdecl_parse(jet_ast* ast);
 
 static jet_list* jet_ast_node_func_parse_params(jet_ast* ast, bool* out_defines_func);
 static jet_ast_node* jet_ast_node_parse_ctrl_stmt(jet_ast* ast);
-static jet_ast_node* jet_ast_node_parse_expr(jet_ast* ast);
+static jet_ast_node* jet_ast_node_parse_expr(jet_ast* ast, size_t min_prec);
 static jet_ast_node* jet_ast_node_parse_primary(jet_ast* ast);
 static jet_ast_node* jet_ast_node_tok_value_ident(jet_token* tok);
 
@@ -355,7 +355,7 @@ static jet_ast_node* jet_ast_node_parse_ctrl_stmt(jet_ast* ast)
     return NULL;
 }
 
-static jet_ast_node* jet_ast_node_parse_expr(jet_ast* ast)
+static jet_ast_node* jet_ast_node_parse_expr(jet_ast* ast, size_t min_prec)
 {
     /* schema
      *  - int i = TOK_IDENT  + 42
@@ -373,41 +373,28 @@ static jet_ast_node* jet_ast_node_parse_expr(jet_ast* ast)
      *      TOK_MINUS
      *      TOK_NOT
      *      TOK_LPAR
-     *      
+     *      TOK_NOT
+     *      TOK_KWD_TRUE
+     *      TOK_KWD_FALSE
+     *
      *  ending:
      *      TOK_SEMI
      * */
-    jet_token* tok = jet_ast_peek_tok(ast);
-    if(tok == NULL)
-    {
-        printf("wrn: cannot parse expr, no tokens to peek.\n");
-        return NULL;
-    }
 
-    size_t op_prec = jet_ast_get_op_prec(tok->type);
-    if(op_prec == 0)
+    jet_ast_node* lhs_node = jet_ast_node_parse_primary(ast);
+
+    while(1)
     {
-        fprintf(stderr, "wrn: token is not an operator.\n");
-        return NULL;
-    }
-    switch(tok->type)
-    {
-        default:
-            fprintf(stderr, "unexpected token, could not parse expression.\n");
-            return NULL;
-        case TOK_IDENT:
-        case TOK_LIT_INT:
-        case TOK_LIT_FLOAT:
-        case TOK_LIT_STR:
-        case TOK_LIT_CHAR:
-        case TOK_KWD_TRUE:
-        case TOK_KWD_FALSE:
-        case TOK_LPAR:
-        case TOK_NOT:
-        case TOK_MINUS:
+        jet_token* op_tok = jet_ast_peek_tok(ast);
+        size_t op_prec = jet_ast_get_op_prec(op_tok->type);
+        if(op_prec == 0)
+            break;
+        if(op_prec < min_prec)
+            break;
+        jet_ast_consume_tok(ast);
+        
     }
 }
-
 
 static jet_ast_node* jet_ast_node_parse_primary(jet_ast* ast)
 {
