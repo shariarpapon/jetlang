@@ -69,7 +69,7 @@ static size_t jet_ast_get_op_prec(jet_token_type op_type)
         case TOK_GT:
         case TOK_LT: return PREC_RELATIONAL;
 
-        case TOK_PLSUEQ:
+        case TOK_PLUSEQ:
         case TOK_MINEQ:
         case TOK_MULEQ:
         case TOK_DIVEQ:
@@ -318,7 +318,7 @@ static jet_ast_node* jet_ast_node_tdecl_parse(jet_ast* ast)
             return vdecl;
         case TOK_ASG:
             jet_ast_consume_tok(ast);
-            jet_ast_node* init_value = jet_ast_node_parse_expr(ast);
+            jet_ast_node* init_value = jet_ast_node_parse_expr(ast, 0);
             vdecl = jet_astn_vdecl_create(binding_ident, tdecl, init_value);
             return vdecl;
         case TOK_LPAR:
@@ -392,13 +392,15 @@ static jet_ast_node* jet_ast_node_parse_expr(jet_ast* ast, size_t min_prec)
         if(op_prec < min_prec)
             break;
         jet_ast_consume_tok(ast);
-        
+        jet_ast_node* rhs_node = jet_ast_node_parse_expr(ast, op_prec + 1);        
+        //create binop and resign too lhs
     }
+    return NULL;
 }
 
 static jet_ast_node* jet_ast_node_parse_primary(jet_ast* ast)
 {
-    
+   return NULL;
 }
 
 static jet_list* jet_ast_node_func_parse_params(jet_ast* ast, bool* out_defines_func)

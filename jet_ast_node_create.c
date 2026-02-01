@@ -141,6 +141,7 @@ jet_ast_node*
     jet_ast_node_type_decl* tdecl = 
         (jet_ast_node_type_decl*)malloc(sizeof(jet_ast_node_type_decl));
     assert(tdecl != NULL);
+    
     tdecl->type_ident = type_ident;
     tdecl->byte_size = byte_size;
     
@@ -159,6 +160,7 @@ jet_ast_node*
     jet_ast_node_func_decl* fdecl = 
         (jet_ast_node_func_decl*)malloc(sizeof(jet_ast_node_func_decl));
     assert(fdecl != NULL);
+    
     fdecl->binding_ident = binding_ident;
     fdecl->ret_type_decls = ret_type_decls;
     fdecl->param_var_decls = param_var_decls;
@@ -178,6 +180,7 @@ jet_ast_node*
     jet_ast_node_func_def* fdef = 
         (jet_ast_node_func_def*)malloc(sizeof(jet_ast_node_func_def));
     assert(fdef != NULL);
+    
     fdef->func_decl = func_decl;
     fdef->block = block;
     
@@ -196,6 +199,9 @@ jet_ast_node*
     jet_ast_node_func_call* fcall = 
         (jet_ast_node_func_call*)malloc(sizeof(jet_ast_node_func_call));
     assert(fcall != NULL);
+     
+    fcall->func_binding_ident = func_binding_ident;
+    fcall->arg_nodes = arg_nodes;
 
     jet_ast_node* node = jet_ast_node_create_base(AST_FUNC_CALL);
     assert(node != NULL);
@@ -204,5 +210,47 @@ jet_ast_node*
 }
 
 
+jet_ast_node* 
+    jet_astn_binop_create(
+       jet_ast_node* lhs, 
+       jet_ast_node* rhs, 
+       jet_token_type op_type)
+{
+    assert(lhs != NULL);
+    assert(rhs != NULL);
 
+    jet_ast_node_binop* binop = 
+        (jet_ast_node_binop*)malloc(sizeof(jet_ast_node_binop));
+    assert(binop != NULL);
+    
+    binop->lhs = lhs;
+    binop->rhs = rhs;
+    binop->op_type = op_type;
+
+    jet_ast_node* node = jet_ast_node_create_base(AST_BINOP);
+    assert(node != NULL);
+    
+    node->as.binop = binop;
+    return node;
+}
+
+
+jet_ast_node* 
+    jet_astn_unop_create(
+        jet_ast_node* term, 
+        jet_token_type op_type)
+{
+    assert(term != NULL);
+    jet_ast_node_unop* unop = (jet_ast_node_unop*)malloc(sizeof(jet_ast_node_unop));
+    assert(unop != NULL);
+    
+    unop->term = term;
+    unop->op_type = op_type;
+    
+    jet_ast_node* node = jet_ast_node_create_base(AST_UNOP);
+    assert(node != NULL);
+    
+    node->as.unop = unop;
+    return node;
+}
 

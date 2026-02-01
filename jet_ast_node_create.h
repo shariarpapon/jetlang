@@ -48,12 +48,16 @@ jet_ast_node*
       jet_ast_node* func_binding_ident, 
       jet_list* arg_nodes);
 
+jet_ast_node* 
+    jet_astn_binop_create(
+       jet_ast_node* lhs, 
+       jet_ast_node* rhs, 
+       jet_token_type op_type);
 
-
-
-
-
-
+jet_ast_node* 
+    jet_astn_unop_create(
+        jet_ast_node* term, 
+        jet_token_type op_type);
 
 
 

@@ -11,7 +11,7 @@
 #define PREC_BIT_SHIFT 9;   // <<  >>
 #define PREC_ADDITIVE 10;  // +  -
 #define PREC_MULT 11;  // *  /  %
-#define PREC_POWER 12;  // **      (right-assoc)
+#define PREC_POW 12;  // **      (right-assoc)
 #define PREC_PREFIX 13;  // !  ++a  --a
 #define PREC_POSTFIX 14; // a++ b--  
 

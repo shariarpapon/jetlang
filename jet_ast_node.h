@@ -1,4 +1,5 @@
 #pragma once
+#include <jet_token.h>
 #include <jet_ast_node_type.h>
 #include <jet_list.h>
 #include <stdbool.h>
@@ -83,6 +84,19 @@ typedef struct jet_ast_node_func_call
   jet_list* arg_nodes;
 } jet_ast_node_func_call;
 
+typedef struct jet_ast_node_binop
+{
+    jet_ast_node* lhs;
+    jet_ast_node* rhs;
+    jet_token_type op_type;
+} jet_ast_node_binop;
+
+typedef struct jet_ast_node_unop
+{
+    jet_ast_node* term;
+    jet_token_type op_type;
+} jet_ast_node_unop;
+
 // NODE BASE STRUCT
 struct jet_ast_node
 {
@@ -100,6 +114,8 @@ struct jet_ast_node
         jet_ast_node_func_decl* func_decl;
         jet_ast_node_func_def* func_def;
         jet_ast_node_func_call* func_call;
+        jet_ast_node_binop* binop;
+        jet_ast_node_unop* unop;
     } as;
 };
 

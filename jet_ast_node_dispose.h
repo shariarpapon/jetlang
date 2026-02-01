@@ -11,6 +11,8 @@ void jet_astn_tdecl_dispose(jet_ast_node* node);
 void jet_astn_fdecl_dispose(jet_ast_node* node);
 void jet_astn_fdef_dispose(jet_ast_node* node);
 void jet_astn_fcall_dispose(jet_ast_node* node);
+void jet_astn_binop_dispose(jet_ast_node* node);
+void jet_astn_unop_dispose(jet_ast_node* node);
 
 
 
