@@ -193,32 +193,44 @@ static jet_ast_node* jet_ast_get_next_node(jet_ast* ast)
     {
         default:
         case TOK_INV:
+        {    
             fprintf(stderr, "error: could not evaluate valid node.");
             return NULL;
+        }
         case TOK_EOF:
+        {
             printf("EOF token reached.\n");
             return NULL;
+        }
         case TOK_KWD_PROG:
+        {
             node = jet_ast_node_prog_parse(ast);
             break;
+        }
         case TOK_KWD_MEM:
+        {
             node = jet_ast_node_mem_parse(ast);
             break;
+        }
         case TOK_KWD_IF:
         case TOK_KWD_WHILE:
         case TOK_KWD_FOR:
         case TOK_KWD_RETURN:
+        {
             node = jet_ast_node_parse_ctrl_stmt(ast);
             break;
+        }
         case TOK_KWD_CHAR : 
         case TOK_KWD_VOID : 
         case TOK_KWD_INT  : 
         case TOK_KWD_FLOAT: 
         case TOK_KWD_STR  : 
         case TOK_KWD_BOOL : 
+        {
             //POTENTIAL: type_decl, func_decl, func_def
             node = jet_ast_node_tdecl_parse(ast);
             break;
+        }
         case TOK_KWD_NULL:
         case TOK_KWD_TRUE:
         case TOK_KWD_FALSE:
@@ -226,13 +238,17 @@ static jet_ast_node* jet_ast_get_next_node(jet_ast* ast)
         case TOK_LIT_FLOAT:
         case TOK_LIT_CHAR:
         case TOK_LIT_STR:
+        {
             node = jet_ast_node_lit_parse(ast);
             break;
+        }
         case TOK_IDENT:
+        {
             //POTENTIAL: func_call, var_ref, expression_component
             //possibly lit in the case of constant ref
             node = jet_ast_node_ident_parse(ast);
             break; 
+        }
     }
 
     if(node == NULL)
@@ -310,18 +326,25 @@ static jet_ast_node* jet_ast_node_tdecl_parse(jet_ast* ast)
     switch(tok_after_ident->type)
     {
         default:
+        {
             fprintf(stderr, "error: expected ';', '=' or '(' after type-decleration.\n");
             return NULL;
+        }
         case TOK_SEMI:
+        {
             jet_ast_consume_tok(ast);
             vdecl = jet_astn_vdecl_create(binding_ident, tdecl, NULL);
             return vdecl;
+        }
         case TOK_ASG:
+        {
             jet_ast_consume_tok(ast);
             jet_ast_node* init_value = jet_ast_node_parse_expr(ast, 0);
             vdecl = jet_astn_vdecl_create(binding_ident, tdecl, init_value);
             return vdecl;
+        }
         case TOK_LPAR:
+        {
             bool is_defined = false;
             jet_list* params_list = jet_ast_node_func_parse_params(ast, &is_defined);   
 
@@ -329,12 +352,11 @@ static jet_ast_node* jet_ast_node_tdecl_parse(jet_ast* ast)
             jet_list_append(ret_type_list, tdecl);
             jet_ast_node* fdecl = jet_astn_fdecl_create(binding_ident, ret_type_list, params_list); 
             if(!is_defined)
-            {
                 return fdecl;
-            }
             jet_ast_node* block = jet_ast_node_block_parse(ast);
             jet_ast_node* fdef = jet_astn_fdef_create(fdecl, block);
             return fdef;
+        }
     }
 }
 
@@ -357,35 +379,18 @@ static jet_ast_node* jet_ast_node_parse_ctrl_stmt(jet_ast* ast)
 
 static jet_ast_node* jet_ast_node_parse_expr(jet_ast* ast, size_t min_prec)
 {
-    /* schema
-     *  - int i = TOK_IDENT  + 42
-     *  - int i = TOK_LIT_INT + 42
-     *  - int i = TOK_MINUS 42 + ident
-     *  - int i = TOK_LPAR ident) + 42
-     *  - bool b = TOK_NOT ident
-     *  - bool b = TOK_KWD_TRUE
-     *  - str s = TOK_LIT_STR
-     *  - char c = TOK_LIT_CHAR
-     *
-     *  potential starts: 
-     *      TOK_IDENT
-     *      TOK_LIT_*
-     *      TOK_MINUS
-     *      TOK_NOT
-     *      TOK_LPAR
-     *      TOK_NOT
-     *      TOK_KWD_TRUE
-     *      TOK_KWD_FALSE
-     *
-     *  ending:
-     *      TOK_SEMI
-     * */
-
     jet_ast_node* lhs_node = jet_ast_node_parse_primary(ast);
+    if(lhs_node == NULL)
+    {
+        fprintf(stderr, "wrn: cannot parse expression, expected primary lhs.\n");
+        return NULL;
+    }
 
-    while(1)
+    while(jet_ast_peek_tok(ast) != NULL)
     {
         jet_token* op_tok = jet_ast_peek_tok(ast);
+        if(op_tok == NULL)
+            break;
         size_t op_prec = jet_ast_get_op_prec(op_tok->type);
         if(op_prec == 0)
             break;
@@ -393,9 +398,16 @@ static jet_ast_node* jet_ast_node_parse_expr(jet_ast* ast, size_t min_prec)
             break;
         jet_ast_consume_tok(ast);
         jet_ast_node* rhs_node = jet_ast_node_parse_expr(ast, op_prec + 1);        
-        //create binop and resign too lhs
+
+        if(rhs_node == NULL)
+        {
+            fprintf(stderr, "wrn: cannot parse expression, expected rhs after operator.\n");
+            return lhs_node;
+        }
+
+        lhs_node = jet_astn_binop_create(lhs_node, rhs_node, op_tok->type);
     }
-    return NULL;
+    return lhs_node;
 }
 
 static jet_ast_node* jet_ast_node_parse_primary(jet_ast* ast)
