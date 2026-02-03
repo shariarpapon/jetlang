@@ -412,7 +412,12 @@ static jet_ast_node* jet_ast_node_parse_expr(jet_ast* ast, size_t min_prec)
 
 static jet_ast_node* jet_ast_node_parse_primary(jet_ast* ast)
 {
-   return NULL;
+    jet_token* cur_tok = jet_ast_peek_tok(ast);
+    if(cur_tok == NULL) 
+        return NULL;
+
+    switch()  
+    return NULL;
 }
 
 static jet_list* jet_ast_node_func_parse_params(jet_ast* ast, bool* out_defines_func)
