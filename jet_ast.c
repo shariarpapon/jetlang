@@ -416,7 +416,39 @@ static jet_ast_node* jet_ast_node_parse_primary(jet_ast* ast)
     if(cur_tok == NULL) 
         return NULL;
 
-    switch()  
+    switch(cur_tok->type)
+    {
+        case TOK_KWD_NULL:
+        case TOK_KWD_TRUE:
+        case TOK_KWD_FALSE:
+        case TOK_LIT_INT:
+        case TOK_LIT_FLOAT:
+        case TOK_LIT_CHAR:
+        case TOK_LIT_STR:
+        {
+            jet_ast_node* lit = jet_astn_lit_create(cur_tok);
+            return lit;
+        }
+        
+        case TOK_IDENT:
+        {
+            jet_ast_node* ident = jet_astn_ident_create(cur_tok->source + cur_tok->origin, cur_tok->len);
+            return ident;
+        }
+        case TOK_LPAR:
+        {
+            jet_ast_consume_tok(ast);
+            jet_ast_node* paran_expr = jet_ast_node_parse_expr(ast);
+            cur_tok = jet_ast_peek_tok(ast);
+            if(cur_tok == NULL || cur_tok->type != TOK_RPAR)
+            {
+                fprintf(stderr, "error: expected ')' after primary expression.\n");
+                return NULL;
+            }
+            jet_ast_consume_tok(ast);
+            return paran_expr;
+        }
+    }  
     return NULL;
 }
 
