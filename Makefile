@@ -15,7 +15,7 @@ C_FLAGS = -Wall -std=c11
 
 C_COMPILE = $(CC) $(C_FLAGS) $(C_SRC) $(C_INCLUDES) -o $(C_BIN)  
 
-JET_FLAGS = pt
+JET_FLAGS = pTok pAst 
 JET_CODE_FILE = code.jt
 JET_EXEC = $(RUN) $(JET_CODE_FILE)
 

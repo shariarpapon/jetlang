@@ -37,7 +37,6 @@ static jet_ast_node* jet_ast_node_tok_value_ident(jet_token* tok);
 
 static jet_token* jet_ast_expect_tok(jet_ast* ast, jet_token_type tok_type);
 static jet_token* jet_ast_peek_tok(jet_ast* ast);
-static jet_token* jet_ast_peek_next_tok(jet_ast* ast);
 static jet_token* jet_ast_consume_tok(jet_ast* ast);
 
 static size_t jet_ast_get_op_prec(jet_token_type op_type)
@@ -111,6 +110,9 @@ jet_ast* jet_ast_create(jet_list* tok_list)
     ast->top_node_list = top_node_list; 
     ast->prog_node = NULL;
     ast->tok_cursor = 0;
+    
+    printf("ast created successfully!\n");
+    
     return ast;
 }
 
@@ -132,6 +134,7 @@ bool jet_ast_dispose(jet_ast* ast)
     if(ast->top_node_list) jet_list_dispose(ast->top_node_list); 
     if(ast->prog_node) jet_ast_node_dispose(ast->prog_node);
     free(ast);
+    printf("ast disposed!\n");
     return true;
 }
 
@@ -288,11 +291,6 @@ static jet_ast_node* jet_ast_node_lit_parse(jet_ast* ast)
     jet_ast_node* lit = jet_astn_lit_create(cur_tok); 
     assert(lit != NULL);
     return lit;
-}
-
-static jet_ast_node* jet_ast_node_func_parse(jet_ast* ast)
-{
-    return NULL;
 }
 
 static jet_ast_node* jet_ast_node_tdecl_parse(jet_ast* ast)
@@ -548,24 +546,6 @@ static jet_token* jet_ast_peek_tok(jet_ast* ast)
         return NULL; 
     }
     return (jet_token*)jet_list_get(ast->tok_list, ast->tok_cursor);
-}
-
-static jet_token* jet_ast_peek_next_tok(jet_ast* ast)
-{
-    assert(ast != NULL);
-    assert(ast->tok_list != NULL);
-    size_t tok_count = jet_list_count(ast->tok_list);
-    if (tok_count <= 0)
-    {
-        fprintf(stderr, "wrn: ast->tok_list is empty.\n");        
-        return NULL; 
-    }
-    if(ast->tok_cursor >= tok_count - 1)
-    {
-        puts("end of token-list reached.");
-        return NULL;
-    }
-    return (jet_token*)jet_list_get(ast->tok_list, ast->tok_cursor + 1);
 }
 
 static jet_token* jet_ast_consume_tok(jet_ast* ast)

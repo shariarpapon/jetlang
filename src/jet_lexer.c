@@ -107,8 +107,6 @@ static char jet_lexer_peek_next(jet_lexer* lexer);
 
 jet_lexer* jet_lexer_create(const char* source)
 {
-    printf("creating lexer...");
-
     jet_lexer* lexer = (jet_lexer*)malloc(sizeof(jet_lexer));
     if(!lexer)
     {
@@ -119,7 +117,7 @@ jet_lexer* jet_lexer_create(const char* source)
     lexer->source = source;
     lexer->len = strlen(source) + 1;
     lexer->cursor = 0;
-    lexer->token_list = jet_list_create(64, sizeof(jet_token));
+    lexer->token_list = jet_list_create(32, sizeof(jet_token));
     if(!lexer->token_list)
     {
         lexer->token_list = NULL;
@@ -127,13 +125,12 @@ jet_lexer* jet_lexer_create(const char* source)
         return NULL;
     }
 
-    printf("successful!\n");
+    printf("lexer created successfully!\n");
     return lexer;
 }
 
 void jet_lexer_dispose(jet_lexer* lexer)
 {
-    printf("disposing lexer...");
     if(!lexer) 
     {
         perror("error: attempting to free invalid lexer pointer.\n");
@@ -146,7 +143,7 @@ void jet_lexer_dispose(jet_lexer* lexer)
     }
     jet_list_dispose(lexer->token_list);
     free(lexer);
-    printf("successful!\n");
+    printf("lexer disposed!\n");
 }
 
 bool jet_lexer_tokenize(jet_lexer* lexer)
