@@ -418,6 +418,9 @@ static jet_ast_node* jet_ast_node_parse_primary(jet_ast* ast)
 
     switch(cur_tok->type)
     {
+        default:
+            fprintf(stderr, "error: expected primary expression.\n");
+            return NULL;
         case TOK_KWD_NULL:
         case TOK_KWD_TRUE:
         case TOK_KWD_FALSE:
@@ -439,7 +442,7 @@ static jet_ast_node* jet_ast_node_parse_primary(jet_ast* ast)
         case TOK_LPAR:
         {
             jet_ast_consume_tok(ast);
-            jet_ast_node* paran_expr = jet_ast_node_parse_expr(ast);
+            jet_ast_node* paran_expr = jet_ast_node_parse_expr(ast, 0);
             cur_tok = jet_ast_peek_tok(ast);
             if(cur_tok == NULL || cur_tok->type != TOK_RPAR)
             {
@@ -454,7 +457,7 @@ static jet_ast_node* jet_ast_node_parse_primary(jet_ast* ast)
         case TOK_MINUS:
         {
             jet_ast_consume_tok(ast);
-            jet_ast_node* rhs = jet_ast_node_parse_expr(ast);
+            jet_ast_node* rhs = jet_ast_node_parse_expr(ast, 0);
             if(rhs == NULL)
             {
                 fprintf(stderr, "error: expected expr after '-'\n");
