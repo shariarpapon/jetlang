@@ -1,19 +1,4 @@
-bool can_print = true;
-
-void print(str text)
-{
-    if(!can_print)
-        return;
-
-    out(text);
-}
-
-prog
-{
-    str message = "hello world!"
-    print(message);
-}
-
+int value = 123;
 
 
 
