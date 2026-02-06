@@ -38,6 +38,7 @@ void jet_ast_node_dispose(jet_ast_node* node)
             return;
         case AST_IDENT:
             jet_astn_ident_dispose(node);
+            return;
         case AST_LIT:
             jet_astn_lit_dispose(node);
             return;

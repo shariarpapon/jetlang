@@ -195,7 +195,7 @@ static jet_ast_node* jet_ast_get_next_node(jet_ast* ast)
         default:
         case TOK_INV:
         {    
-            fprintf(stderr, "error: could not evaluate valid node.");
+            fprintf(stderr, "error: could not evaluate valid node.\n");
             return NULL;
         }
         case TOK_EOF:
