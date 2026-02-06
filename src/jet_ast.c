@@ -17,7 +17,6 @@ struct jet_ast
 };
 
 static void jet_ast_add_top_node(jet_ast* ast, jet_ast_node* node);
-static bool jet_ast_generate(jet_ast* ast);
 static jet_ast_node* jet_ast_get_next_node(jet_ast* ast);
 static size_t jet_ast_get_type_byte_size(jet_token_type tok_type);
 
@@ -138,7 +137,7 @@ bool jet_ast_dispose(jet_ast* ast)
     return true;
 }
 
-static bool jet_ast_generate(jet_ast* ast)
+bool jet_ast_generate(jet_ast* ast)
 {
     assert(ast != NULL);
     assert(ast->tok_list != NULL);

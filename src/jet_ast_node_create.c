@@ -87,8 +87,10 @@ jet_ast_node*
                  assert(sub != NULL);
                  memcpy(sub, tok->source + tok->origin, tok->len);
                  sub[tok->len] = '\0';
+                 lit->as.s = sub;
                  break;
     }
+    lit->lit_type = tok->type;
     jet_ast_node* node = jet_ast_node_create_base(AST_LIT);
     assert(node != NULL);
     node->as.lit = lit;

@@ -29,7 +29,7 @@ typedef struct jet_ast_node_lit
       -1       0       1       2       3       4
       void/v  int/i  float/f  bool/b  char/c  str/s
    */
-   int lit_type;
+   jet_token_type lit_type;
    union
    {
        void* v;
@@ -120,7 +120,7 @@ struct jet_ast_node
 };
 
 jet_ast_node* jet_ast_node_create_base(jet_ast_node_type node_type);
-bool jet_ast_node_dispose(jet_ast_node* node);
-
+void jet_ast_node_dispose(jet_ast_node* node);
+void jet_ast_node_print(jet_ast_node* node);
 
 

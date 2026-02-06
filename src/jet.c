@@ -124,6 +124,10 @@ static jet_ast* ast_generate(jet_list* tok_list)
 {
    jet_ast* ast = jet_ast_create(tok_list);
    assert(ast != NULL);
+   if(!jet_ast_generate(ast))
+   {
+        fprintf(stderr, "error: could not generate AST.");
+   }
    return ast;
 }
 

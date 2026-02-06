@@ -2,6 +2,7 @@
 #include <jet_ast_node.h>
 
 void jet_astn_prog_dispose(jet_ast_node* node);
+void jet_astn_mem_dispose(jet_ast_node* node);
 void jet_astn_ident_dispose(jet_ast_node* node);
 void jet_astn_lit_dispose(jet_ast_node* node);
 void jet_astn_block_dispose(jet_ast_node* node);
