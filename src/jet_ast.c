@@ -457,12 +457,14 @@ static jet_ast_node* jet_ast_node_parse_primary(jet_ast* ast)
         case TOK_LIT_CHAR:
         case TOK_LIT_STR:
         {
+            jet_ast_consume_tok(ast);
             jet_ast_node* lit = jet_astn_lit_create(cur_tok);
             return lit;
         }
         
         case TOK_IDENT:
         {
+            jet_ast_consume_tok(ast);
             jet_ast_node* ident = jet_astn_ident_create(cur_tok->source + cur_tok->origin, cur_tok->len);
             return ident;
         }
