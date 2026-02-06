@@ -44,7 +44,10 @@ int main(int argc, char** argv)
     // ------ free all memory ------
     
     jet_lexer_dispose(lexer);
-    jet_ast_dispose(ast);
+
+    //TODO: fix double free bug
+    //jet_ast_dispose(ast);
+    
     return 0;
 }
 

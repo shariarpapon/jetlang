@@ -19,6 +19,7 @@ struct jet_ast
 static void jet_ast_add_top_node(jet_ast* ast, jet_ast_node* node);
 static jet_ast_node* jet_ast_get_next_node(jet_ast* ast);
 static size_t jet_ast_get_type_byte_size(jet_token_type tok_type);
+static void jet_ast_skip_to_next_stmt(jet_ast* ast);
 
 static jet_ast_node* jet_ast_node_prog_parse(jet_ast* ast);
 static jet_ast_node* jet_ast_node_mem_parse(jet_ast* ast);
@@ -194,6 +195,24 @@ void jet_ast_print(jet_ast* ast)
     }
 }
 
+static void jet_ast_skip_to_next_stmt(jet_ast* ast)
+{
+    assert(ast != NULL);
+    while(jet_ast_peek_tok(ast))
+    {
+        jet_token* tok = jet_ast_peek_tok(ast);
+        if(tok->type == TOK_SEMI || tok->type == TOK_EOF)
+        {   
+            jet_ast_consume_tok(ast);
+            break;
+        }
+        else
+        {
+            jet_ast_consume_tok(ast);
+        }
+    }
+}
+
 static jet_ast_node* jet_ast_get_next_node(jet_ast* ast)
 {
     assert(ast != NULL);
@@ -222,7 +241,8 @@ static jet_ast_node* jet_ast_get_next_node(jet_ast* ast)
     switch(cur_tok->type)
     {
         default: 
-            jet_ast_consume_tok(ast);
+            fprintf(stderr, "wrn: skipping to next stmt due to unexpected token (id: %d)\n", (int)cur_tok->type);
+            jet_ast_skip_to_next_stmt(ast);
             return jet_ast_node_create_base(AST_UNKNOWN);
         case TOK_INV:
         {    
