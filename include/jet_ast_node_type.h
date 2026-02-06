@@ -2,6 +2,7 @@
 
 typedef enum jet_ast_node_type
 {
+  AST_UNKNOWN = -1,
   AST_PROG = 0,  
   AST_MEM,
   AST_IDENT,
@@ -16,3 +17,6 @@ typedef enum jet_ast_node_type
   AST_BINOP,
   AST_UNOP,
 } jet_ast_node_type;
+
+
+const char* jet_ast_node_type_str(jet_ast_node_type t);

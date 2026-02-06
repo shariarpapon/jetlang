@@ -49,6 +49,24 @@ char* jet_io_read_text(const char* path, size_t* out_len)
     return buf;
 }
 
+void jet_io_print_str_range(const char* start, size_t len)
+{
+    if(!start)
+    {
+        fprintf(stderr, "error: cannot print, given start char* is null.\n");
+        return;
+    }
+
+    if(len == 0) 
+        return;
+
+    for(size_t i = 0; i < len; i++)
+    {
+        printf("%c", *start);
+        start++;
+    }
+    printf("\n");
+}
 
 
 

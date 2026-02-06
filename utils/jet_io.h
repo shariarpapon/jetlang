@@ -5,8 +5,7 @@
 #define ARRAY_LEN(a) (sizeof(a) / sizeof(a[0]))
 
 char* jet_io_read_text(const char* file_path, size_t* out_len);
-
-
+void jet_io_print_str_range(const char* start, size_t len);
 
 
 
