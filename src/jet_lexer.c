@@ -12,6 +12,8 @@
 #define DECIMAL_CHAR '.'
 #define ESCAPE_CHAR '\\'
 
+#define INIT_TOK_CAPACITY 32
+
 typedef struct jet_tok_def 
 {
     union
@@ -105,23 +107,46 @@ static char jet_lexer_consume(jet_lexer* lexer);
 static char jet_lexer_peek(jet_lexer* lexer);
 static char jet_lexer_peek_next(jet_lexer* lexer);
 
-jet_lexer* jet_lexer_create(const char* source)
+jet_lexer* jet_lexer_create(const char* filename)
 {
+    if(!filename)
+    {
+        fprintf(stderr, "error: cannot create lexer, filename invalid.\n");
+        return NULL;
+    }
+
+    size_t src_len = 0;
+    const char* source = jet_io_read_text(filename, &src_len);
+    if(!source)
+    {
+        fprintf(stderr, "error: cannot create lexer, unable to load file.\n");
+        return NULL;
+    }
+
+    if(src_len == 0)
+    {
+        fprintf(stderr, "wrn: loaded file is empty.\n");
+        free((void*)source);
+        return NULL;
+    }
+
     jet_lexer* lexer = (jet_lexer*)malloc(sizeof(jet_lexer));
     if(!lexer)
     {
         fprintf(stderr, "error: could not allocate lexer memory\n");
+        free((void*)source);
         return NULL;
     }
 
     lexer->source = source;
-    lexer->len = strlen(source) + 1;
+    lexer->len = src_len + 1;
     lexer->cursor = 0;
-    lexer->token_list = jet_list_create(32, sizeof(jet_token));
+    lexer->token_list = jet_list_create(INIT_TOK_CAPACITY, sizeof(jet_token));
     if(!lexer->token_list)
     {
         lexer->token_list = NULL;
         fprintf(stderr, "error: could not allocate token-list memory\n");
+        jet_lexer_dispose(lexer);
         return NULL;
     }
 
@@ -136,13 +161,19 @@ void jet_lexer_dispose(jet_lexer* lexer)
         perror("error: attempting to free invalid lexer pointer.\n");
         return;
     }
+
+    if(lexer->source)
+    {
+        free((void*)lexer->source);
+    }
+
     if(!lexer->token_list)
     {
-        free(lexer);
+        free((void*)lexer);
         return;
     }
     jet_list_dispose(lexer->token_list);
-    free(lexer);
+    free((void*)lexer);
     printf("lexer disposed!\n");
 }
 
@@ -477,7 +508,7 @@ static char jet_lexer_peek_next(jet_lexer* lexer)
     size_t next = lexer->cursor + 1;
     if(next >= lexer->len - 1)
     {
-        printf("wrn: cannot peek next, eof reached\n");
+        printf("wrn: cannot peek next, EOF reached\n");
         return NULL_TERM;
     }
     return lexer->source[next];

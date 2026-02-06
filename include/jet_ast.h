@@ -6,5 +6,7 @@
 typedef struct jet_ast jet_ast;
 
 jet_ast* jet_ast_create(jet_list* tok_list);
-bool jet_ast_generate(jet_ast* ast);
+bool jet_ast_generate_nodes(jet_ast* ast);
 bool jet_ast_dispose(jet_ast* ast);
+
+void jet_ast_print(jet_ast* ast);

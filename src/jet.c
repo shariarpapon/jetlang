@@ -18,7 +18,7 @@ static char** args;
 static void print_source(const char* src, size_t src_len);
 static bool find_arg(const char* target);
 
-static jet_lexer* lexer_analyze_file(const char* filename, char** loaded_src_ptr);
+static jet_lexer* lexer_analyze_file(const char* filename);
 static jet_ast* ast_generate(jet_list* tok_list);
 
 int main(int argc, char** argv)
@@ -36,77 +36,24 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    // -----  create components -----
-    
-    char* src_filename = *args;
-    char** loaded_src_ptr = (char**)malloc(sizeof(char*));
-
-    if(loaded_src_ptr == NULL)
-    {
-        fprintf(stderr, "error: could not allocate src load buffer.\n");
-        return 1;
-    }
-
-
-    jet_lexer* lexer = lexer_analyze_file(src_filename, loaded_src_ptr);
-    if(!lexer)
-    {
-        fprintf(stderr, "error: could not analyze source file.\n");
-        return 1;
-    }
-       
+    // -----  create components -----    
+    char* src_file_path = *args;
+    jet_lexer* lexer = lexer_analyze_file(src_file_path); 
     jet_ast* ast = ast_generate(lexer->token_list); 
-    if(!ast)
-    {
-        fprintf(stderr, "error: could not generate ast.\n");
-        return 1;
-    }
 
     // ------ free all memory ------
-
-    if(loaded_src_ptr)
-    {
-        if(*loaded_src_ptr != NULL)
-            free((void*)*loaded_src_ptr);
-        free((void*)loaded_src_ptr);
-    }
-
-
+    
     jet_lexer_dispose(lexer);
     jet_ast_dispose(ast);
     return 0;
 }
 
-static jet_lexer* lexer_analyze_file(const char* filename, char** loaded_src_ptr)
+static jet_lexer* lexer_analyze_file(const char* file_path)
 {
-    if(!filename)
-    {
-        fprintf(stderr, "error: no valid source filename provided.\n");
-        return NULL;
-    }
-
-    size_t src_len = -1;
-    const char* source = (const char*)jet_io_read_text(filename, &src_len);
-
-    if(!source)
-    {
-        fprintf(stderr, "error: could not load source text\n");
-        return NULL;
-    }
+    jet_lexer* lexer = jet_lexer_create(file_path);        
     
-    if(loaded_src_ptr) *loaded_src_ptr = (char*)source;
-    else fprintf(stderr, "wrn: no ptr provided to recieve the loaded source file text (which must be freed manually before disposing lexer).\n");
-     
     if(find_arg(ARG_PRINT_ALL) == true || find_arg(ARG_PRINT_SOURCE) ==  true)
-        print_source(source, src_len);
-    
-    jet_lexer* lexer = jet_lexer_create(source);
-
-    if(!lexer)
-    {
-        fprintf(stderr, "error: could not create lexer.\n");
-        return NULL;
-    } 
+        print_source(lexer->source, lexer->len);
 
     if(!jet_lexer_tokenize(lexer))
     {
@@ -116,18 +63,15 @@ static jet_lexer* lexer_analyze_file(const char* filename, char** loaded_src_ptr
      
     if(find_arg(ARG_PRINT_ALL) == true || find_arg(ARG_PRINT_TOKENS) == true)
         jet_token_print_list(lexer->token_list);  
-    
+  
     return lexer;
 }
 
 static jet_ast* ast_generate(jet_list* tok_list)
 {
    jet_ast* ast = jet_ast_create(tok_list);
-   assert(ast != NULL);
-   if(!jet_ast_generate(ast))
-   {
-        fprintf(stderr, "error: could not generate AST.");
-   }
+   if(!jet_ast_generate_nodes(ast))
+        fprintf(stderr, "error: could not generate AST_nodes.");
    return ast;
 }
 
