@@ -1,6 +1,7 @@
 #include <jet_ast_node_dispose.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <stdio.h>
 
 static void jet_ast_node_dispose_list(jet_list* node_list);
 
@@ -42,6 +43,10 @@ void jet_astn_ident_dispose(jet_ast_node* node)
 void jet_astn_lit_dispose(jet_ast_node* node) 
 {
     assert(node != NULL);
+
+    //TEST
+    printf("\ntype id--> %d\n", (int)node->node_type);
+
     assert(node->node_type == AST_LIT);
     assert(node->as.lit != NULL);      
     if(node->as.lit->lit_type == TOK_LIT_STR)
