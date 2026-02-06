@@ -72,7 +72,10 @@ static jet_ast* ast_generate(jet_list* tok_list)
    jet_ast* ast = jet_ast_create(tok_list);
    if(!jet_ast_generate_nodes(ast))
         fprintf(stderr, "error: could not generate AST nodes.\n");
-   jet_ast_print(ast); 
+   
+   if(find_arg(ARG_PRINT_ALL) == true || find_arg(ARG_PRINT_AST) == true)
+       jet_ast_print(ast); 
+   
    return ast;
 }
 
