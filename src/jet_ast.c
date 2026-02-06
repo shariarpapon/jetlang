@@ -176,16 +176,21 @@ void jet_ast_print(jet_ast* ast)
     if(ast->top_node_list)
     {
         size_t top_node_count = jet_list_count(ast->top_node_list);
-        printf("\nAST Top Level Nodes [%zu]\n", top_node_count);
+        printf("\nAST Top Level Nodes [%zu]\n\n", top_node_count);
         
         for(size_t i = 0; i < top_node_count; i++)
+        {
+            printf("\t[%zu]    ", i);
             jet_ast_node_print((jet_ast_node*)jet_list_get(ast->top_node_list, i));
+        }
+        printf("\n");
     }
 
     if(ast->prog_node)
     {
-        printf("\nAST Entry Point\n");
+        printf("\nAST Entry Point\n\n");
         jet_ast_node_print(ast->prog_node);
+        printf("\n");
     }
 }
 
@@ -217,7 +222,8 @@ static jet_ast_node* jet_ast_get_next_node(jet_ast* ast)
     switch(cur_tok->type)
     {
         default: 
-            return NULL;
+            jet_ast_consume_tok(ast);
+            return jet_ast_node_create_base(AST_UNKNOWN);
         case TOK_INV:
         {    
             fprintf(stderr, "error: could not evaluate valid node.\n");

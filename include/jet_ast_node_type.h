@@ -2,6 +2,7 @@
 
 typedef enum jet_ast_node_type
 {
+  AST_UNKNOWN = -1,
   AST_PROG = 0,  
   AST_MEM,
   AST_IDENT,

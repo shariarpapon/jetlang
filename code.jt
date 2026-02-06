@@ -1,4 +1,6 @@
-int value = 123;
+int x = 123;
+bool y = false;
+
 
 
 
