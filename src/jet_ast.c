@@ -27,7 +27,6 @@ static jet_ast_node* jet_ast_node_block_parse(jet_ast* ast);
 static jet_ast_node* jet_ast_node_lit_parse(jet_ast* ast);
 static jet_ast_node* jet_ast_node_tdecl_parse(jet_ast* ast);
 static jet_ast_node* jet_ast_node_ident_parse(jet_ast* ast);
-static jet_ast_node* jet_ast_node_vdecl_parse(jet_ast* ast);
 
 static jet_list* jet_ast_node_func_parse_params(jet_ast* ast, bool* out_defines_func);
 static jet_ast_node* jet_ast_node_parse_ctrl_stmt(jet_ast* ast);
@@ -35,8 +34,10 @@ static jet_ast_node* jet_ast_node_parse_expr(jet_ast* ast, size_t min_prec);
 static jet_ast_node* jet_ast_node_parse_primary(jet_ast* ast);
 static jet_ast_node* jet_ast_node_tok_value_ident(jet_token* tok);
 
+
 static jet_token* jet_ast_expect_tok(jet_ast* ast, jet_token_type tok_type);
 static jet_token* jet_ast_peek_tok(jet_ast* ast);
+static jet_token* jet_ast_peek_next_tok(jet_ast* ast);
 static jet_token* jet_ast_consume_tok(jet_ast* ast);
 
 static size_t jet_ast_get_op_prec(jet_token_type op_type)
@@ -291,8 +292,12 @@ static jet_ast_node* jet_ast_node_prog_parse(jet_ast* ast)
 
 static jet_ast_node* jet_ast_node_mem_parse(jet_ast* ast)
 {
-    return NULL;
-} 
+    jet_ast_node* node = jet_ast_node_create_base(AST_MEM);
+    size_t alloc_size = 0;
+    jet_ast_node_mem* mem = jet_astn_mem_create(alloc_size);
+    node->as.mem = mem;
+    return node;
+}
 
 static jet_ast_node* jet_ast_node_block_parse(jet_ast* ast)
 {
@@ -322,8 +327,7 @@ static jet_ast_node* jet_ast_node_tdecl_parse(jet_ast* ast)
     if(!type_ident)
     {
         fprintf(stderr, "errro: type is not recognized, make sure all files are binded.\n");
-        return NULL;
-    }
+        return NULL;}
 
     //declare
     //declared type_decl info
@@ -368,7 +372,10 @@ static jet_ast_node* jet_ast_node_tdecl_parse(jet_ast* ast)
         {
             bool is_defined = false;
             jet_list* params_list = jet_ast_node_func_parse_params(ast, &is_defined);   
-            jet_ast_expect_tok(ast, TOK_RPAR);
+           
+            jet_token* t = jet_ast_peek_tok(ast);
+            if(t != NULL && t->type != TOK_RPAR)
+                jet_ast_skip_to_next_stmt(ast);
 
             jet_list* ret_type_list = jet_list_create(1, sizeof(jet_ast_node)); 
             jet_list_append(ret_type_list, tdecl);
@@ -387,11 +394,6 @@ static jet_ast_node* jet_ast_node_ident_parse(jet_ast* ast)
     jet_token* ident_tok = jet_ast_expect_tok(ast, TOK_IDENT);
     jet_ast_node* ident = jet_astn_ident_create(ident_tok->source + ident_tok->origin, ident_tok->len);
     return ident;
-}
-
-static jet_ast_node* jet_ast_node_vdecl_parse(jet_ast* ast)
-{
-    return NULL;
 }
 
 static jet_ast_node* jet_ast_node_parse_ctrl_stmt(jet_ast* ast)
@@ -493,37 +495,45 @@ static jet_ast_node* jet_ast_node_parse_primary(jet_ast* ast)
 
 static jet_list* jet_ast_node_func_parse_params(jet_ast* ast, bool* out_defines_func)
 {
+    //TODO: likely need to create seperate parse_vdecl function
+    //      since, currently it can parse anything that starts 
+    //      with type_decl as paramter, even other functions.
+
     jet_ast_expect_tok(ast, TOK_LPAR);
 
     jet_list* list = jet_list_create(4, sizeof(jet_ast_node));
-    assert(list != NULL);
-
+    assert(list != NULL); 
+    jet_token* cur_tok = NULL;
+    jet_ast_node* vdecl = NULL;
     while(1)
     {
-        jet_token* cur_tok = jet_ast_peek_tok(ast);
+        cur_tok = jet_ast_peek_tok(ast);
         if(cur_tok == NULL) 
             break;
         if(cur_tok->type == TOK_RPAR)
             break;
 
-        jet_ast_node* vdecl = jet_ast_node_vdecl_parse(ast);
-        if(vdecl == NULL)
+        vdecl = jet_ast_get_next_node(ast);
+        if(vdecl == NULL || vdecl->node_type != AST_VAR_DECL)
         {
             fprintf(stderr, "error: expected parameter variable declaration.\n");
             jet_list_dispose(list);
-            
             // TODO: mem leak: technically previously added nodes are not disposed.
-            // probably add some dispose_node_list function to be used here.
-            
+            // probably add some dispose_node_list function to be used here. 
             return NULL;
         }
+
+        jet_token* tk = jet_ast_peek_tok(ast);
+        if(tk != NULL && tk->type == TOK_COMMA)
+            jet_ast_consume_tok(ast);
+
         jet_list_append(list, (const void*)vdecl);
     }
 
     if(out_defines_func)
     {
-        jet_token* tok = jet_ast_peek_tok(ast);
-        if(tok != NULL && tok->type == TOK_RBRC)
+        jet_token* next_tok = jet_ast_peek_next_tok(ast);
+        if(next_tok != NULL && next_tok->type == TOK_RBRC)
             *out_defines_func = true;
     }
     return list;
@@ -555,7 +565,12 @@ static jet_token* jet_ast_expect_tok(jet_ast* ast, jet_token_type tok_type)
     }
     jet_token* tok = jet_ast_peek_tok(ast);
     assert(tok != NULL);
-    assert(tok->type == tok_type);
+    
+    if(tok->type != tok_type)
+    {
+        fprintf(stderr, "error: expected token type (id: %d) but encountered (id: %d).\n", (int)tok_type, (int)tok->type);
+        return NULL;
+    }
     return jet_ast_consume_tok(ast);
 }
 
@@ -569,6 +584,18 @@ static jet_token* jet_ast_peek_tok(jet_ast* ast)
         return NULL; 
     }
     return (jet_token*)jet_list_get(ast->tok_list, ast->tok_cursor);
+}
+
+static jet_token* jet_ast_peek_next_tok(jet_ast* ast)
+{ 
+    assert(ast != NULL);
+    assert(ast->tok_list != NULL);
+    if(jet_list_count(ast->tok_list) <= 0)
+    {
+        fprintf(stderr, "wrn: ast->tok_list is empty.\n");        
+        return NULL; 
+    }
+    return (jet_token*)jet_list_get(ast->tok_list, ast->tok_cursor + 1);
 }
 
 static jet_token* jet_ast_consume_tok(jet_ast* ast)
