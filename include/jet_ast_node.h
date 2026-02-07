@@ -121,7 +121,8 @@ struct jet_ast_node
 
 jet_ast_node* jet_ast_node_create_base(jet_ast_node_type node_type);
 void jet_ast_node_dispose(jet_ast_node* node);
-const char* jet_ast_node_to_str(jet_ast_node* node);
-void jet_ast_node_print(jet_ast_node* node);
+void jet_ast_node_list_print(jet_list* node_list, size_t branch);
+void jet_ast_node_print(jet_ast_node* node, size_t branch);
+
 
 

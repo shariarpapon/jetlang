@@ -18,5 +18,4 @@ typedef enum jet_ast_node_type
   AST_UNOP,
 } jet_ast_node_type;
 
-
-const char* jet_ast_node_type_str(jet_ast_node_type t);
+const char* jet_ast_node_type_str(jet_ast_node_type node_type);

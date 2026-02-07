@@ -166,35 +166,6 @@ bool jet_ast_generate_nodes(jet_ast* ast)
     return true;
 }
 
-void jet_ast_print(jet_ast* ast)
-{
-    if(!ast)
-    {
-        fprintf(stderr, "error: cannot print, given ast is null.\n");
-        return;
-    }
-
-    if(ast->top_node_list)
-    {
-        size_t top_node_count = jet_list_count(ast->top_node_list);
-        printf("\nAST Top Level Nodes [%zu]\n\n", top_node_count);
-        
-        for(size_t i = 0; i < top_node_count; i++)
-        {
-            printf("\t[%zu]    ", i);
-            jet_ast_node_print((jet_ast_node*)jet_list_get(ast->top_node_list, i));
-        }
-        printf("\n");
-    }
-
-    if(ast->prog_node)
-    {
-        printf("\nAST Entry Point\n\n");
-        jet_ast_node_print(ast->prog_node);
-        printf("\n");
-    }
-}
-
 static void jet_ast_skip_to_next_stmt(jet_ast* ast)
 {
     assert(ast != NULL);
@@ -636,7 +607,20 @@ static size_t jet_ast_get_type_byte_size(jet_token_type tok_type)
     }
 }    
 
+void jet_ast_print(jet_ast* ast)
+{
+    if(!ast)
+    {
+        fprintf(stderr, "error: cannot print, given ast is null.\n");
+        return;
+    }
+    size_t top_node_count = jet_list_count(ast->top_node_list);
+    printf("\nAST Top Level Nodes [%zu]\n\n", top_node_count);
+    jet_ast_node_list_print(ast->top_node_list, 0);
 
+    printf("\nAST Entry Point\n\n");
+    jet_ast_node_print(ast->prog_node, 0);
+}
 
 
 
