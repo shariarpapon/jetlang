@@ -641,12 +641,18 @@ void jet_ast_print(jet_ast* ast)
         fprintf(stderr, "error: cannot print, given ast is null.\n");
         return;
     }
-    size_t top_node_count = jet_list_count(ast->top_node_list);
-    printf("\nAST Top Level Nodes [%zu]\n\n", top_node_count);
-    jet_ast_node_list_print(ast->top_node_list, 0);
+    printf("\n=======================\n");
+    printf("TOP\n");
 
-    printf("\nAST Entry Point\n\n");
+    size_t top_node_count = jet_list_count(ast->top_node_list);
+    //printf("\nAST Top Level Nodes [%zu]\n\n", top_node_count);
+    jet_ast_node_list_print(ast->top_node_list, 0);
+    printf("=======================\n");
+    //printf("\nAST Entry Point\n\n");
     jet_ast_node_print(ast->prog_node, 0);
+    printf("PROG\n");
+    printf("=======================\n\n");
+    //printf("\nAST Entry Point\n\n");
 }
 
 

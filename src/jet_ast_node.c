@@ -104,63 +104,63 @@ void jet_ast_node_print(jet_ast_node* node, size_t branch)
     switch(node->node_type)
     {
         default: 
-            return;
+            break;
         case AST_PROG:
         {
             jet_ast_node_print(node->as.prog->block, branch);
-            return;
+            break;
         }
         case AST_BLOCK:
         {
             jet_ast_node_list_print(node->as.block->node_list, branch);
-            return;
+            break;
         }
         case AST_VAR_REF:
         {
             jet_ast_node_print(node->as.var_ref->var_binding_ident, branch);
-            return;
+            break;
         }
         case AST_VAR_DECL:
         {
             jet_ast_node_print(node->as.var_decl->binding_ident, branch);
             jet_ast_node_print(node->as.var_decl->type_decl, branch);
             jet_ast_node_print(node->as.var_decl->init_value, branch);
-            return;
+            break;
         }
         case AST_TYPE_DECL:
         {
             jet_ast_node_print(node->as.type_decl->type_ident, branch);
-            return;
+            break;
         }
         case AST_FUNC_DECL:
         {
             jet_ast_node_print(node->as.func_decl->binding_ident, branch);
             jet_ast_node_list_print(node->as.func_decl->ret_type_decls, branch);
             jet_ast_node_list_print(node->as.func_decl->param_var_decls, branch);
-            return;
+            break;
         }
         case AST_FUNC_DEF:
         {
             jet_ast_node_print(node->as.func_def->func_decl, branch);
             jet_ast_node_print(node->as.func_def->block, branch);
-            return;
+            break;
         }
         case AST_FUNC_CALL:
         {
             jet_ast_node_print(node->as.func_call->func_binding_ident, branch);
             jet_ast_node_list_print(node->as.func_call->arg_nodes, branch);
-            return;
+            break;
         }
         case AST_BINOP:
         {
             jet_ast_node_print(node->as.binop->lhs, branch);
             jet_ast_node_print(node->as.binop->rhs, branch);
-            return;
+            break;
         }
         case AST_UNOP:
         {
             jet_ast_node_print(node->as.unop->term, branch);
-            return;
+            break;
         }
     }
 }
