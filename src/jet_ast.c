@@ -16,74 +16,15 @@ struct jet_ast
     size_t tok_cursor;
 };
 
-static void jet_ast_add_top_node(jet_ast* ast, jet_ast_node* node);
-static jet_ast_node* jet_ast_get_next_node(jet_ast* ast);
-static size_t jet_ast_get_type_byte_size(jet_token_type tok_type);
-static void jet_ast_skip_to_next_stmt(jet_ast* ast);
+static void jet_ast_push_node(jet_ast* ast, jet_ast_node* node);
 
-static jet_ast_node* jet_ast_node_prog_parse(jet_ast* ast);
-static jet_ast_node* jet_ast_node_mem_parse(jet_ast* ast);
-static jet_ast_node* jet_ast_node_block_parse(jet_ast* ast);
-static jet_ast_node* jet_ast_node_lit_parse(jet_ast* ast);
-static jet_ast_node* jet_ast_node_tdecl_parse(jet_ast* ast);
-static jet_ast_node* jet_ast_node_ident_parse(jet_ast* ast);
-
-static jet_list* jet_ast_node_func_parse_params(jet_ast* ast, bool* out_defines_func);
-static jet_ast_node* jet_ast_node_parse_ctrl_stmt(jet_ast* ast);
 static jet_ast_node* jet_ast_node_parse_expr(jet_ast* ast, size_t min_prec);
 static jet_ast_node* jet_ast_node_parse_primary(jet_ast* ast);
-static jet_ast_node* jet_ast_node_tok_value_ident(jet_token* tok);
 
-
-static jet_token* jet_ast_expect_tok(jet_ast* ast, jet_token_type tok_type);
 static jet_token* jet_ast_peek_tok(jet_ast* ast);
-static jet_token* jet_ast_peek_next_tok(jet_ast* ast);
+static jet_token* jet_ast_peekn_tok(jet_ast* ast, size_t n);
 static jet_token* jet_ast_consume_tok(jet_ast* ast);
-
-static size_t jet_ast_get_op_prec(jet_token_type op_type)
-{
-    switch(op_type) {
-
-        case TOK_INCR:
-        case TOK_DECR:
-        case TOK_DOT: return PREC_POSTFIX;
-        case TOK_NOT: return PREC_PREFIX;
-        
-        case TOK_STAR:
-        case TOK_SLASH:
-        case TOK_MOD: return PREC_MULT;
-        
-        case TOK_PLUS:
-        case TOK_MINUS: return PREC_ADDITIVE;
-        
-        case TOK_SHL:
-        case TOK_SHR: return PREC_BIT_SHIFT;
-        
-        case TOK_BAND: return PREC_BAND;
-        case TOK_BOR: return PREC_BOR;
-        case TOK_AND: return PREC_AND;
-        case TOK_OR: return PREC_OR;
-        
-        case TOK_GTE:
-        case TOK_LTE:
-        case TOK_GT:
-        case TOK_LT: return PREC_RELATIONAL;
-
-        case TOK_PLUSEQ:
-        case TOK_MINEQ:
-        case TOK_MULEQ:
-        case TOK_DIVEQ:
-        case TOK_MODEQ:
-        case TOK_XOREQ:
-        case TOK_BANDEQ:
-        case TOK_BOREQ: return PREC_ASG;
-        
-        case TOK_POW: return PREC_POW;
-
-        default: return 0; // not an operator
-    }
-}
-
+static jet_token* jet_ast_expect_tok(jet_ast* ast, jet_token_type tok_type);
 
 jet_ast* jet_ast_create(jet_list* tok_list)
 {    
@@ -139,267 +80,84 @@ bool jet_ast_dispose(jet_ast* ast)
     return true;
 }
 
-bool jet_ast_generate_nodes(jet_ast* ast)
+static void jet_ast_push_node(jet_ast* ast, jet_ast_node* node)
 {
-    assert(ast != NULL);
-    assert(ast->tok_list != NULL);
-    if(jet_list_count(ast->tok_list) == 0)
+    if(node->node_type == AST_PROG)
     {
-        fprintf(stderr, "erorr: cannot generate AST, token-list is empty.\n");
-        return false;
-    }
-
-    jet_ast_node* cur_node = jet_ast_get_next_node(ast);
-    while(cur_node  != NULL)
-    {
-        if(cur_node->node_type == AST_PROG)
-        {
-            if(ast->prog_node != NULL)
-            {
-                fprintf(stderr, "error: cannot generate AST, more than 1 program entry point found.\n");
-                return false;
-            }
-            ast->prog_node = cur_node;
-        }
-        else jet_ast_add_top_node(ast, cur_node);        
-        cur_node = jet_ast_get_next_node(ast);
-    }
-    return true;
-}
-
-static void jet_ast_skip_to_next_stmt(jet_ast* ast)
-{
-    assert(ast != NULL);
-    while(jet_ast_peek_tok(ast))
-    {
-        jet_token* tok = jet_ast_peek_tok(ast);
-        if(tok->type == TOK_SEMI || tok->type == TOK_EOF)
-        {   
-            jet_ast_consume_tok(ast);
-            break;
-        }
+        if(ast->prog_node == NULL)
+            ast->prog_node = node;
         else
         {
-            jet_ast_consume_tok(ast);
+            fprintf(stderr, "error: multiple program entry points.\n");
+            return;
         }
+    }
+    else
+    {
+        jet_list_append(ast->top_node_list, (const void*)node);
     }
 }
 
-static jet_ast_node* jet_ast_get_next_node(jet_ast* ast)
+static jet_token* jet_ast_peek_tok(jet_ast* ast)
+{
+    return jet_ast_peekn_tok(ast, 0);
+}
+
+static jet_token* jet_ast_peekn_tok(jet_ast* ast, size_t n)
+{ 
+    assert(ast != NULL);
+    assert(ast->tok_list != NULL);
+    size_t count = jet_list_count(ast->tok_list);
+    if(count <= 0)
+    {
+        fprintf(stderr, "wrn: ast->tok_list is empty.\n");        
+        return NULL; 
+    }
+    else if(ast->tok_cursor + n >= count)
+    {
+        fprintf(stderr, "wrn: cannot peak ahead %zu tokens (cursor=%zu), index out of bounds.", n, ast->tok_cursor);
+        return NULL;
+    }
+    return (jet_token*)jet_list_get(ast->tok_list, ast->tok_cursor + n);
+}
+
+static jet_token* jet_ast_expect_tok(jet_ast* ast, jet_token_type tok_type)
 {
     assert(ast != NULL);
     assert(ast->tok_list != NULL);
-    size_t tok_count = jet_list_count(ast->tok_list);
-    if(tok_count == 0)
+    if(ast->tok_cursor >= jet_list_count(ast->tok_list))
     {
-        fprintf(stderr, "wrn: cannot eval node, token-list is empty.\n");
+        puts("end of token-list reached.");
         return NULL;
     }
-    if(ast->tok_cursor >= tok_count)
+    jet_token* tok = jet_ast_peek_tok(ast);
+    assert(tok != NULL);
+    
+    if(tok->type != tok_type)
     {
-        printf("end of token-list reached\n");
+        fprintf(stderr, "error: expected token type (id: %d) but encountered (id: %d).\n", (int)tok_type, (int)tok->type);
         return NULL;
     }
+    return jet_ast_consume_tok(ast);
+}
 
-    jet_token* cur_tok = jet_ast_peek_tok(ast);
-    if(cur_tok->type == TOK_EOF)
+
+static jet_token* jet_ast_consume_tok(jet_ast* ast)
+{
+    assert(ast != NULL);
+    assert(ast->tok_list != NULL);
+
+    if(ast->tok_cursor >= jet_list_count(ast->tok_list))
     {
-        jet_ast_consume_tok(ast);
+        puts("end of token-list reached.");
         return NULL;
     }
-
-    jet_ast_node* node = NULL;
-
-    switch(cur_tok->type)
-    {
-        default: 
-            fprintf(stderr, "wrn: skipping to next stmt due to unexpected token (id: %d)\n", (int)cur_tok->type);
-            jet_ast_skip_to_next_stmt(ast);
-            return jet_ast_node_create_base(AST_UNKNOWN);
-        case TOK_INV:
-        {    
-            fprintf(stderr, "error: could not evaluate valid node.\n");
-            return NULL;
-        }
-        case TOK_EOF:
-        {
-            printf("EOF token reached.\n");
-            return NULL;
-        }
-        case TOK_KWD_PROG:
-        {
-            node = jet_ast_node_prog_parse(ast);
-            break;
-        }
-        case TOK_KWD_MEM:
-        {
-            node = jet_ast_node_mem_parse(ast);
-            break;
-        }
-        case TOK_KWD_IF:
-        case TOK_KWD_WHILE:
-        case TOK_KWD_FOR:
-        case TOK_KWD_RETURN:
-        {
-            node = jet_ast_node_parse_ctrl_stmt(ast);
-            break;
-        }
-        case TOK_KWD_CHAR : 
-        case TOK_KWD_VOID : 
-        case TOK_KWD_INT  : 
-        case TOK_KWD_FLOAT: 
-        case TOK_KWD_STR  : 
-        case TOK_KWD_BOOL : 
-        {
-            //POTENTIAL: type_decl, func_decl, func_def
-            node = jet_ast_node_tdecl_parse(ast);
-            break;
-        }
-        case TOK_KWD_NULL:
-        case TOK_KWD_TRUE:
-        case TOK_KWD_FALSE:
-        case TOK_LIT_INT:
-        case TOK_LIT_FLOAT:
-        case TOK_LIT_CHAR:
-        case TOK_LIT_STR:
-        {
-            node = jet_ast_node_lit_parse(ast);
-            break;
-        }
-        case TOK_IDENT:
-        {
-            //POTENTIAL: func_call, var_ref, expression_component
-            //possibly lit in the case of constant ref
-            node = jet_ast_node_ident_parse(ast);
-            break; 
-        }
-    }
-
-    if(node == NULL)
-    {
-        fprintf(stderr, "error: could not generate AST node.\n");
-    }
-    return node;
+    ast->tok_cursor++;
+    return (jet_token*)jet_list_get(ast->tok_list , ast->tok_cursor - 1);
 }
 
-static jet_ast_node* jet_ast_node_prog_parse(jet_ast* ast)
-{
-    jet_ast_expect_tok(ast, TOK_KWD_PROG);
-    jet_ast_node* block = jet_ast_node_block_parse(ast);
-    jet_ast_node* prog  = jet_astn_prog_create(block);
-    return prog;
-}
 
-static jet_ast_node* jet_ast_node_mem_parse(jet_ast* ast)
-{
-    jet_ast_node* node = jet_ast_node_create_base(AST_MEM);
-    size_t alloc_size = 0;
-    jet_ast_node_mem* mem = jet_astn_mem_create(alloc_size);
-    node->as.mem = mem;
-    return node;
-}
-
-static jet_ast_node* jet_ast_node_block_parse(jet_ast* ast)
-{
-    jet_list* node_list = jet_list_create(16, sizeof(jet_ast_node));
-    assert(node_list != NULL);
-
-    //TODO: populate node_list
-
-    jet_ast_node* block = jet_astn_block_create(node_list);
-    assert(block != NULL);
-    return block;
-}
-
-static jet_ast_node* jet_ast_node_lit_parse(jet_ast* ast)
-{
-    jet_token* cur_tok = jet_ast_consume_tok(ast);
-    jet_ast_node* lit = jet_astn_lit_create(cur_tok); 
-    assert(lit != NULL);
-    return lit;
-}
-
-static jet_ast_node* jet_ast_node_tdecl_parse(jet_ast* ast)
-{
-    //add multi return support
-    jet_token* tdecl_tok = jet_ast_consume_tok(ast);
-    jet_ast_node* type_ident = jet_ast_node_tok_value_ident(tdecl_tok);
-    if(!type_ident)
-    {
-        fprintf(stderr, "errro: type is not recognized, make sure all files are binded.\n");
-        return NULL;}
-
-    //declare
-    //declared type_decl info
-    size_t byte_size = jet_ast_get_type_byte_size(tdecl_tok->type);
-    bool is_native = true;
-
-    jet_ast_node* tdecl = jet_astn_tdecl_create(type_ident, byte_size, is_native);
-    jet_ast_node* binding_ident = jet_ast_node_ident_parse(ast);
-    jet_token* tok_after_ident = jet_ast_peek_tok(ast);
-    jet_ast_node* vdecl = NULL;
-
-    if(tok_after_ident == NULL)
-    {
-        fprintf(stderr, "error: incomplete type decl, expected one or more tokens after identifier.\n");
-        return NULL;
-    }
-
-    switch(tok_after_ident->type)
-    {
-        default:
-        {
-            fprintf(stderr, "error: expected ';', '=' or '(' after type-decleration.\n");
-            return NULL;
-        }
-
-        case TOK_SEMI:
-        {
-            jet_ast_consume_tok(ast);
-            vdecl = jet_astn_vdecl_create(binding_ident, tdecl, NULL);
-            return vdecl;
-        }
-
-        case TOK_ASG:
-        {
-            jet_ast_consume_tok(ast);
-            jet_ast_node* init_value = jet_ast_node_parse_expr(ast, 0);
-            vdecl = jet_astn_vdecl_create(binding_ident, tdecl, init_value);
-            return vdecl;
-        }
-
-        case TOK_LPAR:
-        {
-            bool is_defined = false;
-            jet_list* params_list = jet_ast_node_func_parse_params(ast, &is_defined);   
-           
-            jet_token* t = jet_ast_peek_tok(ast);
-            if(t != NULL && t->type != TOK_RPAR)
-                jet_ast_skip_to_next_stmt(ast);
-
-            jet_list* ret_type_list = jet_list_create(1, sizeof(jet_ast_node)); 
-            jet_list_append(ret_type_list, tdecl);
-            jet_ast_node* fdecl = jet_astn_fdecl_create(binding_ident, ret_type_list, params_list); 
-            if(!is_defined)
-                return fdecl;
-            jet_ast_node* block = jet_ast_node_block_parse(ast);
-            jet_ast_node* fdef = jet_astn_fdef_create(fdecl, block);
-            return fdef;
-        }
-    }
-}
-
-static jet_ast_node* jet_ast_node_ident_parse(jet_ast* ast)
-{
-    jet_token* ident_tok = jet_ast_expect_tok(ast, TOK_IDENT);
-    jet_ast_node* ident = jet_astn_ident_create(ident_tok->source + ident_tok->origin, ident_tok->len);
-    return ident;
-}
-
-static jet_ast_node* jet_ast_node_parse_ctrl_stmt(jet_ast* ast)
-{
-    return NULL;
-}
+// PARSERS ******************************
 
 static jet_ast_node* jet_ast_node_parse_expr(jet_ast* ast, size_t min_prec)
 {
@@ -493,147 +251,7 @@ static jet_ast_node* jet_ast_node_parse_primary(jet_ast* ast)
     return NULL;
 }
 
-static jet_list* jet_ast_node_func_parse_params(jet_ast* ast, bool* out_defines_func)
-{
-    //TODO: likely need to create seperate parse_vdecl function
-    //      since, currently it can parse anything that starts 
-    //      with type_decl as paramter, even other functions.
-
-    jet_ast_expect_tok(ast, TOK_LPAR);
-
-    jet_list* list = jet_list_create(4, sizeof(jet_ast_node));
-    assert(list != NULL); 
-    jet_token* cur_tok = NULL;
-    jet_ast_node* vdecl = NULL;
-    while(1)
-    {
-        cur_tok = jet_ast_peek_tok(ast);
-        if(cur_tok == NULL) 
-            break;
-        if(cur_tok->type == TOK_RPAR)
-            break;
-
-        vdecl = jet_ast_get_next_node(ast);
-        if(vdecl == NULL || vdecl->node_type != AST_VAR_DECL)
-        {
-            fprintf(stderr, "error: expected parameter variable declaration.\n");
-            jet_list_dispose(list);
-            // TODO: mem leak: technically previously added nodes are not disposed.
-            // probably add some dispose_node_list function to be used here. 
-            return NULL;
-        }
-
-        jet_token* tk = jet_ast_peek_tok(ast);
-        if(tk != NULL && tk->type == TOK_COMMA)
-            jet_ast_consume_tok(ast);
-
-        jet_list_append(list, (const void*)vdecl);
-    }
-
-    if(out_defines_func)
-    {
-        jet_token* next_tok = jet_ast_peek_next_tok(ast);
-        if(next_tok != NULL && next_tok->type == TOK_RBRC)
-            *out_defines_func = true;
-    }
-    return list;
-}
-
-static jet_ast_node* jet_ast_node_tok_value_ident(jet_token* tok)
-{
-    jet_ast_node* ident = jet_astn_ident_create(tok->source + tok->origin, tok->len);
-    assert(ident != NULL);
-    return ident;
-}
-
-static void jet_ast_add_top_node(jet_ast* ast, jet_ast_node* node)
-{
-    assert(ast != NULL);
-    assert(node != NULL);
-    assert(ast->top_node_list != NULL);
-    jet_list_append(ast->top_node_list, (const void*)node);
-}
-
-static jet_token* jet_ast_expect_tok(jet_ast* ast, jet_token_type tok_type)
-{
-    assert(ast != NULL);
-    assert(ast->tok_list != NULL);
-    if(ast->tok_cursor >= jet_list_count(ast->tok_list))
-    {
-        puts("end of token-list reached.");
-        return NULL;
-    }
-    jet_token* tok = jet_ast_peek_tok(ast);
-    assert(tok != NULL);
-    
-    if(tok->type != tok_type)
-    {
-        fprintf(stderr, "error: expected token type (id: %d) but encountered (id: %d).\n", (int)tok_type, (int)tok->type);
-        return NULL;
-    }
-    return jet_ast_consume_tok(ast);
-}
-
-static jet_token* jet_ast_peek_tok(jet_ast* ast)
-{
-    assert(ast != NULL);
-    assert(ast->tok_list != NULL);
-    if(jet_list_count(ast->tok_list) <= 0)
-    {
-        fprintf(stderr, "wrn: ast->tok_list is empty.\n");        
-        return NULL; 
-    }
-    return (jet_token*)jet_list_get(ast->tok_list, ast->tok_cursor);
-}
-
-static jet_token* jet_ast_peek_next_tok(jet_ast* ast)
-{ 
-    assert(ast != NULL);
-    assert(ast->tok_list != NULL);
-    if(jet_list_count(ast->tok_list) <= 0)
-    {
-        fprintf(stderr, "wrn: ast->tok_list is empty.\n");        
-        return NULL; 
-    }
-    return (jet_token*)jet_list_get(ast->tok_list, ast->tok_cursor + 1);
-}
-
-static jet_token* jet_ast_consume_tok(jet_ast* ast)
-{
-    assert(ast != NULL);
-    assert(ast->tok_list != NULL);
-
-    if(ast->tok_cursor >= jet_list_count(ast->tok_list))
-    {
-        puts("end of token-list reached.");
-        return NULL;
-    }
-    ast->tok_cursor++;
-    return (jet_token*)jet_list_get(ast->tok_list , ast->tok_cursor - 1);
-}
-
-static size_t jet_ast_get_type_byte_size(jet_token_type tok_type)
-{
-    switch(tok_type)
-    {
-        default:
-            fprintf(stderr, "wrn: token type doesnt have built native identifier.\n");
-            return 0;
-        case TOK_KWD_VOID:
-            return 0;
-        case TOK_KWD_INT:
-            return 4;
-        case TOK_KWD_FLOAT:
-            return 4;
-        case TOK_KWD_BOOL:
-            return 1;
-        case TOK_KWD_CHAR:
-            return 1;
-        case TOK_KWD_STR:
-            return 4;
-    }
-}    
-
+// DEBUG ******************************
 void jet_ast_print(jet_ast* ast)
 {
     if(!ast)
@@ -643,16 +261,13 @@ void jet_ast_print(jet_ast* ast)
     }
     printf("\n=======================\n");
     printf("TOP\n");
-
-    size_t top_node_count = jet_list_count(ast->top_node_list);
-    //printf("\nAST Top Level Nodes [%zu]\n\n", top_node_count);
     jet_ast_node_list_print(ast->top_node_list, 0);
+    
     printf("=======================\n");
-    //printf("\nAST Entry Point\n\n");
     jet_ast_node_print(ast->prog_node, 0);
+    
     printf("PROG\n");
     printf("=======================\n\n");
-    //printf("\nAST Entry Point\n\n");
 }
 
 

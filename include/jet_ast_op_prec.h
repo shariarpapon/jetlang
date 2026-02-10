@@ -1,4 +1,5 @@
 #pragma once
+#include <jet_token.h>
 
 #define PREC_ASG 1;   // =  +=  -=  *=  /=  %=  &=  |=  ^=
 #define PREC_OR 2;   // ||
@@ -14,10 +15,8 @@
 #define PREC_POW 12;  // **      (right-assoc)
 #define PREC_PREFIX 13;  // !  ++a  --a
 #define PREC_POSTFIX 14; // a++ b--  
-
-
-
-
+                         //
+size_t jet_ast_get_op_prec(jet_token_type op_type);
 
 
 
