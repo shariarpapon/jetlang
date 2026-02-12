@@ -28,7 +28,7 @@ jet_ast_node*
 
 jet_ast_node*
    jet_astn_tdecl_create(
-      jet_ast_node* type_ident, 
+      const char* type_name,
       size_t byte_size, 
       bool is_native);
 

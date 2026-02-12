@@ -81,7 +81,6 @@ void jet_astn_tdecl_dispose(jet_ast_node* node)
     assert(node != NULL);
     assert(node->node_type == AST_TYPE_DECL);
     assert(node->as.type_decl != NULL);
-    jet_ast_node_dispose(node->as.type_decl->type_ident);
 }
 
 void jet_astn_fdecl_dispose(jet_ast_node* node) 

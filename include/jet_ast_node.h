@@ -60,7 +60,7 @@ typedef struct jet_ast_node_var_decl
 
 typedef struct jet_ast_node_type_decl 
 {
-  jet_ast_node* type_ident;
+  const char* type_name;
   size_t byte_size;
   bool is_native;
 } jet_ast_node_type_decl;

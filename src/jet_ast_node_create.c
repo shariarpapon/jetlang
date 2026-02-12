@@ -166,16 +166,16 @@ jet_ast_node*
 
 jet_ast_node*
    jet_astn_tdecl_create(
-      jet_ast_node* type_ident, 
+      const char* type_name,
       size_t byte_size, 
       bool is_native) 
 { 
-    assert(type_ident != NULL);
+    assert(type_name != NULL);
     jet_ast_node_type_decl* tdecl = 
         (jet_ast_node_type_decl*)malloc(sizeof(jet_ast_node_type_decl));
     assert(tdecl != NULL);
     
-    tdecl->type_ident = type_ident;
+    tdecl->type_name = type_name;
     tdecl->byte_size = byte_size;
     
     jet_ast_node* node = jet_ast_node_create_base(AST_TYPE_DECL);

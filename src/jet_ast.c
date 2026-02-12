@@ -18,8 +18,8 @@ struct jet_ast
 
 static void jet_ast_push_node(jet_ast* ast, jet_ast_node* node);
 
-static jet_ast_node* jet_ast_node_parse_expr(jet_ast* ast, size_t min_prec);
-static jet_ast_node* jet_ast_node_parse_primary(jet_ast* ast);
+static jet_ast_node* jet_astn_expr_parse(jet_ast* ast, size_t min_prec);
+static jet_ast_node* jet_astn_primary_parse(jet_ast* ast);
 
 static jet_token* jet_ast_peek_tok(jet_ast* ast);
 static jet_token* jet_ast_peekn_tok(jet_ast* ast, size_t n);
@@ -141,7 +141,6 @@ static jet_token* jet_ast_expect_tok(jet_ast* ast, jet_token_type tok_type)
     return jet_ast_consume_tok(ast);
 }
 
-
 static jet_token* jet_ast_consume_tok(jet_ast* ast)
 {
     assert(ast != NULL);
@@ -156,12 +155,43 @@ static jet_token* jet_ast_consume_tok(jet_ast* ast)
     return (jet_token*)jet_list_get(ast->tok_list , ast->tok_cursor - 1);
 }
 
+// === PARSING ===
 
-// PARSERS ******************************
-
-static jet_ast_node* jet_ast_node_parse_expr(jet_ast* ast, size_t min_prec)
+static bool jet_ast_is_tdecl(jet_ast* ast)
 {
-    jet_ast_node* lhs_node = jet_ast_node_parse_primary(ast);
+    jet_token* tok = jet_ast_peek_tok(ast);
+    if(!tok) return false;
+    switch(tok->type)
+    {
+        case TOK_KWD_INT:
+        case TOK_KWD_FLOAT:
+        case TOK_KWD_STR:
+        case TOK_KWD_BOOL:
+        case TOK_KWD_CHAR:
+        case TOK_KWD_VOID:
+            return true;
+        default:
+            return false;
+    }
+}
+
+static bool jet_ast_is_tok_match(jet_ast* ast, jet_token_type tok_type)
+{
+    jet_token* tok = jet_ast_peek_tok(ast);
+    if(!tok) return false;
+    if(tok->type == tok_type)
+        return true;
+    return false;
+}
+
+static jet_ast_node* jet_astn_tdecl_parse(jet_ast* ast)
+{
+    return NULL;
+}
+
+static jet_ast_node* jet_astn_expr_parse(jet_ast* ast, size_t min_prec)
+{
+    jet_ast_node* lhs_node = jet_astn_primary_parse(ast);
     if(lhs_node == NULL)
     {
         fprintf(stderr, "wrn: cannot parse expression, expected primary lhs.\n");
@@ -178,7 +208,7 @@ static jet_ast_node* jet_ast_node_parse_expr(jet_ast* ast, size_t min_prec)
         if(op_prec < min_prec)
             break;
         jet_ast_consume_tok(ast);
-        jet_ast_node* rhs_node = jet_ast_node_parse_expr(ast, op_prec + 1);        
+        jet_ast_node* rhs_node = jet_astn_expr_parse(ast, op_prec + 1);        
         if(rhs_node == NULL)
         {
             fprintf(stderr, "wrn: cannot parse expression, expected rhs after operator.\n");
@@ -189,7 +219,7 @@ static jet_ast_node* jet_ast_node_parse_expr(jet_ast* ast, size_t min_prec)
     return lhs_node;
 }
 
-static jet_ast_node* jet_ast_node_parse_primary(jet_ast* ast)
+static jet_ast_node* jet_astn_primary_parse(jet_ast* ast)
 {
     jet_token* cur_tok = jet_ast_peek_tok(ast);
     if(cur_tok == NULL) 
@@ -223,7 +253,7 @@ static jet_ast_node* jet_ast_node_parse_primary(jet_ast* ast)
         case TOK_LPAR:
         {
             jet_ast_consume_tok(ast);
-            jet_ast_node* paran_expr = jet_ast_node_parse_expr(ast, 0);
+            jet_ast_node* paran_expr = jet_astn_expr_parse(ast, 0);
             cur_tok = jet_ast_peek_tok(ast);
             if(cur_tok == NULL || cur_tok->type != TOK_RPAR)
             {
@@ -238,7 +268,7 @@ static jet_ast_node* jet_ast_node_parse_primary(jet_ast* ast)
         case TOK_MINUS:
         {
             jet_ast_consume_tok(ast);
-            jet_ast_node* rhs = jet_ast_node_parse_expr(ast, 0);
+            jet_ast_node* rhs = jet_astn_expr_parse(ast, 0);
             if(rhs == NULL)
             {
                 fprintf(stderr, "error: expected expr after '-'\n");
@@ -251,7 +281,8 @@ static jet_ast_node* jet_ast_node_parse_primary(jet_ast* ast)
     return NULL;
 }
 
-// DEBUG ******************************
+// === DEBUG ===
+
 void jet_ast_print(jet_ast* ast)
 {
     if(!ast)

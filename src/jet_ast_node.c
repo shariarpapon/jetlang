@@ -129,7 +129,7 @@ void jet_ast_node_print(jet_ast_node* node, size_t branch)
         }
         case AST_TYPE_DECL:
         {
-            jet_ast_node_print(node->as.type_decl->type_ident, branch);
+            jet_ast_branch_print(node->as.type_decl->type_name, branch);
             break;
         }
         case AST_FUNC_DECL:
