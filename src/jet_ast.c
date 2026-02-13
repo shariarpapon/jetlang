@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <assert.h>
+#include <string.h>
 
 #include <jet_ast.h>
 #include <jet_ast_node.h>
@@ -17,14 +18,11 @@ struct jet_ast
 };
 
 static void jet_ast_push_node(jet_ast* ast, jet_ast_node* node);
-
-static jet_ast_node* jet_astn_expr_parse(jet_ast* ast, size_t min_prec);
-static jet_ast_node* jet_astn_primary_parse(jet_ast* ast);
-
 static jet_token* jet_ast_peek_tok(jet_ast* ast);
 static jet_token* jet_ast_peekn_tok(jet_ast* ast, size_t n);
 static jet_token* jet_ast_consume_tok(jet_ast* ast);
 static jet_token* jet_ast_expect_tok(jet_ast* ast, jet_token_type tok_type);
+static bool jet_ast_is_tok_match(jet_ast* ast, jet_token_type tok_type);
 
 jet_ast* jet_ast_create(jet_list* tok_list)
 {    
@@ -155,7 +153,50 @@ static jet_token* jet_ast_consume_tok(jet_ast* ast)
     return (jet_token*)jet_list_get(ast->tok_list , ast->tok_cursor - 1);
 }
 
-// === PARSING ===
+static bool jet_ast_is_tok_match(jet_ast* ast, jet_token_type tok_type)
+{
+    jet_token* tok = jet_ast_peek_tok(ast);
+    if(!tok) return false;
+    if(tok->type == tok_type)
+        return true;
+    return false;
+}
+
+// PARSING UTILS ================================================================================================================
+
+static const char* jet_ast_get_type_name(jet_token_type tok_type);
+
+static const char* jet_ast_get_type_name(jet_token_type tok_type)
+{
+    const char* type_name;
+    switch(tok_type)
+    {
+        default:
+        {
+            fprintf(stderr, "error: token type (id: %d) is not recognized as type.\n", (int)tok_type);
+            return "invalid";
+        }
+        case TOK_KWD_INT: return "int";
+        case TOK_KWD_FLOAT: return "float";
+        case TOK_KWD_STR: return "str";
+        case TOK_KWD_BOOL: return "bool";
+        case TOK_KWD_CHAR: return "char";
+        case TOK_KWD_VOID: return "void";
+    }
+    return type_name;
+}
+
+// PARSING =======================================================================================================================
+ 
+static bool jet_ast_is_tdecl(jet_ast* ast);
+static bool jet_ast_is_vdecl(jet_ast* ast);
+static bool jet_ast_is_fdecl(jet_ast* ast);
+
+static jet_ast_node* jet_astn_expr_parse(jet_ast* ast, size_t min_prec);
+static jet_ast_node* jet_astn_primary_parse(jet_ast* ast);
+static jet_ast_node* jet_astn_prog_parse(jet_ast* ast);
+static jet_ast_node* jet_astn_block_parse(jet_ast* ast);
+static jet_ast_node* jet_astn_tdecl_parse(jet_ast* ast);
 
 static bool jet_ast_is_tdecl(jet_ast* ast)
 {
@@ -175,18 +216,34 @@ static bool jet_ast_is_tdecl(jet_ast* ast)
     }
 }
 
-static bool jet_ast_is_tok_match(jet_ast* ast, jet_token_type tok_type)
+static bool jet_ast_is_vdecl(jet_ast* ast)
 {
-    jet_token* tok = jet_ast_peek_tok(ast);
-    if(!tok) return false;
-    if(tok->type == tok_type)
-        return true;
-    return false;
+    
+}
+
+static bool jet_ast_is_fdecl(jet_ast* ast)
+{
+    
+}
+
+static jet_ast_node* jet_astn_prog_parse(jet_ast* ast)
+{
+    return NULL;
+}
+
+static jet_ast_node* jet_astn_block_parse(jet_ast* ast)
+{
+    return NULL;
 }
 
 static jet_ast_node* jet_astn_tdecl_parse(jet_ast* ast)
 {
-    return NULL;
+    jet_token* tok = jet_ast_peek_tok(ast);
+    const char* tname = jet_ast_get_type_name(tok->type);
+    size_t size = 4;
+    bool is_native = strcmp(tname, "invalid") != 0;
+    jet_ast_node* tdecl = jet_astn_tdecl_create(tname, size, is_native); 
+    return tdecl;
 }
 
 static jet_ast_node* jet_astn_expr_parse(jet_ast* ast, size_t min_prec)
@@ -224,7 +281,6 @@ static jet_ast_node* jet_astn_primary_parse(jet_ast* ast)
     jet_token* cur_tok = jet_ast_peek_tok(ast);
     if(cur_tok == NULL) 
         return NULL;
-
     switch(cur_tok->type)
     {
         default:
@@ -242,14 +298,12 @@ static jet_ast_node* jet_astn_primary_parse(jet_ast* ast)
             jet_ast_node* lit = jet_astn_lit_create(cur_tok);
             return lit;
         }
-        
         case TOK_IDENT:
         {
             jet_ast_consume_tok(ast);
             jet_ast_node* ident = jet_astn_ident_create(cur_tok->source + cur_tok->origin, cur_tok->len);
             return ident;
         }
-
         case TOK_LPAR:
         {
             jet_ast_consume_tok(ast);
@@ -263,7 +317,6 @@ static jet_ast_node* jet_astn_primary_parse(jet_ast* ast)
             jet_ast_consume_tok(ast);
             return paran_expr;
         }
-
         case TOK_NOT:
         case TOK_MINUS:
         {
