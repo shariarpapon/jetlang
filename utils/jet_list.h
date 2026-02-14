@@ -21,8 +21,8 @@ bool jet_list_remove_first(jet_list* list);
 bool jet_list_remove_last(jet_list* list);
 
 void* jet_list_get(jet_list* list, size_t i);
-void* jet_list_first(jet_list* list);
-void* jet_list_last(jet_list* list);
+void* jet_list_get_first(jet_list* list);
+void* jet_list_get_last(jet_list* list);
 size_t jet_list_count(jet_list* list);
 
 

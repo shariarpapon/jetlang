@@ -22,7 +22,9 @@ static jet_token* jet_ast_peek_tok(jet_ast* ast);
 static jet_token* jet_ast_peekn_tok(jet_ast* ast, size_t n);
 static jet_token* jet_ast_consume_tok(jet_ast* ast);
 static jet_token* jet_ast_expect_tok(jet_ast* ast, jet_token_type tok_type);
+static jet_token_type jet_ast_peekn_tok_type(jet_ast* ast, size_t n);
 static bool jet_ast_is_tok_match(jet_ast* ast, jet_token_type tok_type);
+static const char* jet_ast_get_type_name(jet_token_type tok_type);
 
 jet_ast* jet_ast_create(jet_list* tok_list)
 {    
@@ -153,6 +155,14 @@ static jet_token* jet_ast_consume_tok(jet_ast* ast)
     return (jet_token*)jet_list_get(ast->tok_list , ast->tok_cursor - 1);
 }
 
+static jet_token_type jet_ast_peekn_tok_type(jet_ast* ast, size_t n)
+{
+    jet_token* tok = jet_ast_peekn_tok(ast, n);
+    if(tok == NULL)
+        return TOK_EOF;
+    return tok->type;
+}
+
 static bool jet_ast_is_tok_match(jet_ast* ast, jet_token_type tok_type)
 {
     jet_token* tok = jet_ast_peek_tok(ast);
@@ -161,10 +171,6 @@ static bool jet_ast_is_tok_match(jet_ast* ast, jet_token_type tok_type)
         return true;
     return false;
 }
-
-// PARSING UTILS ================================================================================================================
-
-static const char* jet_ast_get_type_name(jet_token_type tok_type);
 
 static const char* jet_ast_get_type_name(jet_token_type tok_type)
 {
@@ -177,7 +183,7 @@ static const char* jet_ast_get_type_name(jet_token_type tok_type)
             return "invalid";
         }
         case TOK_KWD_INT: return "int";
-        case TOK_KWD_FLOAT: return "float";
+            case TOK_KWD_FLOAT: return "float";
         case TOK_KWD_STR: return "str";
         case TOK_KWD_BOOL: return "bool";
         case TOK_KWD_CHAR: return "char";
@@ -197,6 +203,8 @@ static jet_ast_node* jet_astn_primary_parse(jet_ast* ast);
 static jet_ast_node* jet_astn_prog_parse(jet_ast* ast);
 static jet_ast_node* jet_astn_block_parse(jet_ast* ast);
 static jet_ast_node* jet_astn_tdecl_parse(jet_ast* ast);
+static jet_ast_node* jet_astn_vdecl_parse(jet_ast* ast);
+static jet_ast_node* jet_astn_func_parse(jet_ast* ast);
 
 static bool jet_ast_is_tdecl(jet_ast* ast)
 {
@@ -218,17 +226,33 @@ static bool jet_ast_is_tdecl(jet_ast* ast)
 
 static bool jet_ast_is_vdecl(jet_ast* ast)
 {
-    
+    jet_token_type cur = jet_ast_peekn_tok_type(ast, 0);
+    jet_token_type next = jet_ast_peekn_tok_type(ast, 1);
+    if(cur == TOK_IDENT && next == TOK_ASG)
+        return true;
+    return false;
 }
 
 static bool jet_ast_is_fdecl(jet_ast* ast)
 {
-    
+    jet_token_type cur = jet_ast_peekn_tok_type(ast, 0);
+    jet_token_type next = jet_ast_peekn_tok_type(ast, 1);
+    if(cur == TOK_IDENT && next == TOK_LPAR)
+        return true;
+    return false;
 }
 
 static jet_ast_node* jet_astn_prog_parse(jet_ast* ast)
 {
-    return NULL;
+    jet_ast_expect_tok(ast, TOK_KWD_PROG);
+    jet_ast_node* block = jet_astn_block_parse(ast);
+    if(block == NULL)
+    {
+        fprintf(stderr, "error: unable to parse prog block.\n");
+        return NULL;
+    }
+    jet_ast_node* prog = jet_astn_prog_create(block);
+    return prog;
 }
 
 static jet_ast_node* jet_astn_block_parse(jet_ast* ast)
@@ -244,6 +268,16 @@ static jet_ast_node* jet_astn_tdecl_parse(jet_ast* ast)
     bool is_native = strcmp(tname, "invalid") != 0;
     jet_ast_node* tdecl = jet_astn_tdecl_create(tname, size, is_native); 
     return tdecl;
+}
+
+static jet_ast_node* jet_astn_vdecl_parse(jet_ast* ast) 
+{
+    return NULL;
+}
+
+static jet_ast_node* jet_astn_func_parse(jet_ast* ast) 
+{
+    return NULL;
 }
 
 static jet_ast_node* jet_astn_expr_parse(jet_ast* ast, size_t min_prec)

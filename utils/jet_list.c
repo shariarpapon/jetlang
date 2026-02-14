@@ -27,7 +27,7 @@ jet_list* jet_list_create(size_t capacity, size_t elm_size)
 
     if(elm_size == 0)
     {
-        fprintf(stderr, "cannot initialize list with element size of 0\n");
+        fprintf(stderr, "cannot initialize list with element size of 0 bytes.\n");
         free(v);
         return NULL;
     }
@@ -53,6 +53,7 @@ jet_list* jet_list_create_copy(jet_list* list)
     jet_list* new_list = jet_list_create(list->capacity, list->elm_size);
     assert(new_list != NULL);
     memcpy((void*)new_list->data_array, (const void*)list->data_array, list->elm_size * list->count);
+    new_list->count = list->count;
     return new_list;
 }
 
@@ -67,6 +68,7 @@ bool jet_list_dispose(jet_list* v)
     free(v);    
     return true;
 }
+
 bool jet_list_clear(jet_list* v)
 {
     if(!v || !v->data_array)
@@ -206,11 +208,6 @@ bool jet_list_remove_last(jet_list* list)
     return jet_list_remove(list, list->count - 1); 
 }
 
-bool jet_list_pinch(jet_list* list, size_t from, size_t qt, jet_list* out_list)
-{
-    return false;
-}
-
 void* jet_list_get(jet_list* list, size_t i)
 {
     if(!list)
@@ -232,12 +229,12 @@ void* jet_list_get(jet_list* list, size_t i)
     return (char*)list->data_array + list->elm_size * i;
 }
 
-void* jet_list_first(jet_list* list)
+void* jet_list_get_first(jet_list* list)
 {
     return jet_list_get(list, 0);
 }
 
-void* jet_list_last(jet_list* list)
+void* jet_list_get_last(jet_list* list)
 {
     return jet_list_get(list, list->count - 1);
 }
