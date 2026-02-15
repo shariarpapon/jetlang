@@ -51,14 +51,11 @@ jet_ast_node*
 }
 
 jet_ast_node* 
-   jet_astn_ident_create(const char* start, size_t len)
+   jet_astn_ident_create(const char* str)
 {
-    assert(start != NULL);
     jet_ast_node_ident* ident = (jet_ast_node_ident*)malloc(sizeof(jet_ast_node_ident));
     assert(ident != NULL);
-    ident->start = start;
-    ident->len = len;
-    
+    ident->str = str; 
     jet_ast_node* node = jet_ast_node_create_base(AST_IDENT);
     assert(node != NULL);
     node->as.ident = ident;

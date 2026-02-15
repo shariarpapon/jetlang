@@ -19,8 +19,7 @@ typedef struct jet_ast_node_mem
 
 typedef struct jet_ast_node_ident
 {
-  const char* start;
-  size_t len;
+    const char* str;
 } jet_ast_node_ident;
  
 typedef struct jet_ast_node_lit

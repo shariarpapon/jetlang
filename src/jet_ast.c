@@ -189,7 +189,7 @@ static const char* jet_ast_get_type_name(jet_token_type tok_type)
             return "invalid";
         }
         case TOK_KWD_INT: return "int";
-            case TOK_KWD_FLOAT: return "float";
+        case TOK_KWD_FLOAT: return "float";
         case TOK_KWD_STR: return "str";
         case TOK_KWD_BOOL: return "bool";
         case TOK_KWD_CHAR: return "char";
@@ -208,6 +208,7 @@ static jet_ast_node* jet_astn_expr_parse(jet_ast* ast, size_t min_prec);
 static jet_ast_node* jet_astn_primary_parse(jet_ast* ast);
 static jet_ast_node* jet_astn_prog_parse(jet_ast* ast);
 static jet_ast_node* jet_astn_block_parse(jet_ast* ast);
+static jet_ast_node* jet_astn_ident_parse(jet_ast* ast);
 static jet_ast_node* jet_astn_tdecl_parse(jet_ast* ast);
 static jet_ast_node* jet_astn_vdecl_parse(jet_ast* ast);
 static jet_ast_node* jet_astn_func_parse(jet_ast* ast);
@@ -273,13 +274,44 @@ static jet_ast_node* jet_astn_block_parse(jet_ast* ast)
 {
     jet_ast_expect_tok(ast, TOK_LBRC);
     jet_token_type t = jet_ast_peekn_tok_type(ast, 0);
+    jet_list* list = jet_list_create(8, sizeof(jet_ast_node));
+    if(!list)
+    {
+        fprintf(stderr, "error: unable to parse block, could not create node list.\n");
+        return NULL;
+    }
     while(t != TOK_RBRC && t != TOK_EOF && t != TOK_INV)
     {
         //TODO:  parse all statements until end of block
         t = jet_ast_peekn_tok_type(ast, 0);
     }
+    jet_ast_node* block = jet_astn_block_create(list);
     jet_ast_expect_tok(ast, TOK_RBRC);
-    return NULL;
+    return block;
+}
+
+static jet_ast_node* jet_astn_ident_parse(jet_ast* ast)
+{
+    jet_token* tok = jet_ast_peek_tok(ast);
+    if(!tok)
+    {
+        fprintf(stderr, "error: cannot parse ident, no valid tokens to peek.\n");
+        return NULL;
+    }
+    if(tok->type != TOK_IDENT)
+    {
+        fprintf(stderr, "error: cannot parse ident, token type mismatch.\n");
+        return NULL;
+    }
+    const char* ident_str = (const char*)jet_token_strdup(tok);
+    if(!ident_str)
+    {
+        fprintf(stderr, "error: cannot parse ident, unable to create token string dup.\n");
+        return NULL;
+    }
+    jet_ast_node* ident = jet_astn_ident_create(ident_str);
+    jet_ast_consume_tok(ast);
+    return ident;
 }
 
 static jet_ast_node* jet_astn_tdecl_parse(jet_ast* ast)
@@ -309,7 +341,7 @@ static jet_ast_node* jet_astn_vdecl_parse(jet_ast* ast)
     }
 
     jet_ast_node* init = NULL;
-    jet_token_type tok_type = jet_astn_peekn_tok_type(ast, 0);
+    jet_token_type tok_type = jet_ast_peekn_tok_type(ast, 0);
     if(tok_type == TOK_ASG)
     {
         jet_ast_consume_tok(ast);    
@@ -384,8 +416,14 @@ static jet_ast_node* jet_astn_primary_parse(jet_ast* ast)
         }
         case TOK_IDENT:
         {
+            const char* ident_str = (const char*)jet_token_strdup(cur_tok);
+            if(!ident_str)
+            {
+                fprintf(stderr, "error: cannot parse expr, unable to create token string dup.\n");
+                return NULL;
+            }
+            jet_ast_node* ident = jet_astn_ident_create(ident_str);
             jet_ast_consume_tok(ast);
-            jet_ast_node* ident = jet_astn_ident_create(cur_tok->source + cur_tok->origin, cur_tok->len);
             return ident;
         }
         case TOK_LPAR:

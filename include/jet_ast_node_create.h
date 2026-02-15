@@ -12,7 +12,7 @@ jet_ast_node*
    jet_astn_block_create(jet_list* node_list);
 
 jet_ast_node* 
-   jet_astn_ident_create(const char* start, size_t len);
+   jet_astn_ident_create(const char* str);
 
 jet_ast_node* 
    jet_astn_lit_create(jet_token* tok);

@@ -133,7 +133,18 @@ const char* jet_token_type_str(jet_token_type type)
     }
 }
 
-
+char* jet_token_strdup(jet_token* tok)
+{
+    char* s = (char*)malloc(sizeof(char) * (tok->len + 1));
+    if(!s)
+    {
+        fprintf(stderr, "error: unable to allocate memory for str slice.\n");
+        return NULL;
+    }
+    memcpy(s, tok->source + tok->origin, tok->len);
+    s[tok->len] = '\0';
+    return s;
+}
 
 
 
