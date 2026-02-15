@@ -194,7 +194,7 @@ static const char* jet_ast_get_type_name(jet_token_type tok_type)
 
 // PARSING =======================================================================================================================
  
-static bool jet_ast_is_tdecl(jet_ast* ast);
+static bool jet_ast_is_type_tok(jet_token_type tok_type);
 static bool jet_ast_is_vdecl(jet_ast* ast);
 static bool jet_ast_is_fdecl(jet_ast* ast);
 
@@ -206,11 +206,9 @@ static jet_ast_node* jet_astn_tdecl_parse(jet_ast* ast);
 static jet_ast_node* jet_astn_vdecl_parse(jet_ast* ast);
 static jet_ast_node* jet_astn_func_parse(jet_ast* ast);
 
-static bool jet_ast_is_tdecl(jet_ast* ast)
+static bool jet_ast_is_type_tok(jet_token_type tok_type)
 {
-    jet_token* tok = jet_ast_peek_tok(ast);
-    if(!tok) return false;
-    switch(tok->type)
+    switch(tok_type)
     {
         case TOK_KWD_INT:
         case TOK_KWD_FLOAT:
@@ -226,20 +224,30 @@ static bool jet_ast_is_tdecl(jet_ast* ast)
 
 static bool jet_ast_is_vdecl(jet_ast* ast)
 {
-    jet_token_type cur = jet_ast_peekn_tok_type(ast, 0);
-    jet_token_type next = jet_ast_peekn_tok_type(ast, 1);
-    if(cur == TOK_IDENT && next == TOK_ASG)
-        return true;
-    return false;
+    jet_token_type t = jet_ast_peekn_tok_type(ast, 0);
+    if(!jet_ast_is_type_tok(t))
+        return false;
+    t = jet_ast_peekn_tok_type(ast, 1);
+    if(t != TOK_IDENT)
+        return false;
+    t = jet_ast_peekn_tok_type(ast, 2);
+    if(t != TOK_ASG)
+        return false;
+    return true;
 }
 
 static bool jet_ast_is_fdecl(jet_ast* ast)
 {
-    jet_token_type cur = jet_ast_peekn_tok_type(ast, 0);
-    jet_token_type next = jet_ast_peekn_tok_type(ast, 1);
-    if(cur == TOK_IDENT && next == TOK_LPAR)
-        return true;
-    return false;
+    jet_token_type t = jet_ast_peekn_tok_type(ast, 0);
+    if(!jet_ast_is_type_tok(t))
+        return false;
+    t = jet_ast_peekn_tok_type(ast, 1);
+    if(t != TOK_IDENT) 
+        return false;
+    t = jet_ast_peekn_tok_type(ast, 2);
+    if(t != TOK_LPAR)
+        return false;
+    return true;
 }
 
 static jet_ast_node* jet_astn_prog_parse(jet_ast* ast)
@@ -257,12 +265,20 @@ static jet_ast_node* jet_astn_prog_parse(jet_ast* ast)
 
 static jet_ast_node* jet_astn_block_parse(jet_ast* ast)
 {
+    jet_ast_expect_tok(ast, TOK_LBRC);
+    jet_token_type t = jet_ast_peekn_tok_type(ast, 0);
+    while(t != TOK_RBRC && t != TOK_EOF && t != TOK_INV)
+    {
+        //TODO:  parse all statements until end of block
+        t = jet_ast_peekn_tok_type(ast, 0);
+    }
+    jet_ast_expect_tok(ast, TOK_RBRC);
     return NULL;
 }
 
 static jet_ast_node* jet_astn_tdecl_parse(jet_ast* ast)
 {
-    jet_token* tok = jet_ast_peek_tok(ast);
+    jet_token* tok = jet_ast_consume_tok(ast);
     const char* tname = jet_ast_get_type_name(tok->type);
     size_t size = 4;
     bool is_native = strcmp(tname, "invalid") != 0;
