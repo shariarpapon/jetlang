@@ -1,3 +1,12 @@
+/* 
+ * NAMING CONVENTIONS
+ *
+ * peekn : peek nth
+ * astn  : ast_node 
+ * tok   : token
+ *
+ * */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -92,10 +101,7 @@ static void jet_ast_push_node(jet_ast* ast, jet_ast_node* node)
             return;
         }
     }
-    else
-    {
-        jet_list_append(ast->top_node_list, (const void*)node);
-    }
+    else jet_list_append(ast->top_node_list, (const void*)node);
 }
 
 static jet_token* jet_ast_peek_tok(jet_ast* ast)
@@ -231,7 +237,7 @@ static bool jet_ast_is_vdecl(jet_ast* ast)
     if(t != TOK_IDENT)
         return false;
     t = jet_ast_peekn_tok_type(ast, 2);
-    if(t != TOK_ASG)
+    if(t != TOK_ASG || t != TOK_SEMI)
         return false;
     return true;
 }
@@ -288,7 +294,35 @@ static jet_ast_node* jet_astn_tdecl_parse(jet_ast* ast)
 
 static jet_ast_node* jet_astn_vdecl_parse(jet_ast* ast) 
 {
-    return NULL;
+    jet_ast_node* tdecl = jet_astn_tdecl_parse(ast);
+    if(!tdecl)
+    {
+        fprintf(stderr, "error: cannot parse vdecl, expected tdecl.\n");
+        return NULL;
+    }
+
+    jet_ast_node* ident = jet_astn_ident_parse(ast);
+    if(!ident)
+    {
+        fprintf(stderr, "error: cannot parse vdecl, expected ident after tdecl.\n");
+        return NULL;
+    }
+
+    jet_ast_node* init = NULL;
+    jet_token_type tok_type = jet_astn_peekn_tok_type(ast, 0);
+    if(tok_type == TOK_ASG)
+    {
+        jet_ast_consume_tok(ast);    
+        init = jet_astn_expr_parse(ast, 0);
+        if(!init)
+        {
+            fprintf(stderr, "error: cannot parse vdecl, expected expr value after asg operator.\n");
+            return NULL;
+        } 
+    }
+    jet_ast_expect_tok(ast, TOK_SEMI);
+    jet_ast_node* vdecl = jet_astn_vdecl_create(tdecl, ident, init);
+    return vdecl;
 }
 
 static jet_ast_node* jet_astn_func_parse(jet_ast* ast) 

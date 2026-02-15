@@ -146,8 +146,8 @@ jet_ast_node*
 
 jet_ast_node* 
    jet_astn_vdecl_create(
-      jet_ast_node* binding_ident, 
       jet_ast_node* type_decl, 
+      jet_ast_node* binding_ident, 
       jet_ast_node* init_value) 
 {
     assert(binding_ident != NULL && type_decl != NULL && init_value != NULL);
