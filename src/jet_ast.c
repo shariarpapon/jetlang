@@ -359,7 +359,10 @@ static jet_ast_node* jet_astn_vdecl_parse(jet_ast* ast)
 
 static jet_ast_node* jet_astn_func_parse(jet_ast* ast) 
 {
-    return NULL;
+    jet_ast_node* tdecl = jet_astn_tdecl_parse(ast);
+    jet_ast_node* ident = jet_astn_ident_parse(ast);
+    jet_ast_expect_tok(ast, TOK_LPAR);
+    jet_list* param_nodes = jet_list_create(4, sizeof(jet_ast_node));
 }
 
 static jet_ast_node* jet_astn_expr_parse(jet_ast* ast, size_t min_prec)
