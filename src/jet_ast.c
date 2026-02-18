@@ -204,6 +204,7 @@ static bool jet_ast_is_type_tok(jet_token_type tok_type);
 static bool jet_ast_is_vdecl(jet_ast* ast);
 static bool jet_ast_is_fdecl(jet_ast* ast);
 
+static jet_ast_node* jet_astn_stmt_parse(jet_ast* ast);
 static jet_ast_node* jet_astn_expr_parse(jet_ast* ast, size_t min_prec);
 static jet_ast_node* jet_astn_primary_parse(jet_ast* ast);
 static jet_ast_node* jet_astn_prog_parse(jet_ast* ast);
@@ -255,6 +256,11 @@ static bool jet_ast_is_fdecl(jet_ast* ast)
     if(t != TOK_LPAR)
         return false;
     return true;
+}
+
+static jet_ast_node* jet_astn_stmt_parse(jet_ast* ast)
+{
+
 }
 
 static jet_ast_node* jet_astn_prog_parse(jet_ast* ast)
@@ -362,7 +368,66 @@ static jet_ast_node* jet_astn_func_parse(jet_ast* ast)
     jet_ast_node* tdecl = jet_astn_tdecl_parse(ast);
     jet_ast_node* ident = jet_astn_ident_parse(ast);
     jet_ast_expect_tok(ast, TOK_LPAR);
-    jet_list* param_nodes = jet_list_create(4, sizeof(jet_ast_node));
+    jet_list* param_list = jet_list_create(4, sizeof(jet_ast_node));
+    if(!param_list)
+    {
+        fprintf(stderr, "error: cannot parse func, unable to create param list.\n");
+        return NULL;
+    }
+
+    jet_ast_node* vdecl = NULL;
+    jet_token_type t = TOK_EOF;
+    while(jet_ast_peekn_tok_type(ast, 0) != TOK_RPAR)
+    {
+        vdecl = jet_astn_vdecl_parse(ast);
+        if(vdecl == NULL)
+        {
+            fprintf(stderr, "error: cannot parse func, unable to parse parameter.\n");
+            return NULL;
+        }
+        t = jet_ast_peekn_tok_type(ast, 0);
+        switch(t)
+        {
+            case TOK_RPAR:
+                break;
+            case TOK_COMMA:
+                jet_ast_consume_tok(ast);
+                break;
+            case TOK_EOF:
+                fprintf(stderr, "error: cannot parse func, EOF reached.\n");
+                return NULL;
+            case TOK_INV:
+                fprintf(stderr, "error: cannot parse func, invalid token encountered.\n");
+                return NULL;
+            default:
+                fprintf(stderr, "error: cannot parse func, unexpected token (type-enum-id: %d) encountered.\n", (int)t);
+                return NULL;
+        }
+        jet_list_append(param_list, (const void*)vdecl);
+    }
+    jet_ast_expect_tok(ast, TOK_RPAR); 
+    if(jet_list_is_empty(param_list))
+    {
+        jet_list_dispose(param_list);
+        param_list = NULL;
+    }
+
+    jet_list* ret_type_list = jet_list_create(1, sizeof(jet_ast_node));
+    jet_list_append(ret_type_list, (const void*)tdecl);
+    
+    jet_ast_node* func = jet_astn_fdecl_create(ident, ret_type_list, param_list);
+    
+    if(jet_ast_peekn_tok_type(ast, 0) == TOK_LBRC)
+    {
+        jet_ast_node* block = jet_astn_block_parse(ast);
+        if(block == NULL)
+        {
+            fprintf(stderr, "error: cannot parse func, unable to parse func definiton block.\n");
+            return NULL;
+        }
+        func = jet_astn_fdef_create(func, block);
+    }
+    return func;
 }
 
 static jet_ast_node* jet_astn_expr_parse(jet_ast* ast, size_t min_prec)

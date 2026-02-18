@@ -35,8 +35,8 @@ jet_ast_node*
 jet_ast_node*
    jet_astn_fdecl_create(
       jet_ast_node* binding_ident,
-      jet_list* ret_type_decls,
-      jet_list* param_var_decls);
+      jet_list* ret_type_list,
+      jet_list* param_list);
 
 jet_ast_node*
    jet_astn_fdef_create(

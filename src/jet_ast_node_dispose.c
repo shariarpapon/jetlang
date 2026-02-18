@@ -89,8 +89,8 @@ void jet_astn_fdecl_dispose(jet_ast_node* node)
     assert(node->node_type == AST_FUNC_DECL);
     assert(node->as.func_decl != NULL);
     jet_ast_node_dispose(node->as.func_decl->binding_ident);
-    jet_ast_node_dispose_list(node->as.func_decl->ret_type_decls);
-    jet_ast_node_dispose_list(node->as.func_decl->param_var_decls);
+    jet_ast_node_dispose_list(node->as.func_decl->ret_type_list);
+    jet_ast_node_dispose_list(node->as.func_decl->param_list);
 }
 
 void jet_astn_fdef_dispose(jet_ast_node* node) 

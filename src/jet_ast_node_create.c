@@ -184,16 +184,16 @@ jet_ast_node*
 jet_ast_node* 
    jet_astn_fdecl_create(
       jet_ast_node* binding_ident,
-      jet_list* ret_type_decls,
-      jet_list* param_var_decls) 
+      jet_list* ret_type_list,
+      jet_list* param_list) 
 {
     jet_ast_node_func_decl* fdecl = 
         (jet_ast_node_func_decl*)malloc(sizeof(jet_ast_node_func_decl));
     assert(fdecl != NULL);
     
     fdecl->binding_ident = binding_ident;
-    fdecl->ret_type_decls = ret_type_decls;
-    fdecl->param_var_decls = param_var_decls;
+    fdecl->ret_type_list = ret_type_list;
+    fdecl->param_list = param_list;
     
     jet_ast_node* node = jet_ast_node_create_base(AST_FUNC_DECL);
     assert(node != NULL);

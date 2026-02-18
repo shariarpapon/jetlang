@@ -67,8 +67,8 @@ typedef struct jet_ast_node_type_decl
 typedef struct jet_ast_node_func_decl
 {
   jet_ast_node* binding_ident;
-  jet_list* ret_type_decls;
-  jet_list* param_var_decls; 
+  jet_list* ret_type_list;
+  jet_list* param_list; 
 } jet_ast_node_func_decl;
 
 typedef struct jet_ast_node_func_def

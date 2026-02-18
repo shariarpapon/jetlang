@@ -135,8 +135,8 @@ void jet_ast_node_print(jet_ast_node* node, size_t branch)
         case AST_FUNC_DECL:
         {
             jet_ast_node_print(node->as.func_decl->binding_ident, branch);
-            jet_ast_node_list_print(node->as.func_decl->ret_type_decls, branch);
-            jet_ast_node_list_print(node->as.func_decl->param_var_decls, branch);
+            jet_ast_node_list_print(node->as.func_decl->ret_type_list, branch);
+            jet_ast_node_list_print(node->as.func_decl->param_list, branch);
             break;
         }
         case AST_FUNC_DEF:
