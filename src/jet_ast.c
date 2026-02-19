@@ -288,7 +288,6 @@ static jet_ast_node* jet_astn_block_parse(jet_ast* ast)
     while(jet_ast_peekn_tok_type(ast, 0) != TOK_RBRC)
     {
         //TODO:  parse all statements until end of block
-        t = jet_ast_peekn_tok_type(ast, 0);
     }
     jet_ast_expect_tok(ast, TOK_RBRC);
     jet_ast_node* block = jet_astn_block_create(list);
