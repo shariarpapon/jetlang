@@ -279,20 +279,19 @@ static jet_ast_node* jet_astn_prog_parse(jet_ast* ast)
 static jet_ast_node* jet_astn_block_parse(jet_ast* ast)
 {
     jet_ast_expect_tok(ast, TOK_LBRC);
-    jet_token_type t = jet_ast_peekn_tok_type(ast, 0);
     jet_list* list = jet_list_create(8, sizeof(jet_ast_node));
     if(!list)
     {
         fprintf(stderr, "error: unable to parse block, could not create node list.\n");
         return NULL;
     }
-    while(t != TOK_RBRC && t != TOK_EOF && t != TOK_INV)
+    while(jet_ast_peekn_tok_type(ast, 0) != TOK_RBRC)
     {
         //TODO:  parse all statements until end of block
         t = jet_ast_peekn_tok_type(ast, 0);
     }
-    jet_ast_node* block = jet_astn_block_create(list);
     jet_ast_expect_tok(ast, TOK_RBRC);
+    jet_ast_node* block = jet_astn_block_create(list);
     return block;
 }
 
