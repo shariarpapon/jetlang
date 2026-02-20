@@ -1,7 +1,7 @@
 /* 
  * NAMING CONVENTIONS
  *
- * peekn : peek nth
+ * peekn : peek_nth
  * astn  : ast_node 
  * tok   : token
  *
@@ -184,7 +184,7 @@ static const char* jet_ast_get_type_name(jet_token_type tok_type)
     {
         default:
         {
-            fprintf(stderr, "error: token type (id: %d) is not recognized as type.\n", (int)tok_type);
+            fprintf(stderr, "error: token type (enum-id: %d) is not recognized as a native type.\n", (int)tok_type);
             return "invalid";
         }
         case TOK_KWD_INT: return "int";
@@ -201,9 +201,9 @@ static const char* jet_ast_get_type_name(jet_token_type tok_type)
  
 static bool jet_ast_is_type_tok(jet_token_type tok_type);
 static bool jet_ast_is_vdecl(jet_ast* ast);
-static bool jet_ast_is_fdecl(jet_ast* ast);
+static bool jet_ast_is_func_head(jet_ast* ast);
 
-static jet_ast_node* jet_astn_stmt_parse(jet_ast* ast);
+static jet_ast_node* jet_astn_parse_next_stmt(jet_ast* ast);
 static jet_ast_node* jet_astn_expr_parse(jet_ast* ast, size_t min_prec);
 static jet_ast_node* jet_astn_primary_parse(jet_ast* ast);
 static jet_ast_node* jet_astn_prog_parse(jet_ast* ast);
@@ -243,7 +243,7 @@ static bool jet_ast_is_vdecl(jet_ast* ast)
     return true;
 }
 
-static bool jet_ast_is_fdecl(jet_ast* ast)
+static bool jet_ast_is_func_head(jet_ast* ast)
 {
     jet_token_type t = jet_ast_peekn_tok_type(ast, 0);
     if(!jet_ast_is_type_tok(t))
@@ -257,9 +257,59 @@ static bool jet_ast_is_fdecl(jet_ast* ast)
     return true;
 }
 
-static jet_ast_node* jet_astn_stmt_parse(jet_ast* ast)
+static jet_ast_node* jet_astn_parse_next_stmt(jet_ast* ast)
 {
+    if(!ast)
+    {
+        fprintf(stderr, "error: cannot parse next stmt, ast is null.\n");
+        return NULL;
+    }
+    
+    jet_ast_node* parsed_node = NULL;
+    jet_token_type t = jet_ast_peekn_tok_type(ast, 0);
+    
+    if(t == TOK_EOF)
+    {
+        printf("* ast parsing complete, end of file reached.\n");
+        return NULL;
+    }
+    else if(t == TOK_INV)
+    {
+        fprintf(stderr, "error: cannot parse next stmt, invalid token.\n");
+        return NULL; 
+    }    
+    else if(t == TOK_KWD_PROG)
+    {
+        parsed_node = jet_astn_prog_parse(ast);
+        if(!parsed_node)
+        {
+            fprintf(stderr, "error: unable to parse next stmt (prog)\n");
+            return NULL;
+        }
+    }
+    else if(jet_ast_is_vdecl(ast))
+    {
+        parsed_node = jet_astn_vdecl_parse(ast);
+        if(!parsed_node)
+        {
+            fprintf(stderr, "error: cannot parse next stmt (vdecl)\n");
+            return NULL;
+        }
+    }
+    else if(jet_ast_is_func_head(ast))
+    { 
+        parsed_node = jet_astn_func_parse(ast);
+        if(!parsed_node)
+        {
+            fprintf(stderr, "error: cannot parse next stmt (func)\n");
+            return NULL;
+        }
+    }
 
+    if(parsed_node == NULL)
+        fprintf(stderr, "error: unable to parse next stmt, no stmt sequences recognized.\n");
+
+    return parsed_node;
 }
 
 static jet_ast_node* jet_astn_prog_parse(jet_ast* ast)
