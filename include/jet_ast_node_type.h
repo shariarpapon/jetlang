@@ -12,7 +12,7 @@ typedef enum jet_ast_node_type
   AST_TYPE_DECL,
   AST_FUNC_DECL,
   AST_FUNC_DEF,
-  AST_FUNC_CALL,
+  AST_CALL,
   AST_BINOP,
   AST_UNOP,
 } jet_ast_node_type;

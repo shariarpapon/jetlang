@@ -54,8 +54,8 @@ void jet_ast_node_dispose(jet_ast_node* node)
         case AST_FUNC_DEF:
             jet_astn_fdef_dispose(node);
             break;
-        case AST_FUNC_CALL:
-            jet_astn_fcall_dispose(node);
+        case AST_CALL:
+            jet_astn_call_dispose(node);
             break;
         case AST_BINOP:
             jet_astn_binop_dispose(node);
@@ -137,10 +137,10 @@ void jet_ast_node_print(jet_ast_node* node, size_t branch)
             jet_ast_node_print(node->as.func_def->block, branch);
             break;
         }
-        case AST_FUNC_CALL:
+        case AST_CALL:
         {
-            jet_ast_node_print(node->as.func_call->func_ident, branch);
-            jet_ast_node_list_print(node->as.func_call->arg_nodes, branch);
+            jet_ast_node_print(node->as.call->ident, branch);
+            jet_ast_node_list_print(node->as.call->arg_nodes, branch);
             break;
         }
         case AST_BINOP:

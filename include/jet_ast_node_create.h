@@ -41,8 +41,8 @@ jet_ast_node*
       jet_ast_node* block);
 
 jet_ast_node*
-   jet_astn_fcall_create(
-      jet_ast_node* func_ident, 
+   jet_astn_call_create(
+      jet_ast_node* ident, 
       jet_list* arg_nodes);
 
 jet_ast_node* 

@@ -94,13 +94,13 @@ void jet_astn_fdef_dispose(jet_ast_node* node)
     jet_ast_node_dispose(node->as.func_def->block);
 }
 
-void jet_astn_fcall_dispose(jet_ast_node* node) 
+void jet_astn_call_dispose(jet_ast_node* node) 
 {
     assert(node != NULL);
-    assert(node->node_type == AST_FUNC_CALL);
-    assert(node->as.func_call != NULL);
-    jet_ast_node_dispose(node->as.func_call->func_ident);
-    jet_ast_node_dispose_list(node->as.func_call->arg_nodes);
+    assert(node->node_type == AST_CALL);
+    assert(node->as.call != NULL);
+    jet_ast_node_dispose(node->as.call->ident);
+    jet_ast_node_dispose_list(node->as.call->arg_nodes);
 }
 
 void jet_astn_binop_dispose(jet_ast_node* node) 

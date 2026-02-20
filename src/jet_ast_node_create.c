@@ -205,21 +205,21 @@ jet_ast_node*
 }
 
 jet_ast_node* 
-   jet_astn_fcall_create(
-      jet_ast_node* func_ident, 
+   jet_astn_call_create(
+      jet_ast_node* ident, 
       jet_list* arg_nodes) 
 { 
-    assert(func_ident != NULL && arg_nodes != NULL);
-    jet_ast_node_func_call* fcall = 
-        (jet_ast_node_func_call*)malloc(sizeof(jet_ast_node_func_call));
+    assert(ident != NULL && arg_nodes != NULL);
+    jet_ast_node_call* fcall = 
+        (jet_ast_node_call*)malloc(sizeof(jet_ast_node_call));
     assert(fcall != NULL);
      
-    fcall->func_ident = func_ident;
+    fcall->ident = ident;
     fcall->arg_nodes = arg_nodes;
 
-    jet_ast_node* node = jet_ast_node_create_base(AST_FUNC_CALL);
+    jet_ast_node* node = jet_ast_node_create_base(AST_CALL);
     assert(node != NULL);
-    node->as.func_call = fcall;
+    node->as.call = fcall;
     return node;
 }
 

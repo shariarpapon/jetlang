@@ -72,11 +72,11 @@ typedef struct jet_ast_node_func_def
   jet_ast_node* block;
 } jet_ast_node_func_def; 
 
-typedef struct jet_ast_node_func_call
+typedef struct jet_ast_node_call
 {
-  jet_ast_node* func_ident;
+  jet_ast_node* ident;
   jet_list* arg_nodes;
-} jet_ast_node_func_call;
+} jet_ast_node_call;
 
 typedef struct jet_ast_node_binop
 {
@@ -106,7 +106,7 @@ struct jet_ast_node
         jet_ast_node_type_decl* type_decl;
         jet_ast_node_func_decl* func_decl;
         jet_ast_node_func_def* func_def;
-        jet_ast_node_func_call* func_call;
+        jet_ast_node_call* call;
         jet_ast_node_binop* binop;
         jet_ast_node_unop* unop;
     } as;

@@ -26,8 +26,8 @@ const char* jet_ast_node_type_str(jet_ast_node_type node_type)
             return "AST_FUNC_DECL";
         case AST_FUNC_DEF:
             return "AST_FUNC_DEF";
-        case AST_FUNC_CALL:
-            return "AST_FUNC_CALL";
+        case AST_CALL:
+            return "AST_CALL";
         case AST_BINOP:
             return "AST_BINOP";
         case AST_UNOP:
