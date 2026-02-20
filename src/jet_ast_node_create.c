@@ -125,33 +125,17 @@ jet_ast_node*
     return node;
 }
 
-
-jet_ast_node* 
-   jet_astn_vref_create(jet_ast_node* var_binding_ident) 
-{
-    assert(var_binding_ident != NULL);
-    jet_ast_node_var_ref* vref = 
-        (jet_ast_node_var_ref*)malloc(sizeof(jet_ast_node_var_ref));
-    assert(vref != NULL);
-    vref -> var_binding_ident = var_binding_ident;
-    
-    jet_ast_node* node = jet_ast_node_create_base(AST_VAR_REF);
-    assert(node != NULL);
-    node->as.var_ref = vref;
-    return node;
-}
-
 jet_ast_node* 
    jet_astn_vdecl_create(
       jet_ast_node* type_decl, 
-      jet_ast_node* binding_ident, 
+      jet_ast_node* ident, 
       jet_ast_node* init_value) 
 {
-    assert(binding_ident != NULL && type_decl != NULL && init_value != NULL);
+    assert(ident != NULL && type_decl != NULL && init_value != NULL);
     jet_ast_node_var_decl* vdecl = 
         (jet_ast_node_var_decl*)malloc(sizeof(jet_ast_node_var_decl));
     assert(vdecl != NULL);
-    vdecl->binding_ident = binding_ident;
+    vdecl->ident = ident;
     vdecl->type_decl = type_decl;
     vdecl->init_value = init_value;
     
@@ -183,7 +167,7 @@ jet_ast_node*
 
 jet_ast_node* 
    jet_astn_fdecl_create(
-      jet_ast_node* binding_ident,
+      jet_ast_node* ident,
       jet_list* ret_type_list,
       jet_list* param_list) 
 {
@@ -191,7 +175,7 @@ jet_ast_node*
         (jet_ast_node_func_decl*)malloc(sizeof(jet_ast_node_func_decl));
     assert(fdecl != NULL);
     
-    fdecl->binding_ident = binding_ident;
+    fdecl->ident = ident;
     fdecl->ret_type_list = ret_type_list;
     fdecl->param_list = param_list;
     
@@ -222,15 +206,15 @@ jet_ast_node*
 
 jet_ast_node* 
    jet_astn_fcall_create(
-      jet_ast_node* func_binding_ident, 
+      jet_ast_node* func_ident, 
       jet_list* arg_nodes) 
 { 
-    assert(func_binding_ident != NULL && arg_nodes != NULL);
+    assert(func_ident != NULL && arg_nodes != NULL);
     jet_ast_node_func_call* fcall = 
         (jet_ast_node_func_call*)malloc(sizeof(jet_ast_node_func_call));
     assert(fcall != NULL);
      
-    fcall->func_binding_ident = func_binding_ident;
+    fcall->func_ident = func_ident;
     fcall->arg_nodes = arg_nodes;
 
     jet_ast_node* node = jet_ast_node_create_base(AST_FUNC_CALL);

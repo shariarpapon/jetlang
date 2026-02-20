@@ -42,9 +42,6 @@ void jet_ast_node_dispose(jet_ast_node* node)
         case AST_BLOCK:
             jet_astn_block_dispose(node);
             break;
-        case AST_VAR_REF:
-            jet_astn_vref_dispose(node);
-            break;
         case AST_VAR_DECL:
             jet_astn_vdecl_dispose(node);
             break;
@@ -115,14 +112,9 @@ void jet_ast_node_print(jet_ast_node* node, size_t branch)
             jet_ast_node_list_print(node->as.block->node_list, branch);
             break;
         }
-        case AST_VAR_REF:
-        {
-            jet_ast_node_print(node->as.var_ref->var_binding_ident, branch);
-            break;
-        }
         case AST_VAR_DECL:
         {
-            jet_ast_node_print(node->as.var_decl->binding_ident, branch);
+            jet_ast_node_print(node->as.var_decl->ident, branch);
             jet_ast_node_print(node->as.var_decl->type_decl, branch);
             jet_ast_node_print(node->as.var_decl->init_value, branch);
             break;
@@ -134,7 +126,7 @@ void jet_ast_node_print(jet_ast_node* node, size_t branch)
         }
         case AST_FUNC_DECL:
         {
-            jet_ast_node_print(node->as.func_decl->binding_ident, branch);
+            jet_ast_node_print(node->as.func_decl->ident, branch);
             jet_ast_node_list_print(node->as.func_decl->ret_type_list, branch);
             jet_ast_node_list_print(node->as.func_decl->param_list, branch);
             break;
@@ -147,7 +139,7 @@ void jet_ast_node_print(jet_ast_node* node, size_t branch)
         }
         case AST_FUNC_CALL:
         {
-            jet_ast_node_print(node->as.func_call->func_binding_ident, branch);
+            jet_ast_node_print(node->as.func_call->func_ident, branch);
             jet_ast_node_list_print(node->as.func_call->arg_nodes, branch);
             break;
         }

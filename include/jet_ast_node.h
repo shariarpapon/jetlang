@@ -45,14 +45,9 @@ typedef struct jet_ast_node_block
   jet_list* node_list;
 } jet_ast_node_block;
 
-typedef struct jet_ast_node_var_ref 
-{
-  jet_ast_node* var_binding_ident;
-} jet_ast_node_var_ref;
-
 typedef struct jet_ast_node_var_decl
 {  
-  jet_ast_node* binding_ident;
+  jet_ast_node* ident;
   jet_ast_node* type_decl;
   jet_ast_node* init_value;
 } jet_ast_node_var_decl;
@@ -66,7 +61,7 @@ typedef struct jet_ast_node_type_decl
 
 typedef struct jet_ast_node_func_decl
 {
-  jet_ast_node* binding_ident;
+  jet_ast_node* ident;
   jet_list* ret_type_list;
   jet_list* param_list; 
 } jet_ast_node_func_decl;
@@ -79,7 +74,7 @@ typedef struct jet_ast_node_func_def
 
 typedef struct jet_ast_node_func_call
 {
-  jet_ast_node* func_binding_ident;
+  jet_ast_node* func_ident;
   jet_list* arg_nodes;
 } jet_ast_node_func_call;
 
@@ -107,7 +102,6 @@ struct jet_ast_node
         jet_ast_node_ident* ident;
         jet_ast_node_lit* lit;
         jet_ast_node_block* block; 
-        jet_ast_node_var_ref* var_ref;
         jet_ast_node_var_decl* var_decl;
         jet_ast_node_type_decl* type_decl;
         jet_ast_node_func_decl* func_decl;

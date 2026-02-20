@@ -8,7 +8,6 @@ typedef enum jet_ast_node_type
   AST_IDENT,
   AST_LIT,
   AST_BLOCK,
-  AST_VAR_REF,
   AST_VAR_DECL,
   AST_TYPE_DECL,
   AST_FUNC_DECL,

@@ -17,13 +17,10 @@ jet_ast_node*
 jet_ast_node* 
    jet_astn_lit_create(jet_token* tok);
 
-jet_ast_node*
-   jet_astn_vref_create(jet_ast_node* var_binding_ident);
-
 jet_ast_node* 
    jet_astn_vdecl_create(
       jet_ast_node* type_decl, 
-      jet_ast_node* binding_ident, 
+      jet_ast_node* ident, 
       jet_ast_node* init_value);
 
 jet_ast_node*
@@ -34,7 +31,7 @@ jet_ast_node*
 
 jet_ast_node*
    jet_astn_fdecl_create(
-      jet_ast_node* binding_ident,
+      jet_ast_node* ident,
       jet_list* ret_type_list,
       jet_list* param_list);
 
@@ -45,7 +42,7 @@ jet_ast_node*
 
 jet_ast_node*
    jet_astn_fcall_create(
-      jet_ast_node* func_binding_ident, 
+      jet_ast_node* func_ident, 
       jet_list* arg_nodes);
 
 jet_ast_node* 

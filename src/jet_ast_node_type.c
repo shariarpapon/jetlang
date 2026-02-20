@@ -18,8 +18,6 @@ const char* jet_ast_node_type_str(jet_ast_node_type node_type)
             return "AST_LIT";
         case AST_BLOCK:
             return "AST_BLOCK";
-        case AST_VAR_REF:
-            return "AST_VAR_REF";
         case AST_VAR_DECL:
             return "AST_VAR_DECL";
         case AST_TYPE_DECL:

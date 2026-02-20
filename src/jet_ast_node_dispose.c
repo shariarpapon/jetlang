@@ -58,20 +58,12 @@ void jet_astn_block_dispose(jet_ast_node* node)
     jet_ast_node_dispose_list(node->as.block->node_list);
 }
 
-void jet_astn_vref_dispose(jet_ast_node* node) 
-{
-    assert(node != NULL);
-    assert(node->node_type == AST_VAR_REF);
-    assert(node->as.var_ref != NULL);
-    jet_ast_node_dispose(node->as.var_ref->var_binding_ident); 
-}
-
 void jet_astn_vdecl_dispose(jet_ast_node* node) 
 {
     assert(node != NULL);
     assert(node->node_type == AST_VAR_DECL);
     assert(node->as.var_decl != NULL);
-    jet_ast_node_dispose(node->as.var_decl->binding_ident);
+    jet_ast_node_dispose(node->as.var_decl->ident);
     jet_ast_node_dispose(node->as.var_decl->type_decl);
     jet_ast_node_dispose(node->as.var_decl->init_value);
 }
@@ -88,7 +80,7 @@ void jet_astn_fdecl_dispose(jet_ast_node* node)
     assert(node != NULL);
     assert(node->node_type == AST_FUNC_DECL);
     assert(node->as.func_decl != NULL);
-    jet_ast_node_dispose(node->as.func_decl->binding_ident);
+    jet_ast_node_dispose(node->as.func_decl->ident);
     jet_ast_node_dispose_list(node->as.func_decl->ret_type_list);
     jet_ast_node_dispose_list(node->as.func_decl->param_list);
 }
@@ -107,7 +99,7 @@ void jet_astn_fcall_dispose(jet_ast_node* node)
     assert(node != NULL);
     assert(node->node_type == AST_FUNC_CALL);
     assert(node->as.func_call != NULL);
-    jet_ast_node_dispose(node->as.func_call->func_binding_ident);
+    jet_ast_node_dispose(node->as.func_call->func_ident);
     jet_ast_node_dispose_list(node->as.func_call->arg_nodes);
 }
 

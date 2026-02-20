@@ -97,7 +97,7 @@ static void jet_ast_push_node(jet_ast* ast, jet_ast_node* node)
             ast->prog_node = node;
         else
         {
-            fprintf(stderr, "error: multiple program entry points.\n");
+            fprintf(stderr, "error: cannot push node to ast, multiple program entry points.\n");
             return;
         }
     }
@@ -121,7 +121,7 @@ static jet_token* jet_ast_peekn_tok(jet_ast* ast, size_t n)
     }
     else if(ast->tok_cursor + n >= count)
     {
-        fprintf(stderr, "wrn: cannot peak ahead %zu tokens (cursor=%zu), index out of bounds.", n, ast->tok_cursor);
+        fprintf(stderr, "wrn: cannot peak ahead %zu tokens (cursor=%zu), index out of bounds.\n", n, ast->tok_cursor);
         return NULL;
     }
     return (jet_token*)jet_list_get(ast->tok_list, ast->tok_cursor + n);
@@ -151,10 +151,9 @@ static jet_token* jet_ast_consume_tok(jet_ast* ast)
 {
     assert(ast != NULL);
     assert(ast->tok_list != NULL);
-
     if(ast->tok_cursor >= jet_list_count(ast->tok_list))
     {
-        puts("end of token-list reached.");
+        puts("- cannot consume, end of token-list reached.");
         return NULL;
     }
     ast->tok_cursor++;
