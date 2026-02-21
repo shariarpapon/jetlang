@@ -202,10 +202,12 @@ static const char* jet_ast_get_type_name(jet_token_type tok_type)
 static bool jet_ast_is_type_tok(jet_token_type tok_type);
 static bool jet_ast_is_vdecl(jet_ast* ast);
 static bool jet_ast_is_func_head(jet_ast* ast);
+static bool jet_ast_is_expr_stmt(jet_ast* ast);
 
+static jet_ast_node* jet_astn_parse_expr_stmt(jet_ast* ast);
 static jet_ast_node* jet_astn_parse_next_stmt(jet_ast* ast);
-static jet_ast_node* jet_astn_expr_parse(jet_ast* ast, size_t min_prec);
-static jet_ast_node* jet_astn_primary_parse(jet_ast* ast);
+static jet_ast_node* jet_astn_parse_expr(jet_ast* ast, size_t min_prec);
+static jet_ast_node* jet_astn_parse_primary(jet_ast* ast);
 static jet_ast_node* jet_astn_prog_parse(jet_ast* ast);
 static jet_ast_node* jet_astn_block_parse(jet_ast* ast);
 static jet_ast_node* jet_astn_ident_parse(jet_ast* ast);
@@ -257,6 +259,16 @@ static bool jet_ast_is_func_head(jet_ast* ast)
     return true;
 }
 
+static bool jet_ast_is_expr_stmt(jet_ast* ast)
+{
+    return true; // placeholder
+}
+
+static jet_ast_node* jet_astn_parse_expr_stmt(jet_ast* ast)
+{
+    return NULL; // placeholder
+}
+
 static jet_ast_node* jet_astn_parse_next_stmt(jet_ast* ast)
 {
     if(!ast)
@@ -284,6 +296,14 @@ static jet_ast_node* jet_astn_parse_next_stmt(jet_ast* ast)
         if(!parsed_node)
         {
             fprintf(stderr, "error: unable to parse next stmt (prog)\n");
+            return NULL;
+        }
+    }
+    else if(t == TOK_IDENT)
+    {
+        if(!parsed_node)
+        {
+            fprintf(stderr, "error: cannot parse next stmt (head : ident)\n");
             return NULL;
         }
     }
@@ -398,7 +418,7 @@ static jet_ast_node* jet_astn_vdecl_parse(jet_ast* ast)
     if(tok_type == TOK_ASG)
     {
         jet_ast_consume_tok(ast);    
-        init = jet_astn_expr_parse(ast, 0);
+        init = jet_astn_parse_expr(ast, 0);
         if(!init)
         {
             fprintf(stderr, "error: cannot parse vdecl, expected expr value after asg operator.\n");
@@ -477,9 +497,9 @@ static jet_ast_node* jet_astn_func_parse(jet_ast* ast)
     return func;
 }
 
-static jet_ast_node* jet_astn_expr_parse(jet_ast* ast, size_t min_prec)
+static jet_ast_node* jet_astn_parse_expr(jet_ast* ast, size_t min_prec)
 {
-    jet_ast_node* lhs_node = jet_astn_primary_parse(ast);
+    jet_ast_node* lhs_node = jet_astn_parse_primary(ast);
     if(lhs_node == NULL)
     {
         fprintf(stderr, "wrn: cannot parse expression, expected primary lhs.\n");
@@ -496,7 +516,7 @@ static jet_ast_node* jet_astn_expr_parse(jet_ast* ast, size_t min_prec)
         if(op_prec < min_prec)
             break;
         jet_ast_consume_tok(ast);
-        jet_ast_node* rhs_node = jet_astn_expr_parse(ast, op_prec + 1);        
+        jet_ast_node* rhs_node = jet_astn_parse_expr(ast, op_prec + 1);        
         if(rhs_node == NULL)
         {
             fprintf(stderr, "wrn: cannot parse expression, expected rhs after operator.\n");
@@ -507,7 +527,7 @@ static jet_ast_node* jet_astn_expr_parse(jet_ast* ast, size_t min_prec)
     return lhs_node;
 }
 
-static jet_ast_node* jet_astn_primary_parse(jet_ast* ast)
+static jet_ast_node* jet_astn_parse_primary(jet_ast* ast)
 {
     jet_token* cur_tok = jet_ast_peek_tok(ast);
     if(cur_tok == NULL) 
@@ -544,7 +564,7 @@ static jet_ast_node* jet_astn_primary_parse(jet_ast* ast)
         case TOK_LPAR:
         {
             jet_ast_consume_tok(ast);
-            jet_ast_node* paran_expr = jet_astn_expr_parse(ast, 0);
+            jet_ast_node* paran_expr = jet_astn_parse_expr(ast, 0);
             cur_tok = jet_ast_peek_tok(ast);
             if(cur_tok == NULL || cur_tok->type != TOK_RPAR)
             {
@@ -558,7 +578,7 @@ static jet_ast_node* jet_astn_primary_parse(jet_ast* ast)
         case TOK_MINUS:
         {
             jet_ast_consume_tok(ast);
-            jet_ast_node* rhs = jet_astn_expr_parse(ast, 0);
+            jet_ast_node* rhs = jet_astn_parse_expr(ast, 0);
             if(rhs == NULL)
             {
                 fprintf(stderr, "error: expected expr after '-'\n");
