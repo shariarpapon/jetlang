@@ -75,7 +75,7 @@ typedef struct jet_ast_node_func_def
 typedef struct jet_ast_node_call
 {
   jet_ast_node* ident;
-  jet_list* arg_nodes;
+  jet_list* arg_list;
 } jet_ast_node_call;
 
 typedef struct jet_ast_node_binop

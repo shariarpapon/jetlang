@@ -100,7 +100,7 @@ void jet_astn_call_dispose(jet_ast_node* node)
     assert(node->node_type == AST_CALL);
     assert(node->as.call != NULL);
     jet_ast_node_dispose(node->as.call->ident);
-    jet_ast_node_dispose_list(node->as.call->arg_nodes);
+    jet_ast_node_dispose_list(node->as.call->arg_list);
 }
 
 void jet_astn_binop_dispose(jet_ast_node* node) 

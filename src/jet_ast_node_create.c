@@ -207,15 +207,15 @@ jet_ast_node*
 jet_ast_node* 
    jet_astn_call_create(
       jet_ast_node* ident, 
-      jet_list* arg_nodes) 
+      jet_list* arg_list) 
 { 
-    assert(ident != NULL && arg_nodes != NULL);
+    assert(ident != NULL && arg_list != NULL);
     jet_ast_node_call* fcall = 
         (jet_ast_node_call*)malloc(sizeof(jet_ast_node_call));
     assert(fcall != NULL);
      
     fcall->ident = ident;
-    fcall->arg_nodes = arg_nodes;
+    fcall->arg_list = arg_list;
 
     jet_ast_node* node = jet_ast_node_create_base(AST_CALL);
     assert(node != NULL);

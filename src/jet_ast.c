@@ -202,7 +202,6 @@ static const char* jet_ast_get_type_name(jet_token_type tok_type)
 static bool jet_ast_is_type_tok(jet_token_type tok_type);
 static bool jet_ast_is_vdecl(jet_ast* ast);
 static bool jet_ast_is_func_head(jet_ast* ast);
-static bool jet_ast_is_expr_stmt(jet_ast* ast);
 
 static jet_ast_node* jet_astn_parse_expr_stmt(jet_ast* ast);
 static jet_ast_node* jet_astn_parse_next_stmt(jet_ast* ast);
@@ -259,14 +258,16 @@ static bool jet_ast_is_func_head(jet_ast* ast)
     return true;
 }
 
-static bool jet_ast_is_expr_stmt(jet_ast* ast)
-{
-    return true; // placeholder
-}
-
 static jet_ast_node* jet_astn_parse_expr_stmt(jet_ast* ast)
 {
-    return NULL; // placeholder
+    jet_ast_node* expr = jet_astn_parse_expr(ast, 0);
+    if(!expr)
+    {
+        fprintf(stderr, "error: cannot parse expr stmt, expected expr node.\n");
+        return NULL;
+    }
+    jet_ast_expect_tok(ast, TOK_SEMI);
+    return expr;
 }
 
 static jet_ast_node* jet_astn_parse_next_stmt(jet_ast* ast)
@@ -299,14 +300,6 @@ static jet_ast_node* jet_astn_parse_next_stmt(jet_ast* ast)
             return NULL;
         }
     }
-    else if(t == TOK_IDENT)
-    {
-        if(!parsed_node)
-        {
-            fprintf(stderr, "error: cannot parse next stmt (head : ident)\n");
-            return NULL;
-        }
-    }
     else if(jet_ast_is_vdecl(ast))
     {
         parsed_node = jet_astn_vdecl_parse(ast);
@@ -325,9 +318,18 @@ static jet_ast_node* jet_astn_parse_next_stmt(jet_ast* ast)
             return NULL;
         }
     }
+    else 
+    {
+        parsed_node = jet_astn_parse_expr_stmt(ast);
+        if(!parsed_node)
+        {
+            fprintf(stderr, "cannot parse next stmt, expected expression statement.\n");
+            return NULL;
+        }
+    }
 
     if(parsed_node == NULL)
-        fprintf(stderr, "error: unable to parse next stmt, no stmt sequences recognized.\n");
+        fprintf(stderr, "error: unable to parse next stmt, no valid stmt sequences parsed.\n");
 
     return parsed_node;
 }

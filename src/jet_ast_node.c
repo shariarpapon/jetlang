@@ -140,7 +140,7 @@ void jet_ast_node_print(jet_ast_node* node, size_t branch)
         case AST_CALL:
         {
             jet_ast_node_print(node->as.call->ident, branch);
-            jet_ast_node_list_print(node->as.call->arg_nodes, branch);
+            jet_ast_node_list_print(node->as.call->arg_list, branch);
             break;
         }
         case AST_BINOP:

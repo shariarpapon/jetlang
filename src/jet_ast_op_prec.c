@@ -3,7 +3,6 @@
 size_t jet_ast_get_op_prec(jet_token_type op_type)
 {
     switch(op_type) {
-
         case TOK_INCR:
         case TOK_DECR:
         case TOK_DOT: return PREC_POSTFIX;
@@ -29,6 +28,7 @@ size_t jet_ast_get_op_prec(jet_token_type op_type)
         case TOK_GT:
         case TOK_LT: return PREC_RELATIONAL;
 
+        case TOK_ASG:
         case TOK_PLUSEQ:
         case TOK_MINEQ:
         case TOK_MULEQ:
