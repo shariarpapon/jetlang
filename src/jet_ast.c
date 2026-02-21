@@ -26,6 +26,7 @@ struct jet_ast
     size_t tok_cursor;
 };
 
+// TOKEN TRAVERSING/UTILITY
 static void jet_ast_push_node(jet_ast* ast, jet_ast_node* node);
 static jet_token* jet_ast_peek_tok(jet_ast* ast);
 static jet_token* jet_ast_peekn_tok(jet_ast* ast, size_t n);
@@ -34,6 +35,23 @@ static jet_token* jet_ast_expect_tok(jet_ast* ast, jet_token_type tok_type);
 static jet_token_type jet_ast_peekn_tok_type(jet_ast* ast, size_t n);
 static bool jet_ast_is_tok_match(jet_ast* ast, jet_token_type tok_type);
 static const char* jet_ast_get_type_name(jet_token_type tok_type);
+
+// PARSING
+static bool jet_ast_is_type_tok(jet_token_type tok_type);
+static bool jet_ast_is_vdecl(jet_ast* ast);
+static bool jet_ast_is_func_head(jet_ast* ast);
+
+static jet_ast_node* jet_astn_parse_next_stmt(jet_ast* ast);
+static jet_ast_node* jet_astn_parse_expr_stmt(jet_ast* ast);
+static jet_ast_node* jet_astn_parse_expr(jet_ast* ast, size_t min_prec);
+static jet_ast_node* jet_astn_parse_primary(jet_ast* ast);
+static jet_ast_node* jet_astn_prog_parse(jet_ast* ast);
+static jet_ast_node* jet_astn_block_parse(jet_ast* ast);
+static jet_ast_node* jet_astn_ident_parse(jet_ast* ast);
+static jet_ast_node* jet_astn_tdecl_parse(jet_ast* ast);
+static jet_ast_node* jet_astn_vdecl_parse(jet_ast* ast);
+static jet_ast_node* jet_astn_func_parse(jet_ast* ast);
+
 
 jet_ast* jet_ast_create(jet_list* tok_list)
 {    
@@ -85,6 +103,57 @@ bool jet_ast_dispose(jet_ast* ast)
     if(ast->prog_node) jet_ast_node_dispose(ast->prog_node);
     free(ast);
     printf("ast disposed!\n");
+    return true;
+}
+
+bool jet_ast_generate_nodes(jet_ast* ast)
+{
+    if(ast == NULL)
+    {
+        fprintf(stderr, "error: cannot generate ast nodes, given ast is NULL.\n");
+        return false;
+    }
+
+    if(ast->tok_list == NULL)
+    {
+        fprintf(stderr, "error: cannot generate ast nodes, ast was not initialized with valid token list.\n");
+        return false;
+    }
+    
+    if(ast->top_node_list == NULL)
+    {
+        fprintf(stderr, "error: cannot generate ast nodes, ast did not initialize top_node_list.\n");
+        return false;
+    }
+
+    if(!jet_list_is_empty(ast->top_node_list))
+        jet_list_clear(ast->top_node_list);
+    
+    ast->tok_cursor = 0;
+
+    while(jet_ast_peekn_tok_type(ast, 0) != TOK_EOF)
+    {
+        if(jet_ast_peekn_tok_type(ast, 0) == TOK_INV)
+        {
+            fprintf(stderr, "error: cannot generate ast nodes, invalid token encountered.\n");
+            return false;
+        }
+
+        jet_ast_node* node = jet_astn_parse_next_stmt(ast);
+        if(!node)
+        {
+            fprintf(stderr, "error: cannot generate ast, unable to parse next stmt.\n");        
+            return false;
+        }
+        jet_ast_push_node(ast, node);
+    }
+
+    size_t top_node_count = jet_list_count(ast->top_node_list);
+    printf("* successfully generated %zu top level statements.\n", top_node_count);
+    
+    if(ast->prog_node)
+        printf("* program entry (prog) node generated.\n");
+
     return true;
 }
 
@@ -197,21 +266,6 @@ static const char* jet_ast_get_type_name(jet_token_type tok_type)
 }
 
 // PARSING ==============================================================================
-
-static bool jet_ast_is_type_tok(jet_token_type tok_type);
-static bool jet_ast_is_vdecl(jet_ast* ast);
-static bool jet_ast_is_func_head(jet_ast* ast);
-
-static jet_ast_node* jet_astn_parse_expr_stmt(jet_ast* ast);
-static jet_ast_node* jet_astn_parse_next_stmt(jet_ast* ast);
-static jet_ast_node* jet_astn_parse_expr(jet_ast* ast, size_t min_prec);
-static jet_ast_node* jet_astn_parse_primary(jet_ast* ast);
-static jet_ast_node* jet_astn_prog_parse(jet_ast* ast);
-static jet_ast_node* jet_astn_block_parse(jet_ast* ast);
-static jet_ast_node* jet_astn_ident_parse(jet_ast* ast);
-static jet_ast_node* jet_astn_tdecl_parse(jet_ast* ast);
-static jet_ast_node* jet_astn_vdecl_parse(jet_ast* ast);
-static jet_ast_node* jet_astn_func_parse(jet_ast* ast);
 
 static bool jet_ast_is_type_tok(jet_token_type tok_type)
 {
