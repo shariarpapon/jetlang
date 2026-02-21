@@ -553,14 +553,12 @@ static jet_ast_node* jet_astn_parse_primary(jet_ast* ast)
         }
         case TOK_IDENT:
         {
-            const char* ident_str = (const char*)jet_token_strdup(cur_tok);
-            if(!ident_str)
+            jet_ast_node* ident = jet_astn_ident_parse(ast);
+            if(!ident)
             {
-                fprintf(stderr, "error: cannot parse expr, unable to create token string dup.\n");
+                fprintf(stderr, "error: cannot parse primary, unable to parse ident.\n");
                 return NULL;
             }
-            jet_ast_node* ident = jet_astn_ident_create(ident_str);
-            jet_ast_consume_tok(ast);
             return ident;
         }
         case TOK_LPAR:
