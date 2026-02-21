@@ -43,7 +43,7 @@ jet_ast* jet_ast_create(jet_list* tok_list)
         return NULL;
     }
 
-    jet_list* top_node_list = jet_list_create(2, sizeof(jet_ast_node));
+    jet_list* top_node_list = jet_list_create(8, sizeof(jet_ast_node));
     if(!top_node_list)
     {
         fprintf(stderr, "error: cannot create ast, could not create node list.\n");
@@ -61,9 +61,8 @@ jet_ast* jet_ast_create(jet_list* tok_list)
     ast->top_node_list = top_node_list; 
     ast->prog_node = NULL;
     ast->tok_cursor = 0;
-    
+
     printf("ast created successfully!\n");
-    
     return ast;
 }
 
@@ -197,8 +196,8 @@ static const char* jet_ast_get_type_name(jet_token_type tok_type)
     return type_name;
 }
 
-// PARSING =======================================================================================================================
- 
+// PARSING ==============================================================================
+
 static bool jet_ast_is_type_tok(jet_token_type tok_type);
 static bool jet_ast_is_vdecl(jet_ast* ast);
 static bool jet_ast_is_func_head(jet_ast* ast);
@@ -256,18 +255,6 @@ static bool jet_ast_is_func_head(jet_ast* ast)
     if(t != TOK_LPAR)
         return false;
     return true;
-}
-
-static jet_ast_node* jet_astn_parse_expr_stmt(jet_ast* ast)
-{
-    jet_ast_node* expr = jet_astn_parse_expr(ast, 0);
-    if(!expr)
-    {
-        fprintf(stderr, "error: cannot parse expr stmt, expected expr node.\n");
-        return NULL;
-    }
-    jet_ast_expect_tok(ast, TOK_SEMI);
-    return expr;
 }
 
 static jet_ast_node* jet_astn_parse_next_stmt(jet_ast* ast)
@@ -334,6 +321,18 @@ static jet_ast_node* jet_astn_parse_next_stmt(jet_ast* ast)
     return parsed_node;
 }
 
+static jet_ast_node* jet_astn_parse_expr_stmt(jet_ast* ast)
+{
+    jet_ast_node* expr = jet_astn_parse_expr(ast, 0);
+    if(!expr)
+    {
+        fprintf(stderr, "error: cannot parse expr stmt, expected expr node.\n");
+        return NULL;
+    }
+    jet_ast_expect_tok(ast, TOK_SEMI);
+    return expr;
+}
+
 static jet_ast_node* jet_astn_prog_parse(jet_ast* ast)
 {
     jet_ast_expect_tok(ast, TOK_KWD_PROG);
@@ -350,18 +349,24 @@ static jet_ast_node* jet_astn_prog_parse(jet_ast* ast)
 static jet_ast_node* jet_astn_block_parse(jet_ast* ast)
 {
     jet_ast_expect_tok(ast, TOK_LBRC);
-    jet_list* list = jet_list_create(8, sizeof(jet_ast_node));
-    if(!list)
+    jet_list* stmt_list = jet_list_create(4, sizeof(jet_ast_node));
+    if(!stmt_list)
     {
-        fprintf(stderr, "error: unable to parse block, could not create node list.\n");
+        fprintf(stderr, "error: cannot parse block, could not create node list.\n");
         return NULL;
     }
     while(jet_ast_peekn_tok_type(ast, 0) != TOK_RBRC)
     {
-        //TODO:  parse all statements until end of block
+        jet_ast_node* stmt = jet_astn_parse_next_stmt(ast);
+        if(stmt == NULL)
+        {
+            fprintf(stderr, "error: cannot parse block, unable to parse next stmt.\n");
+            return NULL;
+        }
+        jet_list_append(stmt_list, (const void*)stmt);
     }
     jet_ast_expect_tok(ast, TOK_RBRC);
-    jet_ast_node* block = jet_astn_block_create(list);
+    jet_ast_node* block = jet_astn_block_create(stmt_list);
     return block;
 }
 
@@ -593,6 +598,12 @@ static jet_ast_node* jet_astn_parse_primary(jet_ast* ast)
         }
     }  
 
+    if(out_node == NULL)
+    {
+        fprintf(stderr, "error: no valid primary expressions parsed.\n");
+        return NULL;
+    }
+
     //postfix expression call evaluation
     while(jet_ast_peekn_tok_type(ast, 0) == TOK_LPAR)
     {
@@ -624,7 +635,7 @@ static jet_ast_node* jet_astn_parse_primary(jet_ast* ast)
     return out_node;
 }
 
-// === DEBUG ===
+// DEBUG ===================================================================================
 
 void jet_ast_print(jet_ast* ast)
 {
