@@ -131,7 +131,7 @@ jet_ast_node*
       jet_ast_node* ident, 
       jet_ast_node* init_value) 
 {
-    assert(ident != NULL && type_decl != NULL && init_value != NULL);
+    assert(ident != NULL && type_decl != NULL);
     jet_ast_node_var_decl* vdecl = 
         (jet_ast_node_var_decl*)malloc(sizeof(jet_ast_node_var_decl));
     assert(vdecl != NULL);

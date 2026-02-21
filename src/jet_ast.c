@@ -151,10 +151,10 @@ bool jet_ast_generate_nodes(jet_ast* ast)
     }
 
     size_t top_node_count = jet_list_count(ast->top_node_list);
-    printf("* successfully generated %zu top level statements.\n", top_node_count);
+    printf("successfully generated %zu top level statements.\n", top_node_count);
     
     if(ast->prog_node)
-        printf("* program entry (prog) node generated.\n");
+        printf("program entry (prog) node generated.\n");
 
     return true;
 }

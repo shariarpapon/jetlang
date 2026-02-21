@@ -19,7 +19,7 @@ static void print_source(const char* src, size_t src_len);
 static bool find_arg(const char* target);
 
 static jet_lexer* lexer_analyze_file(const char* filename);
-//static jet_ast* ast_generate(jet_list* tok_list);
+static jet_ast* ast_generate(jet_list* tok_list);
 
 int main(int argc, char** argv)
 {
@@ -39,12 +39,12 @@ int main(int argc, char** argv)
     // -----  create components -----    
     char* src_file_path = *args;
     jet_lexer* lexer = lexer_analyze_file(src_file_path); 
-    //jet_ast* ast = ast_generate(lexer->token_list); 
+    jet_ast* ast = ast_generate(lexer->token_list); 
 
     // ------ free all memory ------
     
     jet_lexer_dispose(lexer);
-
+    printf("* TODO: implement proper node disposal system.\n");
     //TODO: fix double free bug
     //jet_ast_dispose(ast);
     
@@ -70,7 +70,7 @@ static jet_lexer* lexer_analyze_file(const char* file_path)
     return lexer;
 }
 
-/*
+
 static jet_ast* ast_generate(jet_list* tok_list)
 {
    jet_ast* ast = jet_ast_create(tok_list);
@@ -82,7 +82,6 @@ static jet_ast* ast_generate(jet_list* tok_list)
    
    return ast;
 }
-*/
 
 static void print_source(const char* source, size_t src_len)
 {   
