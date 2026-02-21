@@ -608,6 +608,10 @@ static jet_ast_node* jet_astn_parse_primary(jet_ast* ast)
                 return NULL;
             }
             jet_list_append(arg_list, arg);
+
+            if(jet_ast_peekn_tok_type(ast, 0) == TOK_COMMA)
+                jet_ast_consume_tok(ast);
+            else break;
         }
         jet_ast_expect_tok(ast, TOK_RPAR);
         if(jet_list_is_empty(arg_list))
