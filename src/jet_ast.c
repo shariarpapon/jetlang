@@ -534,11 +534,15 @@ static jet_ast_node* jet_astn_parse_primary(jet_ast* ast)
     jet_token* cur_tok = jet_ast_peek_tok(ast);
     if(cur_tok == NULL) 
         return NULL;
+
+    jet_ast_node* out_node = NULL;
     switch(cur_tok->type)
     {
         default:
+        {
             fprintf(stderr, "error: expected primary expression.\n");
             return NULL;
+        }
         case TOK_KWD_NULL:
         case TOK_KWD_TRUE:
         case TOK_KWD_FALSE:
@@ -548,23 +552,23 @@ static jet_ast_node* jet_astn_parse_primary(jet_ast* ast)
         case TOK_LIT_STR:
         {
             jet_ast_consume_tok(ast);
-            jet_ast_node* lit = jet_astn_lit_create(cur_tok);
-            return lit;
+            out_node = jet_astn_lit_create(cur_tok);
+            break;
         }
         case TOK_IDENT:
         {
-            jet_ast_node* ident = jet_astn_ident_parse(ast);
-            if(!ident)
+            out_node = jet_astn_ident_parse(ast);
+            if(!out_node)
             {
                 fprintf(stderr, "error: cannot parse primary, unable to parse ident.\n");
                 return NULL;
             }
-            return ident;
+            break;
         }
         case TOK_LPAR:
         {
             jet_ast_consume_tok(ast);
-            jet_ast_node* paran_expr = jet_astn_parse_expr(ast, 0);
+            out_node = jet_astn_parse_expr(ast, 0);
             cur_tok = jet_ast_peek_tok(ast);
             if(cur_tok == NULL || cur_tok->type != TOK_RPAR)
             {
@@ -572,7 +576,7 @@ static jet_ast_node* jet_astn_parse_primary(jet_ast* ast)
                 return NULL;
             }
             jet_ast_consume_tok(ast);
-            return paran_expr;
+            break;
         }
         case TOK_NOT:
         case TOK_MINUS:
@@ -584,11 +588,36 @@ static jet_ast_node* jet_astn_parse_primary(jet_ast* ast)
                 fprintf(stderr, "error: expected expr after '-'\n");
                 return NULL;
             }
-            jet_ast_node* unop = jet_astn_unop_create(rhs, cur_tok->type);
-            return unop;
+            out_node = jet_astn_unop_create(rhs, cur_tok->type);
+            break;
         }
     }  
-    return NULL;
+
+    //postfix expression call evaluation
+    while(jet_ast_peekn_tok_type(ast, 0) == TOK_LPAR)
+    {
+        jet_ast_consume_tok(ast);        
+        jet_list* arg_list = jet_list_create(4, sizeof(jet_ast_node));
+
+        while(jet_ast_peekn_tok_type(ast, 0) != TOK_RPAR)
+        {
+            jet_ast_node* arg = jet_astn_parse_expr(ast, 0);
+            if(!arg)
+            {
+                fprintf(stderr, "error: cannot parse primary expr, unable to parse call arg.\n");
+                return NULL;
+            }
+            jet_list_append(arg_list, arg);
+        }
+        jet_ast_expect_tok(ast, TOK_RPAR);
+        if(jet_list_is_empty(arg_list))
+        {
+            jet_list_dispose(arg_list);
+            arg_list = NULL;
+        }
+        out_node = jet_astn_call_create(out_node, arg_list);
+    }
+    return out_node;
 }
 
 // === DEBUG ===
