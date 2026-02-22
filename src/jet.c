@@ -4,7 +4,7 @@
 #include <assert.h>
 #include <jet_lexer.h>
 #include <jet_io.h>
-#include <jet_list.h>
+#include <jet_darray.h>
 #include <jet_ast.h>
 
 #define ARG_PRINT_ALL "pAll"
@@ -19,7 +19,7 @@ static void print_source(const char* src, size_t src_len);
 static bool find_arg(const char* target);
 
 static jet_lexer* lexer_analyze_file(const char* filename);
-static jet_ast* ast_generate(jet_list* tok_list);
+static jet_ast* ast_generate(jet_darray* tok_darray);
 
 int main(int argc, char** argv)
 {
@@ -39,7 +39,7 @@ int main(int argc, char** argv)
     // -----  create components -----    
     char* src_file_path = *args;
     jet_lexer* lexer = lexer_analyze_file(src_file_path); 
-    jet_ast* ast = ast_generate(lexer->token_list); 
+    jet_ast* ast = ast_generate(lexer->token_darray); 
 
     // ------ free all memory ------
     
@@ -65,15 +65,15 @@ static jet_lexer* lexer_analyze_file(const char* file_path)
     }
      
     if(find_arg(ARG_PRINT_ALL) == true || find_arg(ARG_PRINT_TOKENS) == true)
-        jet_token_print_list(lexer->token_list);  
+        jet_token_print_darray(lexer->token_darray);  
   
     return lexer;
 }
 
 
-static jet_ast* ast_generate(jet_list* tok_list)
+static jet_ast* ast_generate(jet_darray* tok_darray)
 {
-   jet_ast* ast = jet_ast_create(tok_list);
+   jet_ast* ast = jet_ast_create(tok_darray);
    if(!jet_ast_generate_nodes(ast))
         fprintf(stderr, "error: could not generate AST nodes.\n");
    

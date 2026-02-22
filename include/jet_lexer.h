@@ -1,14 +1,14 @@
 #pragma once
 #include <stdlib.h>
 #include <jet_token.h>
-#include <jet_list.h>
+#include <jet_darray.h>
 
 typedef struct jet_lexer
 {
     size_t len;
     size_t cursor;
     const char* source;
-    jet_list* token_list;
+    jet_darray* token_darray;
 } jet_lexer;
 
 

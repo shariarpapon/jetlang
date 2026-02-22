@@ -20,8 +20,8 @@
 
 struct jet_ast 
 {
-    jet_list* tok_list;
-    jet_list* top_node_list;
+    jet_darray* tok_darray;
+    jet_darray* top_node_darray;
     jet_ast_node* prog_node;
     size_t tok_cursor;
 };
@@ -55,18 +55,18 @@ static jet_ast_node* jet_astn_func_parse(jet_ast* ast);
 static jet_ast_node* jet_astn_parse_fparam(jet_ast* ast);
 
 
-jet_ast* jet_ast_create(jet_list* tok_list)
+jet_ast* jet_ast_create(jet_darray* tok_darray)
 {    
-    if(!tok_list)
+    if(!tok_darray)
     {
-        fprintf(stderr, "error: cannot create ast, invalid token list.\n");
+        fprintf(stderr, "error: cannot create ast, invalid token darray.\n");
         return NULL;
     }
 
-    jet_list* top_node_list = jet_list_create(8, sizeof(jet_ast_node));
-    if(!top_node_list)
+    jet_darray* top_node_darray = jet_darray_create(8, sizeof(jet_ast_node));
+    if(!top_node_darray)
     {
-        fprintf(stderr, "error: cannot create ast, could not create node list.\n");
+        fprintf(stderr, "error: cannot create ast, could not create node darray.\n");
         return NULL;
     }
 
@@ -77,8 +77,8 @@ jet_ast* jet_ast_create(jet_list* tok_list)
         return NULL;
     }
 
-    ast->tok_list = tok_list;
-    ast->top_node_list = top_node_list; 
+    ast->tok_darray = tok_darray;
+    ast->top_node_darray = top_node_darray; 
     ast->prog_node = NULL;
     ast->tok_cursor = 0;
 
@@ -94,14 +94,14 @@ bool jet_ast_dispose(jet_ast* ast)
         return false;
     }
 
-    for(size_t i = 0; i < jet_list_count(ast->top_node_list); i++)
+    for(size_t i = 0; i < jet_darray_count(ast->top_node_darray); i++)
     {
-        void* node = jet_list_get(ast->top_node_list, i);
+        void* node = jet_darray_get(ast->top_node_darray, i);
         if(node)
             jet_ast_node_dispose((jet_ast_node*)node);
     }
 
-    if(ast->top_node_list) jet_list_dispose(ast->top_node_list); 
+    if(ast->top_node_darray) jet_darray_dispose(ast->top_node_darray); 
     if(ast->prog_node) jet_ast_node_dispose(ast->prog_node);
     free(ast);
     printf("ast disposed!\n");
@@ -116,20 +116,20 @@ bool jet_ast_generate_nodes(jet_ast* ast)
         return false;
     }
 
-    if(ast->tok_list == NULL)
+    if(ast->tok_darray == NULL)
     {
-        fprintf(stderr, "error: cannot generate ast nodes, ast was not initialized with valid token list.\n");
+        fprintf(stderr, "error: cannot generate ast nodes, ast was not initialized with valid token darray.\n");
         return false;
     }
     
-    if(ast->top_node_list == NULL)
+    if(ast->top_node_darray == NULL)
     {
-        fprintf(stderr, "error: cannot generate ast nodes, ast did not initialize top_node_list.\n");
+        fprintf(stderr, "error: cannot generate ast nodes, ast did not initialize top_node_darray.\n");
         return false;
     }
 
-    if(!jet_list_is_empty(ast->top_node_list))
-        jet_list_clear(ast->top_node_list);
+    if(!jet_darray_is_empty(ast->top_node_darray))
+        jet_darray_clear(ast->top_node_darray);
     
     ast->tok_cursor = 0;
 
@@ -150,7 +150,7 @@ bool jet_ast_generate_nodes(jet_ast* ast)
         jet_ast_push_node(ast, node);
     }
 
-    size_t top_node_count = jet_list_count(ast->top_node_list);
+    size_t top_node_count = jet_darray_count(ast->top_node_darray);
     printf("successfully generated %zu top level statements.\n", top_node_count);
     
     if(ast->prog_node)
@@ -171,7 +171,7 @@ static void jet_ast_push_node(jet_ast* ast, jet_ast_node* node)
             return;
         }
     }
-    else jet_list_append(ast->top_node_list, (const void*)node);
+    else jet_darray_append(ast->top_node_darray, (const void*)node);
 }
 
 static jet_token* jet_ast_peek_tok(jet_ast* ast)
@@ -182,11 +182,11 @@ static jet_token* jet_ast_peek_tok(jet_ast* ast)
 static jet_token* jet_ast_peekn_tok(jet_ast* ast, size_t n)
 { 
     assert(ast != NULL);
-    assert(ast->tok_list != NULL);
-    size_t count = jet_list_count(ast->tok_list);
+    assert(ast->tok_darray != NULL);
+    size_t count = jet_darray_count(ast->tok_darray);
     if(count <= 0)
     {
-        fprintf(stderr, "wrn: ast->tok_list is empty.\n");        
+        fprintf(stderr, "wrn: ast->tok_darray is empty.\n");        
         return NULL; 
     }
     else if(ast->tok_cursor + n >= count)
@@ -194,16 +194,16 @@ static jet_token* jet_ast_peekn_tok(jet_ast* ast, size_t n)
         fprintf(stderr, "wrn: cannot peak ahead %zu tokens (cursor=%zu), index out of bounds.\n", n, ast->tok_cursor);
         return NULL;
     }
-    return (jet_token*)jet_list_get(ast->tok_list, ast->tok_cursor + n);
+    return (jet_token*)jet_darray_get(ast->tok_darray, ast->tok_cursor + n);
 }
 
 static jet_token* jet_ast_expect_tok(jet_ast* ast, jet_token_type tok_type)
 {
     assert(ast != NULL);
-    assert(ast->tok_list != NULL);
-    if(ast->tok_cursor >= jet_list_count(ast->tok_list))
+    assert(ast->tok_darray != NULL);
+    if(ast->tok_cursor >= jet_darray_count(ast->tok_darray))
     {
-        puts("end of token-list reached.");
+        puts("end of token-darray reached.");
         return NULL;
     }
     jet_token* tok = jet_ast_peek_tok(ast);
@@ -220,14 +220,14 @@ static jet_token* jet_ast_expect_tok(jet_ast* ast, jet_token_type tok_type)
 static jet_token* jet_ast_consume_tok(jet_ast* ast)
 {
     assert(ast != NULL);
-    assert(ast->tok_list != NULL);
-    if(ast->tok_cursor >= jet_list_count(ast->tok_list))
+    assert(ast->tok_darray != NULL);
+    if(ast->tok_cursor >= jet_darray_count(ast->tok_darray))
     {
-        puts("- cannot consume, end of token-list reached.");
+        puts("- cannot consume, end of token-darray reached.");
         return NULL;
     }
     ast->tok_cursor++;
-    return (jet_token*)jet_list_get(ast->tok_list , ast->tok_cursor - 1);
+    return (jet_token*)jet_darray_get(ast->tok_darray , ast->tok_cursor - 1);
 }
 
 static jet_token_type jet_ast_peekn_tok_type(jet_ast* ast, size_t n)
@@ -405,10 +405,10 @@ static jet_ast_node* jet_astn_prog_parse(jet_ast* ast)
 static jet_ast_node* jet_astn_block_parse(jet_ast* ast)
 {
     jet_ast_expect_tok(ast, TOK_LBRC);
-    jet_list* stmt_list = jet_list_create(4, sizeof(jet_ast_node));
-    if(!stmt_list)
+    jet_darray* stmt_darray = jet_darray_create(4, sizeof(jet_ast_node));
+    if(!stmt_darray)
     {
-        fprintf(stderr, "error: cannot parse block, could not create node list.\n");
+        fprintf(stderr, "error: cannot parse block, could not create node darray.\n");
         return NULL;
     }
     while(jet_ast_peekn_tok_type(ast, 0) != TOK_RBRC)
@@ -419,10 +419,10 @@ static jet_ast_node* jet_astn_block_parse(jet_ast* ast)
             fprintf(stderr, "error: cannot parse block, unable to parse next stmt.\n");
             return NULL;
         }
-        jet_list_append(stmt_list, (const void*)stmt);
+        jet_darray_append(stmt_darray, (const void*)stmt);
     }
     jet_ast_expect_tok(ast, TOK_RBRC);
-    jet_ast_node* block = jet_astn_block_create(stmt_list);
+    jet_ast_node* block = jet_astn_block_create(stmt_darray);
     return block;
 }
 
@@ -498,10 +498,10 @@ static jet_ast_node* jet_astn_func_parse(jet_ast* ast)
     jet_ast_node* tdecl = jet_astn_tdecl_parse(ast);
     jet_ast_node* ident = jet_astn_ident_parse(ast);
     jet_ast_expect_tok(ast, TOK_LPAR);
-    jet_list* param_list = jet_list_create(4, sizeof(jet_ast_node));
-    if(!param_list)
+    jet_darray* param_darray = jet_darray_create(4, sizeof(jet_ast_node));
+    if(!param_darray)
     {
-        fprintf(stderr, "error: cannot parse func, unable to create param list.\n");
+        fprintf(stderr, "error: cannot parse func, unable to create param darray.\n");
         return NULL;
     }
 
@@ -533,19 +533,19 @@ static jet_ast_node* jet_astn_func_parse(jet_ast* ast)
                 fprintf(stderr, "error: cannot parse func, unexpected token (type-enum-id: %d) encountered.\n", (int)t);
                 return NULL;
         }
-        jet_list_append(param_list, (const void*)vdecl);
+        jet_darray_append(param_darray, (const void*)vdecl);
     }
     jet_ast_expect_tok(ast, TOK_RPAR); 
-    if(jet_list_is_empty(param_list))
+    if(jet_darray_is_empty(param_darray))
     {
-        jet_list_dispose(param_list);
-        param_list = NULL;
+        jet_darray_dispose(param_darray);
+        param_darray = NULL;
     }
 
-    jet_list* ret_type_list = jet_list_create(1, sizeof(jet_ast_node));
-    jet_list_append(ret_type_list, (const void*)tdecl);
+    jet_darray* ret_type_darray = jet_darray_create(1, sizeof(jet_ast_node));
+    jet_darray_append(ret_type_darray, (const void*)tdecl);
     
-    jet_ast_node* func = jet_astn_fdecl_create(ident, ret_type_list, param_list);
+    jet_ast_node* func = jet_astn_fdecl_create(ident, ret_type_darray, param_darray);
     
     if(jet_ast_peekn_tok_type(ast, 0) == TOK_LBRC)
     {
@@ -696,7 +696,7 @@ static jet_ast_node* jet_astn_parse_primary(jet_ast* ast)
     while(jet_ast_peekn_tok_type(ast, 0) == TOK_LPAR)
     {
         jet_ast_consume_tok(ast);        
-        jet_list* arg_list = jet_list_create(4, sizeof(jet_ast_node));
+        jet_darray* arg_darray = jet_darray_create(4, sizeof(jet_ast_node));
 
         while(jet_ast_peekn_tok_type(ast, 0) != TOK_RPAR)
         {
@@ -706,19 +706,19 @@ static jet_ast_node* jet_astn_parse_primary(jet_ast* ast)
                 fprintf(stderr, "error: cannot parse primary expr, unable to parse call arg.\n");
                 return NULL;
             }
-            jet_list_append(arg_list, arg);
+            jet_darray_append(arg_darray, arg);
 
             if(jet_ast_peekn_tok_type(ast, 0) == TOK_COMMA)
                 jet_ast_consume_tok(ast);
             else break;
         }
         jet_ast_expect_tok(ast, TOK_RPAR);
-        if(jet_list_is_empty(arg_list))
+        if(jet_darray_is_empty(arg_darray))
         {
-            jet_list_dispose(arg_list);
-            arg_list = NULL;
+            jet_darray_dispose(arg_darray);
+            arg_darray = NULL;
         }
-        out_node = jet_astn_call_create(out_node, arg_list);
+        out_node = jet_astn_call_create(out_node, arg_darray);
     }
     return out_node;
 }
@@ -734,7 +734,7 @@ void jet_ast_print(jet_ast* ast)
     }
     printf("\n=======================\n");
     printf("TOP\n");
-    jet_ast_node_list_print(ast->top_node_list, 0);
+    jet_ast_node_darray_print(ast->top_node_darray, 0);
     
     printf("=======================\n");
     jet_ast_node_print(ast->prog_node, 0);

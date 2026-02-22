@@ -141,11 +141,11 @@ jet_lexer* jet_lexer_create(const char* filename)
     lexer->source = source;
     lexer->len = src_len + 1;
     lexer->cursor = 0;
-    lexer->token_list = jet_list_create(INIT_TOK_CAPACITY, sizeof(jet_token));
-    if(!lexer->token_list)
+    lexer->token_darray = jet_darray_create(INIT_TOK_CAPACITY, sizeof(jet_token));
+    if(!lexer->token_darray)
     {
-        lexer->token_list = NULL;
-        fprintf(stderr, "error: could not allocate token-list memory\n");
+        lexer->token_darray = NULL;
+        fprintf(stderr, "error: could not allocate token-darray memory\n");
         jet_lexer_dispose(lexer);
         return NULL;
     }
@@ -167,12 +167,12 @@ void jet_lexer_dispose(jet_lexer* lexer)
         free((void*)lexer->source);
     }
 
-    if(!lexer->token_list)
+    if(!lexer->token_darray)
     {
         free((void*)lexer);
         return;
     }
-    jet_list_dispose(lexer->token_list);
+    jet_darray_dispose(lexer->token_darray);
     free((void*)lexer);
     printf("lexer disposed!\n");
 }
@@ -180,9 +180,9 @@ void jet_lexer_dispose(jet_lexer* lexer)
 bool jet_lexer_tokenize(jet_lexer* lexer)
 {
     printf("tokenizing...\n");
-    if(!lexer || !lexer->token_list) 
+    if(!lexer || !lexer->token_darray) 
     {
-        fprintf(stderr, "error: cannot tokenize, lexer or lexer->token_list is invalid.\n");
+        fprintf(stderr, "error: cannot tokenize, lexer or lexer->token_darray is invalid.\n");
         return false;
     }
     //TEST
@@ -219,9 +219,9 @@ static void jet_lexer_emit_token(jet_lexer* lexer, size_t origin, size_t len, je
     tok.origin = origin;
     tok.len = len;
     tok.type = tok_type;
-    if(jet_list_append(lexer->token_list, (const void*)&tok) == false)
+    if(jet_darray_append(lexer->token_darray, (const void*)&tok) == false)
     {
-        fprintf(stderr, "error: could not add new token to lexer->token_list.\n");
+        fprintf(stderr, "error: could not add new token to lexer->token_darray.\n");
         return;
     }
 }

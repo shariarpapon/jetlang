@@ -1,7 +1,7 @@
 #pragma once
 #include <jet_token.h>
 #include <jet_ast_node_type.h>
-#include <jet_list.h>
+#include <jet_darray.h>
 #include <stdbool.h>
 
 typedef struct jet_ast_node jet_ast_node;
@@ -42,7 +42,7 @@ typedef struct jet_ast_node_lit
 
 typedef struct jet_ast_node_block
 {
-  jet_list* node_list;
+  jet_darray* node_darray;
 } jet_ast_node_block;
 
 typedef struct jet_ast_node_var_decl
@@ -62,8 +62,8 @@ typedef struct jet_ast_node_type_decl
 typedef struct jet_ast_node_func_decl
 {
   jet_ast_node* ident;
-  jet_list* ret_type_list;
-  jet_list* param_list; 
+  jet_darray* ret_type_darray;
+  jet_darray* param_darray; 
 } jet_ast_node_func_decl;
 
 typedef struct jet_ast_node_func_def
@@ -75,7 +75,7 @@ typedef struct jet_ast_node_func_def
 typedef struct jet_ast_node_call
 {
   jet_ast_node* ident;
-  jet_list* arg_list;
+  jet_darray* arg_darray;
 } jet_ast_node_call;
 
 typedef struct jet_ast_node_binop
@@ -114,7 +114,7 @@ struct jet_ast_node
 
 jet_ast_node* jet_ast_node_create_base(jet_ast_node_type node_type);
 void jet_ast_node_dispose(jet_ast_node* node);
-void jet_ast_node_list_print(jet_list* node_list, size_t branch);
+void jet_ast_node_darray_print(jet_darray* node_darray, size_t branch);
 void jet_ast_node_print(jet_ast_node* node, size_t branch);
 
 

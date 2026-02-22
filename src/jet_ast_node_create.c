@@ -37,12 +37,12 @@ jet_ast_node* jet_astn_mem_create(size_t alloc_size)
 }
 
 jet_ast_node* 
-   jet_astn_block_create(jet_list* node_list) 
+   jet_astn_block_create(jet_darray* node_darray) 
 { 
-    assert(node_list != NULL);
+    assert(node_darray != NULL);
     jet_ast_node_block* block = (jet_ast_node_block*)malloc(sizeof(jet_ast_node_block));
     assert(block != NULL);    
-    block->node_list = node_list;
+    block->node_darray = node_darray;
     
     jet_ast_node* node = jet_ast_node_create_base(AST_BLOCK);
     assert(node != NULL);
@@ -168,16 +168,16 @@ jet_ast_node*
 jet_ast_node* 
    jet_astn_fdecl_create(
       jet_ast_node* ident,
-      jet_list* ret_type_list,
-      jet_list* param_list) 
+      jet_darray* ret_type_darray,
+      jet_darray* param_darray) 
 {
     jet_ast_node_func_decl* fdecl = 
         (jet_ast_node_func_decl*)malloc(sizeof(jet_ast_node_func_decl));
     assert(fdecl != NULL);
     
     fdecl->ident = ident;
-    fdecl->ret_type_list = ret_type_list;
-    fdecl->param_list = param_list;
+    fdecl->ret_type_darray = ret_type_darray;
+    fdecl->param_darray = param_darray;
     
     jet_ast_node* node = jet_ast_node_create_base(AST_FUNC_DECL);
     assert(node != NULL);
@@ -207,15 +207,15 @@ jet_ast_node*
 jet_ast_node* 
    jet_astn_call_create(
       jet_ast_node* ident, 
-      jet_list* arg_list) 
+      jet_darray* arg_darray) 
 { 
-    assert(ident != NULL && arg_list != NULL);
+    assert(ident != NULL && arg_darray != NULL);
     jet_ast_node_call* fcall = 
         (jet_ast_node_call*)malloc(sizeof(jet_ast_node_call));
     assert(fcall != NULL);
      
     fcall->ident = ident;
-    fcall->arg_list = arg_list;
+    fcall->arg_darray = arg_darray;
 
     jet_ast_node* node = jet_ast_node_create_base(AST_CALL);
     assert(node != NULL);

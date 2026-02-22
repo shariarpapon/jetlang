@@ -3,19 +3,19 @@
 #include <assert.h>
 #include <stdio.h>
 
-static void jet_ast_node_dispose_list(jet_list* node_list);
+static void jet_ast_node_dispose_darray(jet_darray* node_darray);
 
-static void jet_ast_node_dispose_list(jet_list* node_list)
+static void jet_ast_node_dispose_darray(jet_darray* node_darray)
 {
-    if(node_list == NULL)
+    if(node_darray == NULL)
         return;
-    size_t count = jet_list_count(node_list);
+    size_t count = jet_darray_count(node_darray);
     for(size_t i = 0; i < count; i++)
     {
-        jet_ast_node* node = (jet_ast_node*)jet_list_get(node_list, i);
+        jet_ast_node* node = (jet_ast_node*)jet_darray_get(node_darray, i);
         jet_ast_node_dispose(node);
     }
-    jet_list_dispose(node_list);
+    jet_darray_dispose(node_darray);
 }
 
 void jet_astn_prog_dispose(jet_ast_node* node) 
@@ -55,7 +55,7 @@ void jet_astn_block_dispose(jet_ast_node* node)
     assert(node != NULL);
     assert(node->node_type == AST_BLOCK);
     assert(node->as.block != NULL);
-    jet_ast_node_dispose_list(node->as.block->node_list);
+    jet_ast_node_dispose_darray(node->as.block->node_darray);
 }
 
 void jet_astn_vdecl_dispose(jet_ast_node* node) 
@@ -81,8 +81,8 @@ void jet_astn_fdecl_dispose(jet_ast_node* node)
     assert(node->node_type == AST_FUNC_DECL);
     assert(node->as.func_decl != NULL);
     jet_ast_node_dispose(node->as.func_decl->ident);
-    jet_ast_node_dispose_list(node->as.func_decl->ret_type_list);
-    jet_ast_node_dispose_list(node->as.func_decl->param_list);
+    jet_ast_node_dispose_darray(node->as.func_decl->ret_type_darray);
+    jet_ast_node_dispose_darray(node->as.func_decl->param_darray);
 }
 
 void jet_astn_fdef_dispose(jet_ast_node* node) 
@@ -100,7 +100,7 @@ void jet_astn_call_dispose(jet_ast_node* node)
     assert(node->node_type == AST_CALL);
     assert(node->as.call != NULL);
     jet_ast_node_dispose(node->as.call->ident);
-    jet_ast_node_dispose_list(node->as.call->arg_list);
+    jet_ast_node_dispose_darray(node->as.call->arg_darray);
 }
 
 void jet_astn_binop_dispose(jet_ast_node* node) 

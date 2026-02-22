@@ -5,6 +5,9 @@
 #include <stddef.h>
 #include <stdio.h>
 
+#define BRANCH_LINE "|__" 
+#define BRANCH_SPACE "+++"
+
 static void jet_ast_branch_print(const char* name, size_t branch);
 
 jet_ast_node* jet_ast_node_create_base(jet_ast_node_type node_type)
@@ -72,20 +75,23 @@ void jet_ast_node_dispose(jet_ast_node* node)
 static void jet_ast_branch_print(const char* name, size_t branch)
 {
     if(!name) return;
-    const char* branch_line = "|__";
-    const char* branch_space = "+++";
     for(size_t i = 0; i < branch; i++)
-        printf("%s", branch_space);
-    printf("%s%s\n", branch_line, name);
+        printf("\033[38;5;244m%s\033[0m", BRANCH_SPACE);
+
+    printf("\033[38;5;49m%s\033[0m\033[0m%s\033[0m\n", BRANCH_LINE, name);
 }
 
-void jet_ast_node_list_print(jet_list* node_list, size_t branch)
+void jet_ast_node_darray_print(jet_darray* node_darray, size_t branch)
 {
-    if(!node_list) return;
-    size_t count = jet_list_count(node_list);
+    if(!node_darray) return;
+    size_t count = jet_darray_count(node_darray);
+    
+    jet_ast_branch_print("\033[38;5;215m[COLLECTION]\033[0m", branch);
+    branch++;
+
     for(size_t i = 0; i < count; i++)
     {
-        jet_ast_node* n = (jet_ast_node*)jet_list_get(node_list, i);
+        jet_ast_node* n = (jet_ast_node*)jet_darray_get(node_darray, i);
         jet_ast_node_print(n, branch);
     }
 }
@@ -109,7 +115,7 @@ void jet_ast_node_print(jet_ast_node* node, size_t branch)
         }
         case AST_BLOCK:
         {
-            jet_ast_node_list_print(node->as.block->node_list, branch);
+            jet_ast_node_darray_print(node->as.block->node_darray, branch);
             break;
         }
         case AST_VAR_DECL:
@@ -119,16 +125,11 @@ void jet_ast_node_print(jet_ast_node* node, size_t branch)
             jet_ast_node_print(node->as.var_decl->init_value, branch);
             break;
         }
-        case AST_TYPE_DECL:
-        {
-            jet_ast_branch_print(node->as.type_decl->type_name, branch);
-            break;
-        }
         case AST_FUNC_DECL:
         {
             jet_ast_node_print(node->as.func_decl->ident, branch);
-            jet_ast_node_list_print(node->as.func_decl->ret_type_list, branch);
-            jet_ast_node_list_print(node->as.func_decl->param_list, branch);
+            jet_ast_node_darray_print(node->as.func_decl->ret_type_darray, branch);
+            jet_ast_node_darray_print(node->as.func_decl->param_darray, branch);
             break;
         }
         case AST_FUNC_DEF:
@@ -140,7 +141,7 @@ void jet_ast_node_print(jet_ast_node* node, size_t branch)
         case AST_CALL:
         {
             jet_ast_node_print(node->as.call->ident, branch);
-            jet_ast_node_list_print(node->as.call->arg_list, branch);
+            jet_ast_node_darray_print(node->as.call->arg_darray, branch);
             break;
         }
         case AST_BINOP:
