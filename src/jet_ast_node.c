@@ -5,8 +5,8 @@
 #include <stddef.h>
 #include <stdio.h>
 
-#define BRANCH_LINE "|__" 
-#define BRANCH_SPACE "+++"
+#define BRANCH_LINE "|_" 
+#define BRANCH_SPACE "++"
 
 static void jet_ast_branch_print(const char* name, size_t branch);
 
