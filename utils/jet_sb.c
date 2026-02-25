@@ -1,5 +1,9 @@
 #include <jet_sb.h>
 #include <assert.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
+
 #define JET_SB_GROWTH_FAC 2
 #define JET_SB_MIN_CAP 2
 
@@ -65,6 +69,59 @@ void jet_sb_append_char(jet_sb* sb, char c)
     sb->buf[sb->len] = c;
     sb->len++;
     sb->buf[sb->len] = '\0';
+}
+
+void jet_sb_append_cstr(jet_sb* sb, const char* s)
+{
+    assert(sb != NULL && s != NULL);
+    size_t n = strlen(s);
+    jet_sb_ensure_cap(sb, n);
+
+    memcpy(sb->buf + sb->len, s, n);
+    sb->len += n;
+    sb->buf[sb->len] = '\0';
+}
+
+void jet_sb_append_u64(jet_sb* sb, uint64_t v)
+{
+    char temp_buf[32];
+    size_t i = 0;
+    if(v == 0)
+    {
+        jet_sb_append_char(sb, '0');
+        return;
+    }
+
+    while(v > 0)
+    {
+        temp_buf[i] = (char)('0' + (v % 10));
+        i++;
+        v /= 10;
+    }
+
+    for(size_t r = 0; r < i; r++)
+        jet_sb_append_char(sb, temp_buf[i - 1 - r]);
+}
+
+void jet_sb_append_int(jet_sb* sb, int i)
+{
+    assert(sb != NULL);
+    if(i < 0)
+    {
+        jet_sb_append_char(sb, '-');
+        uint64_t magnitude = (uint64_t)(-(int64_t)i);
+        jet_sb_append_u64(sb, magnitude);
+    }
+    else
+    {
+        jet_sb_append_u64(sb, (uint64_t)i);
+    }
+}
+
+void jet_sb_append_sizet(jet_sb* sb, size_t v)
+{
+    assert(sb != NULL);
+    jet_sb_append_u64(sb, (uint64_t)v);
 }
 
 static void jet_sb_ensure_cap(jet_sb* sb, size_t n)

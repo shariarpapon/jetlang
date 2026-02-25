@@ -1,7 +1,6 @@
 #pragma once
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
+#include <stddef.h>
+#include <>
 
 typedef struct jet_sb jet_sb;
 
@@ -11,6 +10,10 @@ void jet_sb_clear(jet_sb* sb);
 size_t jet_sb_len(jet_sb* sb);
 
 void jet_sb_append_char(jet_sb* sb, char c);
+void jet_sb_append_cstr(jet_sb* sb, const char* s);
+void jet_sb_append_u64(jet_sb* sb, uint64_t v);
+void jet_sb_append_int(jet_sb* sb, int i);
+void jet_sb_append_sizet(jet_sb* sb, size_t v);
 
 
 
