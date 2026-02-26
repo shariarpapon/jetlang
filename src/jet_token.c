@@ -21,7 +21,7 @@ jet_token* jet_token_create(const char* source, size_t origin, size_t len, jet_t
 }
 
 
-void jet_token_print_darray(jet_darray* tokens)
+void jet_token_print_darray(jet_da* tokens)
 {
     if(!tokens)
     {
@@ -29,7 +29,7 @@ void jet_token_print_darray(jet_darray* tokens)
         return;
     }
     
-    size_t len = jet_darray_count(tokens);
+    size_t len = jet_da_count(tokens);
 
     if(len == 0)
     {
@@ -42,7 +42,7 @@ void jet_token_print_darray(jet_darray* tokens)
    
     for(size_t i = 0; i < len; i++)
     {  
-        jet_token* token = jet_darray_get(tokens, i);
+        jet_token* token = jet_da_get(tokens, i);
         const char* type_str = jet_token_type_str(token->type);
         printf("%-7llu %-17s %-10d %.*s\n",(unsigned long long)(i), type_str,(int)token->type, (int)token->len, token->source + token->origin);        
     }

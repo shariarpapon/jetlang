@@ -1,4 +1,32 @@
-#include <jet_darray.h>
+#pragma once
+
+#include <stdbool.h>
+#include <stddef.h>
+
+typedef struct jet_da jet_da;
+
+jet_da* jet_da_create(size_t capacity, size_t elm_size);
+jet_da* jet_da_create_copy(jet_da* darray);
+
+bool jet_da_dispose(jet_da* darray);
+bool jet_da_clear(jet_da* darray);
+bool jet_da_is_empty(jet_da* darray);
+bool jet_da_insert(jet_da* darray, size_t i, const void* data);
+bool jet_da_append(jet_da* darray, const void* data);
+bool jet_da_prepend(jet_da* darray, const void* data);
+
+bool jet_da_remove(jet_da* darray, size_t i);
+bool jet_da_remove_range(jet_da* darray, size_t start, size_t end);
+bool jet_da_remove_first(jet_da* darray);
+bool jet_da_remove_last(jet_da* darray);
+
+void* jet_da_get(jet_da* darray, size_t i);
+void* jet_da_get_first(jet_da* darray);
+void* jet_da_get_last(jet_da* darray);
+size_t jet_da_count(jet_da* darray);
+
+#ifdef JET_DA_IMPL
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -6,7 +34,7 @@
 
 #define UPSIZE_FAC 2
 
-struct jet_darray
+struct jet_da
 {
     size_t capacity;
     size_t count;
@@ -14,14 +42,14 @@ struct jet_darray
     void* data_array;
 };
 
-static bool jet_darray_ensure_capacity(jet_darray* darray, size_t min_cap);
+static bool jet_da_ensure_capacity(jet_da* darray, size_t min_cap);
 
-jet_darray* jet_darray_create(size_t capacity, size_t elm_size)
+jet_da* jet_da_create(size_t capacity, size_t elm_size)
 {
-    jet_darray* v = (jet_darray*)malloc(sizeof(jet_darray));
+    jet_da* v = (jet_da*)malloc(sizeof(jet_da));
     if(!v)
     {
-        fprintf(stderr, "cannot create jet_darray, memory allocation failed.\n");
+        fprintf(stderr, "cannot create jet_da, memory allocation failed.\n");
         return NULL;
     }
 
@@ -47,17 +75,17 @@ jet_darray* jet_darray_create(size_t capacity, size_t elm_size)
     return v;
 }
 
-jet_darray* jet_darray_create_copy(jet_darray* darray)
+jet_da* jet_da_create_copy(jet_da* darray)
 {
     assert(darray != NULL);
-    jet_darray* new_darray = jet_darray_create(darray->capacity, darray->elm_size);
+    jet_da* new_darray = jet_da_create(darray->capacity, darray->elm_size);
     assert(new_darray != NULL);
     memcpy((void*)new_darray->data_array, (const void*)darray->data_array, darray->elm_size * darray->count);
     new_darray->count = darray->count;
     return new_darray;
 }
 
-bool jet_darray_dispose(jet_darray* v)
+bool jet_da_dispose(jet_da* v)
 {
     if(!v) return false;
     if(v->data_array)
@@ -69,7 +97,7 @@ bool jet_darray_dispose(jet_darray* v)
     return true;
 }
 
-bool jet_darray_clear(jet_darray* v)
+bool jet_da_clear(jet_da* v)
 {
     if(!v || !v->data_array)
     {
@@ -80,7 +108,7 @@ bool jet_darray_clear(jet_darray* v)
     return true;
 }
 
-bool jet_darray_is_empty(jet_darray* darray)
+bool jet_da_is_empty(jet_da* darray)
 {
     if(!darray)
     {
@@ -91,7 +119,7 @@ bool jet_darray_is_empty(jet_darray* darray)
     return false;
 }
 
-bool jet_darray_insert(jet_darray* darray, size_t i, const void* data)
+bool jet_da_insert(jet_da* darray, size_t i, const void* data)
 {
     if(!darray)
     {
@@ -105,7 +133,7 @@ bool jet_darray_insert(jet_darray* darray, size_t i, const void* data)
         i = darray->count;
     }
     
-    if(!jet_darray_ensure_capacity(darray, darray->count + 1))
+    if(!jet_da_ensure_capacity(darray, darray->count + 1))
     {
         return false;
     }
@@ -124,17 +152,17 @@ bool jet_darray_insert(jet_darray* darray, size_t i, const void* data)
     return true;
 }
 
-bool jet_darray_prepend(jet_darray* darray, const void* data)
+bool jet_da_prepend(jet_da* darray, const void* data)
 {
-    return jet_darray_insert(darray, 0, data);
+    return jet_da_insert(darray, 0, data);
 }
 
-bool jet_darray_append(jet_darray* darray, const void* data)
+bool jet_da_append(jet_da* darray, const void* data)
 {
-    return jet_darray_insert(darray, darray->count, data);
+    return jet_da_insert(darray, darray->count, data);
 }
 
-bool jet_darray_remove(jet_darray* darray, size_t i)
+bool jet_da_remove(jet_da* darray, size_t i)
 { 
     if(!darray)
     {
@@ -165,7 +193,7 @@ bool jet_darray_remove(jet_darray* darray, size_t i)
     return true;
 }
 
-bool jet_darray_remove_range(jet_darray* darray, size_t start, size_t end)
+bool jet_da_remove_range(jet_da* darray, size_t start, size_t end)
 { 
     if(!darray)
     {
@@ -198,17 +226,17 @@ bool jet_darray_remove_range(jet_darray* darray, size_t start, size_t end)
     return true;
 }
 
-bool jet_darray_remove_first(jet_darray* darray)
+bool jet_da_remove_first(jet_da* darray)
 {
-    return jet_darray_remove(darray, 0); 
+    return jet_da_remove(darray, 0); 
 }
 
-bool jet_darray_remove_last(jet_darray* darray)
+bool jet_da_remove_last(jet_da* darray)
 {
-    return jet_darray_remove(darray, darray->count - 1); 
+    return jet_da_remove(darray, darray->count - 1); 
 }
 
-void* jet_darray_get(jet_darray* darray, size_t i)
+void* jet_da_get(jet_da* darray, size_t i)
 {
     if(!darray)
     {
@@ -229,27 +257,27 @@ void* jet_darray_get(jet_darray* darray, size_t i)
     return (char*)darray->data_array + darray->elm_size * i;
 }
 
-void* jet_darray_get_first(jet_darray* darray)
+void* jet_da_get_first(jet_da* darray)
 {
-    return jet_darray_get(darray, 0);
+    return jet_da_get(darray, 0);
 }
 
-void* jet_darray_get_last(jet_darray* darray)
+void* jet_da_get_last(jet_da* darray)
 {
-    return jet_darray_get(darray, darray->count - 1);
+    return jet_da_get(darray, darray->count - 1);
 }
 
-size_t jet_darray_count(jet_darray* v)
+size_t jet_da_count(jet_da* v)
 {
     if(!v)
     {
-        fprintf(stderr, "error: provided jet_darray is invalid.\n");
+        fprintf(stderr, "error: provided jet_da is invalid.\n");
         return 0;
     }
     return v->count;
 }
 
-static bool jet_darray_ensure_capacity(jet_darray* darray, size_t min_cap)
+static bool jet_da_ensure_capacity(jet_da* darray, size_t min_cap)
 {
     if(darray->capacity >= min_cap)
         return true;
@@ -269,6 +297,46 @@ static bool jet_darray_ensure_capacity(jet_darray* darray, size_t min_cap)
     darray->data_array = new_array;
     return true;       
 }
+
+#endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -9,7 +9,7 @@ jet_ast_node*
  jet_astn_mem_create(size_t alloc_size);
 
 jet_ast_node* 
-   jet_astn_block_create(jet_darray* node_darray);
+   jet_astn_block_create(jet_da* node_darray);
 
 jet_ast_node* 
    jet_astn_ident_create(const char* str);
@@ -32,8 +32,8 @@ jet_ast_node*
 jet_ast_node*
    jet_astn_fdecl_create(
       jet_ast_node* ident,
-      jet_darray* ret_type_darray,
-      jet_darray* param_darray);
+      jet_da* ret_type_darray,
+      jet_da* param_darray);
 
 jet_ast_node*
    jet_astn_fdef_create(
@@ -43,7 +43,7 @@ jet_ast_node*
 jet_ast_node*
    jet_astn_call_create(
       jet_ast_node* ident, 
-      jet_darray* arg_nodes);
+      jet_da* arg_nodes);
 
 jet_ast_node* 
     jet_astn_binop_create(

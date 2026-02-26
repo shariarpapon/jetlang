@@ -4,7 +4,7 @@
 #include <assert.h>
 #include <jet_lexer.h>
 #include <jet_io.h>
-#include <jet_darray.h>
+#include <jet_da.h>
 #include <jet_ast.h>
 
 #define ARG_PRINT_ALL "pAll"
@@ -19,7 +19,7 @@ static void print_source(const char* src, size_t src_len);
 static bool find_arg(const char* target);
 
 static jet_lexer* lexer_analyze_file(const char* filename);
-static jet_ast* ast_generate(jet_darray* tok_darray);
+static jet_ast* ast_generate(jet_da* tok_darray);
 
 int main(int argc, char** argv)
 {
@@ -71,7 +71,7 @@ static jet_lexer* lexer_analyze_file(const char* file_path)
 }
 
 
-static jet_ast* ast_generate(jet_darray* tok_darray)
+static jet_ast* ast_generate(jet_da* tok_darray)
 {
    jet_ast* ast = jet_ast_create(tok_darray);
    if(!jet_ast_generate_nodes(ast))

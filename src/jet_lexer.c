@@ -141,7 +141,7 @@ jet_lexer* jet_lexer_create(const char* filename)
     lexer->source = source;
     lexer->len = src_len + 1;
     lexer->cursor = 0;
-    lexer->token_darray = jet_darray_create(INIT_TOK_CAPACITY, sizeof(jet_token));
+    lexer->token_darray = jet_da_create(INIT_TOK_CAPACITY, sizeof(jet_token));
     if(!lexer->token_darray)
     {
         lexer->token_darray = NULL;
@@ -172,7 +172,7 @@ void jet_lexer_dispose(jet_lexer* lexer)
         free((void*)lexer);
         return;
     }
-    jet_darray_dispose(lexer->token_darray);
+    jet_da_dispose(lexer->token_darray);
     free((void*)lexer);
     printf("lexer disposed!\n");
 }
@@ -220,7 +220,7 @@ static void jet_lexer_emit_token(jet_lexer* lexer, size_t origin, size_t len, je
     tok.origin = origin;
     tok.len = len;
     tok.type = tok_type;
-    if(jet_darray_append(lexer->token_darray, (const void*)&tok) == false)
+    if(jet_da_append(lexer->token_darray, (const void*)&tok) == false)
     {
         fprintf(stderr, "error: could not add new token to lexer->token_darray.\n");
         return;

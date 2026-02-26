@@ -46,17 +46,17 @@ static void jet_ast_depth_print(const char* name, size_t depth)
     printf("\033[38;5;49m%s\033[0m\033[0m%s\033[0m\n", BRANCH_LINE, name);
 }
 
-void jet_ast_node_darray_print(jet_darray* node_darray, size_t depth)
+void jet_ast_node_darray_print(jet_da* node_darray, size_t depth)
 {
     if(!node_darray) return;
-    size_t count = jet_darray_count(node_darray);
+    size_t count = jet_da_count(node_darray);
     
     jet_ast_depth_print("\033[38;5;215m[collection]\033[0m", depth);
     size_t child_depth = depth + 1;
 
     for(size_t i = 0; i < count; i++)
     {
-        jet_ast_node* n = (jet_ast_node*)jet_darray_get(node_darray, i);
+        jet_ast_node* n = (jet_ast_node*)jet_da_get(node_darray, i);
         jet_ast_node_print(n, child_depth);
     }
 }

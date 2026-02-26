@@ -1,7 +1,7 @@
 #pragma once
 #include <stdlib.h>
 #include <jet_token.h>
-#include <jet_darray.h>
+#include <jet_da.h>
 
 typedef struct jet_lexer
 {
@@ -9,7 +9,7 @@ typedef struct jet_lexer
     size_t cursor;
     size_t cur_line;
     const char* source;
-    jet_darray* token_darray;
+    jet_da* token_darray;
 } jet_lexer;
 
 jet_lexer* jet_lexer_create(const char* src);
