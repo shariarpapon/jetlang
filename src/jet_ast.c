@@ -94,13 +94,6 @@ bool jet_ast_dispose(jet_ast* ast)
         return false;
     }
 
-    for(size_t i = 0; i < jet_darray_count(ast->top_node_darray); i++)
-    {
-        void* node = jet_darray_get(ast->top_node_darray, i);
-        if(node)
-            jet_ast_node_dispose((jet_ast_node*)node);
-    }
-
     if(ast->top_node_darray) jet_darray_dispose(ast->top_node_darray); 
     if(ast->prog_node) jet_ast_node_dispose(ast->prog_node);
     free(ast);

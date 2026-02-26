@@ -96,6 +96,7 @@ typedef struct
     const char* source;
     size_t origin;
     size_t len;
+    size_t line;
     jet_token_type type;
 } jet_token;
 

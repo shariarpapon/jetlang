@@ -29,7 +29,7 @@ typedef struct
     const char tok_value_left;
     const char tok_value_right;
     jet_token_type tok_type;
-} cmpd_punct_token_def;
+} cmpd_punct_tok_def;
 
 static const jet_tok_def kwd_table[] = 
 { 
@@ -72,7 +72,7 @@ static const jet_tok_def punct_table[] =
     { .value.chr = '[' , TOK_LBRK  },  { .value.chr = ']' , TOK_RBRK  },
 };
 
-static const cmpd_punct_token_def cmpd_punct_table[] = 
+static const cmpd_punct_tok_def cmpd_punct_table[] = 
 {
     {'=', '=', TOK_EQ     }, {'!', '=', TOK_NEQ   },
     {'<', '=', TOK_LTE    }, {'>', '=', TOK_GTE   },
@@ -216,6 +216,7 @@ static void jet_lexer_emit_token(jet_lexer* lexer, size_t origin, size_t len, je
     call_count++;
     jet_token tok;
     tok.source = lexer->source;
+    tok.line = lexer->cur_line;
     tok.origin = origin;
     tok.len = len;
     tok.type = tok_type;
@@ -487,17 +488,19 @@ static bool jet_lexer_try_scan_whitespace(jet_lexer* lexer)
 {
     switch(jet_lexer_peek(lexer))
     {
-        case ' ' :
         case '\n': 
+            lexer->cur_line++;
+            break;
+
+        case ' ' :
         case '\t':
         case '\v':
         case '\f':
-            break;
         case '\r':
-            if(jet_lexer_peek_next(lexer) == '\n')
-                jet_lexer_consume(lexer);
-        break;
-        default: return false;
+            break;
+
+        default: 
+            return false;
     }
     jet_lexer_consume(lexer);
     return true;

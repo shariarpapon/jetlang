@@ -7,10 +7,10 @@ typedef struct jet_lexer
 {
     size_t len;
     size_t cursor;
+    size_t cur_line;
     const char* source;
     jet_darray* token_darray;
 } jet_lexer;
-
 
 jet_lexer* jet_lexer_create(const char* src);
 void jet_lexer_dispose(jet_lexer* lexer);

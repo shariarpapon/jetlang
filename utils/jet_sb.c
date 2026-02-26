@@ -3,11 +3,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #define JET_SB_GROWTH_FAC 2
 #define JET_SB_MIN_CAP 2
 
-struct jet_sb {
+struct jet_sb 
+{
      char* buf;
      size_t cap;
      size_t len;

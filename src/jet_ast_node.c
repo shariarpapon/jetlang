@@ -1,5 +1,4 @@
 #include <jet_ast_node.h>
-#include <jet_ast_node_dispose.h>
 #include <jet_io.h>
 #include <stdlib.h>
 #include <stddef.h>
@@ -26,50 +25,6 @@ jet_ast_node* jet_ast_node_create_base(jet_ast_node_type node_type)
 
 void jet_ast_node_dispose(jet_ast_node* node)
 {
-    if(!node) 
-    {
-        fprintf(stderr, "error: cannot free, provided node is NULL.\n");
-        return;
-    }
-
-    switch(node->node_type)
-    {
-        default: break;
-        case AST_PROG:  
-            jet_astn_prog_dispose(node);
-            break;
-        case AST_IDENT:
-            jet_astn_ident_dispose(node);
-            break;
-        case AST_LIT:
-            jet_astn_lit_dispose(node);
-            break;
-        case AST_BLOCK:
-            jet_astn_block_dispose(node);
-            break;
-        case AST_VAR_DECL:
-            jet_astn_vdecl_dispose(node);
-            break;
-        case AST_TYPE_DECL:
-            jet_astn_tdecl_dispose(node);
-            break;
-        case AST_FUNC_DECL:
-            jet_astn_fdecl_dispose(node);
-            break;
-        case AST_FUNC_DEF:
-            jet_astn_fdef_dispose(node);
-            break;
-        case AST_CALL:
-            jet_astn_call_dispose(node);
-            break;
-        case AST_BINOP:
-            jet_astn_binop_dispose(node);
-            break;
-        case AST_UNOP:
-            jet_astn_unop_dispose(node);
-            break;
-    }
-
     if(node)
         free(node);
 }
