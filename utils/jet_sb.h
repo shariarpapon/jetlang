@@ -2,6 +2,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <stdarg.h>
 
 typedef struct jet_sb jet_sb;
 
@@ -9,8 +10,10 @@ jet_sb* jet_sb_create(size_t cap);
 void jet_sb_dispose(jet_sb* sb);
 void jet_sb_clear(jet_sb* sb);
 size_t jet_sb_len(const jet_sb* sb);
+char* jet_sb_dup(const jet_sb* sb);
 const char* jet_sb_view(const jet_sb* sb);
 
+void jet_sb_appendf(jet_sb* sb, const char* fmt, ...);
 void jet_sb_append_char(jet_sb* sb, char c);
 void jet_sb_append_cstr(jet_sb* sb, const char* s);
 void jet_sb_append_u64(jet_sb* sb, uint64_t v);
@@ -35,7 +38,7 @@ struct jet_sb
      size_t len;
 };
 
-static void jet_sb_ensure_cap(jet_sb* sb, size_t n);
+static void jet_sb_ensure_extra_cap(jet_sb* sb, size_t n);
 static void jet_sb_grow(jet_sb* sb);
 
 jet_sb* jet_sb_create(size_t cap)
@@ -84,16 +87,56 @@ size_t jet_sb_len(const jet_sb* sb)
     return sb->len;
 }
 
+char* jet_sb_dup(const jet_sb* sb)
+{
+    char* dup = malloc(sb->len + 1);
+    if(!dup)
+    {
+        fprintf(stderr, "err: could not allocate memory for dup.\n");
+        return NULL;
+    }
+    memcpy((void*)dup, (const void*)sb->buf, sb->len + 1);
+    return dup;
+}
+
 const char* jet_sb_view(const jet_sb* sb)
 {
     assert(sb != NULL);
     return (const char*)sb->buf;
 }
 
+void jet_sb_appendf(jet_sb* sb, const char* fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+
+    va_list args_copy;
+    va_copy(args_copy, args);
+    
+    int req = vsnprintf(NULL, 0, fmt, args);
+    va_end(args);
+
+    if(req < 0)
+    {
+        va_end(args_copy);
+        return;
+    }
+    
+    jet_sb_ensure_extra_cap(sb, (size_t)req + 1);
+    vsnprintf(
+            sb->buf + sb->len, 
+            sb->cap - sb->len, 
+            fmt, 
+            args_copy);
+
+    va_end(args_copy);
+    sb->len += (size_t)req;
+}
+
 void jet_sb_append_char(jet_sb* sb, char c)
 {
     assert(sb != NULL); 
-    jet_sb_ensure_cap(sb, 1);
+    jet_sb_ensure_extra_cap(sb, 1);
     sb->buf[sb->len] = c;
     sb->len++;
     sb->buf[sb->len] = '\0';
@@ -103,7 +146,7 @@ void jet_sb_append_cstr(jet_sb* sb, const char* s)
 {
     assert(sb != NULL && s != NULL);
     size_t n = strlen(s);
-    jet_sb_ensure_cap(sb, n);
+    jet_sb_ensure_extra_cap(sb, n);
 
     memcpy(sb->buf + sb->len, s, n);
     sb->len += n;
@@ -150,7 +193,7 @@ void jet_sb_append_sizet(jet_sb* sb, size_t v)
     jet_sb_append_u64(sb, (uint64_t)v);
 }
 
-static void jet_sb_ensure_cap(jet_sb* sb, size_t n)
+static void jet_sb_ensure_extra_cap(jet_sb* sb, size_t n)
 {
     assert(sb != NULL);
     while(sb->len + n >= sb->cap)
