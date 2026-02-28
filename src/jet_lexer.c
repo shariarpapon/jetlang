@@ -130,7 +130,7 @@ jet_lexer* jet_lexer_create(const char* filename)
         return NULL;
     }
 
-    jet_lexer* lexer = (jet_lexer*)malloc(sizeof(jet_lexer));
+    jet_lexer* lexer = malloc(sizeof(jet_lexer));
     if(!lexer)
     {
         fprintf(stderr, "error: could not allocate lexer memory\n");
@@ -141,6 +141,7 @@ jet_lexer* jet_lexer_create(const char* filename)
     lexer->source = source;
     lexer->len = src_len + 1;
     lexer->cursor = 0;
+    lexer->cur_line = 0;
     lexer->token_darray = jet_da_create(INIT_TOK_CAPACITY, sizeof(jet_token));
     if(!lexer->token_darray)
     {
@@ -212,15 +213,14 @@ bool jet_lexer_tokenize(jet_lexer* lexer)
 
 static void jet_lexer_emit_token(jet_lexer* lexer, size_t origin, size_t len, jet_token_type tok_type)
 {
-    static size_t call_count = 0;
-    call_count++;
     jet_token tok;
     tok.source = lexer->source;
     tok.origin = origin;
     tok.len = len;
     tok.line = lexer->cur_line;
     tok.column = lexer->cursor - len;
-    tok.type = tok_type;
+    tok.type = tok_type;    
+
     if(jet_da_append(lexer->token_darray, (const void*)&tok) == false)
     {
         fprintf(stderr, "error: could not add new token to lexer->token_darray.\n");

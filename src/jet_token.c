@@ -4,6 +4,9 @@
 #include <jet_token.h>
 #include <jet_io.h>
 
+#define TOK_TB_HEADER_FMT "%-7s %-17s %-10s %-10s %s\n\n"
+#define TOK_TB_ENTRY_FMT "%-7zu %-17s %-10zu %-10zu %.*s\n"
+
 void jet_token_print_darray(jet_da* tokens)
 {
     if(!tokens)
@@ -11,26 +14,24 @@ void jet_token_print_darray(jet_da* tokens)
         fprintf(stderr, "error: cannot print tokens, token tokens null.\n");
         return;
     }
-    
     size_t len = jet_da_count(tokens);
-
     if(len == 0)
     {
-        printf("# nothing to print, token darray is empty\n");
+        printf("nothing to print, token darray is empty\n");
         return;
     }
     
-    printf("\ntoken darray [%llu]:\n\n", (unsigned long long)len);
-    printf("%-7s %-17s %-10s %s\n\n", "index", "type", "enum-id", "value");        
+    printf("\ntoken darray [%zu]:\n\n", len);
+    printf(TOK_TB_HEADER_FMT, "index", "type", "line", "col", "value");        
    
     for(size_t i = 0; i < len; i++)
     {  
         jet_token* token = jet_da_get(tokens, i);
         const char* type_str = jet_token_type_str(token->type);
-        printf("%-7llu %-17s %-10d %.*s\n",(unsigned long long)(i), type_str,(int)token->type, (int)token->len, token->source + token->origin);        
+        printf(TOK_TB_ENTRY_FMT, i, type_str, token->line, token->column, token->len, token->source + token->origin);        
     }
     printf("\n");
-    printf("* generated %llu tokens\n\n", (unsigned long long)len);
+    printf("* generated %zu tokens\n\n", len);
 }
 
 const char* jet_token_type_str(jet_token_type type)
