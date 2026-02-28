@@ -39,21 +39,26 @@ int main(int argc, char** argv)
     // -----  create components -----    
     char* src_file_path = *args;
     jet_lexer* lexer = lexer_analyze_file(src_file_path); 
-    jet_ast* ast = ast_generate(lexer->token_darray); 
+    ast_generate(lexer->token_darray); 
 
-    // ------ free all memory ------
-    
+    // ------ free all memory ------ 
     jet_lexer_dispose(lexer);
-    printf("* TODO: implement proper node disposal system.\n");
-    //TODO: fix double free bug
-    //jet_ast_dispose(ast);
     
+    //TEST: jet_ast_dispose(ast);
+    printf("* TODO: implement proper node disposal system.\n"); 
     return 0;
 }
 
-static jet_lexer* lexer_analyze_file(const char* file_path)
+static jet_lexer* lexer_analyze_file(const char* filepath)
 {
-    jet_lexer* lexer = jet_lexer_create(file_path);        
+    jet_lexer* lexer = jet_lexer_create(); 
+    assert(lexer != NULL);
+
+    if(!jet_lexer_init(lexer, filepath))
+    {
+        fprintf(stderr, "err: could not init lexer.\n");
+        return NULL;
+    }
     
     if(find_arg(ARG_PRINT_ALL) == true || find_arg(ARG_PRINT_SOURCE) ==  true)
         print_source(lexer->source, lexer->len);

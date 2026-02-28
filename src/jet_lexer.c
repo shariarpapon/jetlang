@@ -107,52 +107,68 @@ static char jet_lexer_consume(jet_lexer* lexer);
 static char jet_lexer_peek(jet_lexer* lexer);
 static char jet_lexer_peek_next(jet_lexer* lexer);
 
-jet_lexer* jet_lexer_create(const char* filename)
+jet_lexer* jet_lexer_create()
 {
-    if(!filename)
+    jet_lexer* lexer = malloc(sizeof(jet_lexer));
+    if(!lexer)
     {
-        fprintf(stderr, "error: cannot create lexer, filename invalid.\n");
+        fprintf(stderr, "error: could not allocate lexer memory\n");
         return NULL;
     }
 
+    lexer->source = NULL;
+    lexer->len = 0;
+    lexer->cursor = 0;
+    lexer->cur_line = 0;
+    lexer->token_darray = jet_da_create(INIT_TOK_CAPACITY, sizeof(jet_token));
+
+    if(!lexer->token_darray)
+    {
+        lexer->token_darray = NULL;
+        fprintf(stderr, "err: could not allocate token-darray memory\n");
+        free((void*)lexer);
+        return NULL;
+    }
+
+    printf("lexer created successfully!\n");
+    return lexer;
+}
+
+bool jet_lexer_init(jet_lexer* lexer, const char* filepath)
+{
+    assert(lexer != NULL);
+    assert(filepath != NULL); 
     size_t src_len = 0;
-    const char* source = jet_io_read_text(filename, &src_len);
+    const char* source = jet_io_read_text(filepath, &src_len);
     if(!source)
     {
-        fprintf(stderr, "error: cannot create lexer, unable to load file.\n");
-        return NULL;
+        fprintf(stderr, "err: cannot read file at path %s\n", filepath);
+        return false;
     }
 
     if(src_len == 0)
     {
         fprintf(stderr, "wrn: loaded file is empty.\n");
         free((void*)source);
-        return NULL;
+        return false;
     }
 
-    jet_lexer* lexer = malloc(sizeof(jet_lexer));
-    if(!lexer)
-    {
-        fprintf(stderr, "error: could not allocate lexer memory\n");
-        free((void*)source);
-        return NULL;
-    }
-
+    jet_lexer_reset(lexer);
     lexer->source = source;
     lexer->len = src_len + 1;
+    return true;
+}
+
+void jet_lexer_reset(jet_lexer* lexer)
+{
+    assert(lexer != NULL);
+    if(lexer->source)
+        free((void*)lexer->source);
+    lexer->source = NULL;
+    lexer->len = 0;
     lexer->cursor = 0;
     lexer->cur_line = 0;
-    lexer->token_darray = jet_da_create(INIT_TOK_CAPACITY, sizeof(jet_token));
-    if(!lexer->token_darray)
-    {
-        lexer->token_darray = NULL;
-        fprintf(stderr, "error: could not allocate token-darray memory\n");
-        jet_lexer_dispose(lexer);
-        return NULL;
-    }
-
-    printf("lexer created successfully!\n");
-    return lexer;
+    jet_da_clear(lexer->token_darray);
 }
 
 void jet_lexer_dispose(jet_lexer* lexer)
