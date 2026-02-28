@@ -28,7 +28,7 @@ void jet_token_print_darray(jet_da* tokens)
     {  
         jet_token* token = jet_da_get(tokens, i);
         const char* type_str = jet_token_type_str(token->type);
-        printf(TOK_TB_ENTRY_FMT, i, type_str, token->line, token->column, token->len, token->source + token->origin);        
+        printf(TOK_TB_ENTRY_FMT, i, type_str, token->line, token->column, (int)token->len, token->source + token->origin);        
     }
     printf("\n");
     printf("* generated %zu tokens\n\n", len);
