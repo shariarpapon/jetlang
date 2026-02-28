@@ -216,9 +216,10 @@ static void jet_lexer_emit_token(jet_lexer* lexer, size_t origin, size_t len, je
     call_count++;
     jet_token tok;
     tok.source = lexer->source;
-    tok.line = lexer->cur_line;
     tok.origin = origin;
     tok.len = len;
+    tok.line = lexer->cur_line;
+    tok.column = lexer->cursor - len;
     tok.type = tok_type;
     if(jet_da_append(lexer->token_darray, (const void*)&tok) == false)
     {

@@ -4,23 +4,6 @@
 #include <jet_token.h>
 #include <jet_io.h>
 
-jet_token* jet_token_create(const char* source, size_t origin, size_t len, jet_token_type type)
-{
-    jet_token* token = (jet_token*)malloc(sizeof(jet_token));
-    if(!token)
-    {
-        fprintf(stderr, "error: couldn't allocate token memory.");
-        return (jet_token*){0};
-    }
-
-    token->source = source;
-    token->origin = origin;
-    token->len = len;
-    token->type = type;
-    return token;
-}
-
-
 void jet_token_print_darray(jet_da* tokens)
 {
     if(!tokens)
@@ -135,7 +118,7 @@ const char* jet_token_type_str(jet_token_type type)
 
 char* jet_token_strdup(jet_token* tok)
 {
-    char* s = (char*)malloc(sizeof(char) * (tok->len + 1));
+    char* s = malloc(tok->len + 1);
     if(!s)
     {
         fprintf(stderr, "error: unable to allocate memory for str slice.\n");

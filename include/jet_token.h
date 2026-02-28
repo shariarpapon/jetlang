@@ -97,11 +97,10 @@ typedef struct
     size_t origin;
     size_t len;
     size_t line;
+    size_t column;
     jet_token_type type;
 } jet_token;
 
-
-jet_token* jet_token_create(const char* source, size_t origin, size_t len, jet_token_type type);
 const char* jet_token_type_str(jet_token_type type);
 void jet_token_print_darray(jet_da* v);
 char* jet_token_strdup(jet_token* tok);

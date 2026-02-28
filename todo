@@ -1,4 +1,3 @@
 - create arena allocator (needed for stable AST node lifetime)
 - tokens should carry line numbers 
-- add varargs in jet_sb for formatting
 - complete jet_err system
