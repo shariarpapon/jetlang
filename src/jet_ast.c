@@ -730,9 +730,8 @@ void jet_ast_print(jet_ast* ast)
     jet_ast_node_darray_print(ast->top_node_darray, 0);
     
     printf("=======================\n");
-    jet_ast_node_print(ast->prog_node, 0);
-    
     printf("PROG\n");
+    jet_ast_node_print(ast->prog_node, 0); 
     printf("=======================\n\n");
 }
 

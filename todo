@@ -1,3 +1,4 @@
 - fix ast node creation mem leak issue, using darray and individual pointers dont mix well.
+    * either move to INDEX-based storage or per node allocation with ptr array.
 - create arena allocator (needed for stable AST node lifetime)
 - complete jet_err system

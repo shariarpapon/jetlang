@@ -6,6 +6,10 @@ void add(int x, int y)
     add(x, y);
 }
 
+prog 
+{
+    print("hello world");
+}
 
 
 
