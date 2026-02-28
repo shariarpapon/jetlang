@@ -15,7 +15,7 @@ C_FLAGS = -Wall -std=c11
 
 C_COMPILE = $(CC) $(C_FLAGS) $(C_SRC) $(C_INCLUDES) -o $(C_BIN)  
 
-JET_FLAGS = pTok 
+jf ?= pAll
 JET_CODE_FILE = code.jt
 JET_EXEC = $(RUN) $(JET_CODE_FILE)
 
@@ -23,11 +23,7 @@ JET_EXEC = $(RUN) $(JET_CODE_FILE)
 
 all:
 	$(C_COMPILE)
-	$(JET_EXEC)
-
-info_build ib:
-	$(C_COMPILE)
-	$(JET_EXEC) $(JET_FLAGS)
+	$(JET_EXEC) $(jf)
 
 rebuild rb:
 	$(MAKE) clean

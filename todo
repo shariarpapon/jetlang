@@ -1,2 +1,3 @@
+- fix ast node creation mem leak issue, using darray and individual pointers dont mix well.
 - create arena allocator (needed for stable AST node lifetime)
 - complete jet_err system
