@@ -4,12 +4,15 @@
 #include <jet_da.h>
 #include <stdbool.h>
 
+#define INVALID_NID 0
+typedef size_t node_id;
+
 typedef struct jet_ast_node jet_ast_node;
 
 // PROGRAM ENTRY POINT
 typedef struct jet_ast_node_prog 
 {
-  jet_ast_node* block;
+    node_id block_nid;
 } jet_ast_node_prog;
 
 typedef struct jet_ast_node_mem
@@ -42,14 +45,14 @@ typedef struct jet_ast_node_lit
 
 typedef struct jet_ast_node_block
 {
-  jet_da* node_darray;
+  jet_da* stmt_nid_da;
 } jet_ast_node_block;
 
 typedef struct jet_ast_node_var_decl
 {  
-  jet_ast_node* ident;
-  jet_ast_node* type_decl;
-  jet_ast_node* init_value;
+  node_id ident;
+  node_id type_decl;
+  node_id init_value;
 } jet_ast_node_var_decl;
 
 typedef struct jet_ast_node_type_decl 

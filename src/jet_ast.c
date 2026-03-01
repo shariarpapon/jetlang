@@ -18,9 +18,6 @@
 #include <jet_ast_node.h>
 #include <jet_ast_op_prec.h>
 
-#define INVALID_NID 0
-typedef size_t node_id;
-
 struct jet_ast 
 {
     jet_da* node_registry;
@@ -363,117 +360,132 @@ static bool jet_ast_is_func_head(jet_ast* ast)
     return true;
 }
 
-static jet_ast_node* jet_astn_parse_next_stmt(jet_ast* ast)
+static node_id jet_astn_parse_next_stmt(jet_ast* ast)
 {
     if(!ast)
     {
         fprintf(stderr, "error: cannot parse next stmt, ast is null.\n");
-        return NULL;
+        return INVALID_NID;
     }
     
-    jet_ast_node* parsed_node = NULL;
+    node_id parsed_nid = INVALID_NID;
     jet_token_type t = jet_ast_peekn_tok_type(ast, 0);
     
     if(t == TOK_EOF)
     {
         printf("* ast parsing complete, end of file reached.\n");
-        return NULL;
+        return INVALID_NID;
     }
     else if(t == TOK_INV)
     {
         fprintf(stderr, "error: cannot parse next stmt, invalid token.\n");
-        return NULL; 
+        return INVALID_NID; 
     }    
     else if(t == TOK_KWD_PROG)
     {
-        parsed_node = jet_astn_prog_parse(ast);
-        if(!parsed_node)
+        parsed_nid = jet_astn_prog_parse(ast);
+        if(parsed_nid == INVALID_NID)
         {
             fprintf(stderr, "error: unable to parse next stmt (prog)\n");
-            return NULL;
+            return INVALID_NID;
         }
     }
     else if(jet_ast_is_vdecl(ast))
     {
-        parsed_node = jet_astn_vdecl_parse(ast);
-        if(!parsed_node)
+        parsed_nid = jet_astn_vdecl_parse(ast);
+        if(parsed_nid == INVALID_NID)
         {
             fprintf(stderr, "error: cannot parse next stmt (vdecl)\n");
-            return NULL;
+            return INVALID_NID;
         }
     }
     else if(jet_ast_is_func_head(ast))
     { 
-        parsed_node = jet_astn_func_parse(ast);
-        if(!parsed_node)
+        parsed_nid = jet_astn_func_parse(ast);
+        if(parsed_nid == INVALID_NID)
         {
             fprintf(stderr, "error: cannot parse next stmt (func)\n");
-            return NULL;
+            return INVALID_NID;
         }
     }
     else 
     {
-        parsed_node = jet_astn_parse_expr_stmt(ast);
-        if(!parsed_node)
+        parsed_nid = jet_astn_parse_expr_stmt(ast);
+        if(parsed_nid == INVALID_NID)
         {
             fprintf(stderr, "cannot parse next stmt, expected expression statement.\n");
-            return NULL;
+            return INVALID_NID;
         }
     }
 
-    if(parsed_node == NULL)
+    if(parsed_nid == INVALID_NID)
         fprintf(stderr, "error: unable to parse next stmt, no valid stmt sequences parsed.\n");
 
-    return parsed_node;
+    return parsed_nid;
 }
 
-static jet_ast_node* jet_astn_parse_expr_stmt(jet_ast* ast)
+static node_id jet_astn_parse_expr_stmt(jet_ast* ast)
 {
-    jet_ast_node* expr = jet_astn_parse_expr(ast, 0);
-    if(!expr)
+    node_id expr = jet_astn_parse_expr(ast, 0);
+    if(expr == INVALID_NID)
     {
         fprintf(stderr, "error: cannot parse expr stmt, expected expr node.\n");
-        return NULL;
+        return INVALID_NID;
     }
     jet_ast_expect_tok(ast, TOK_SEMI);
     return expr;
 }
 
-static jet_ast_node* jet_astn_prog_parse(jet_ast* ast)
+static node_id jet_astn_prog_parse(jet_ast* ast)
 {
     jet_ast_expect_tok(ast, TOK_KWD_PROG);
-    jet_ast_node* block = jet_astn_block_parse(ast);
-    if(block == NULL)
+    node_id block = jet_astn_block_parse(ast);
+    if(block == INVALID_NID)
     {
         fprintf(stderr, "error: unable to parse prog block.\n");
-        return NULL;
+        return INVALID_NID;
     }
-    jet_ast_node* prog = jet_astn_prog_create(block);
-    return prog;
+
+    jet_ast_node_prog prog;
+    prog.block_nid = block;
+    
+    jet_ast_node node;
+    node.node_type = AST_PROG;
+    node.as.prog = prog;
+
+    return jet_ast_register_node((const jet_ast_node*)&node);
 }
 
-static jet_ast_node* jet_astn_block_parse(jet_ast* ast)
+//WOKRING...
+static node_id jet_astn_block_parse(jet_ast* ast)
 {
     jet_ast_expect_tok(ast, TOK_LBRC);
-    jet_da* stmt_darray = jet_da_create(4, sizeof(jet_ast_node));
-    if(!stmt_darray)
+    jet_da* stmt_da = jet_da_create(4, sizeof(node_id));
+    if(!stmt_da)
     {
-        fprintf(stderr, "error: cannot parse block, could not create node darray.\n");
-        return NULL;
+        fprintf(stderr, "error: cannot parse block, could not create node da.\n");
+        return INVALID_NID;
     }
     while(jet_ast_peekn_tok_type(ast, 0) != TOK_RBRC)
     {
-        jet_ast_node* stmt = jet_astn_parse_next_stmt(ast);
-        if(stmt == NULL)
+        node_id stmt = jet_astn_parse_next_stmt(ast);
+        if(stmt == INVALID_NID)
         {
             fprintf(stderr, "error: cannot parse block, unable to parse next stmt.\n");
-            return NULL;
+            return INVALID_NID;
         }
-        jet_da_append(stmt_darray, (const void*)stmt);
+        jet_da_append(stmt_da, (const void*)stmt);
     }
     jet_ast_expect_tok(ast, TOK_RBRC);
-    jet_ast_node* block = jet_astn_block_create(stmt_darray);
-    return block;
+
+    jet_ast_node_block block;
+    block.stmt_nid_da = stmt_da;
+    
+    jet_ast_node node;
+    node.node_type = AST_BLOCK;
+    node.as.block = block;
+    
+    return jet_ast_register_node((const jet_ast_node*)&node);
 }
 
 static jet_ast_node* jet_astn_ident_parse(jet_ast* ast)
