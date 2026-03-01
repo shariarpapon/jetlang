@@ -19,7 +19,7 @@ static void print_source(const char* src, size_t src_len);
 static bool find_arg(const char* target);
 
 static jet_lexer* lexer_analyze_file(const char* filename);
-static jet_ast* ast_generate(jet_da* tok_darray);
+static jet_ast* ast_generate(jet_da* tok_da);
 
 int main(int argc, char** argv)
 {
@@ -76,9 +76,9 @@ static jet_lexer* lexer_analyze_file(const char* filepath)
 }
 
 
-static jet_ast* ast_generate(jet_da* tok_darray)
+static jet_ast* ast_generate(jet_da* tok_da)
 {
-   jet_ast* ast = jet_ast_create(tok_darray);
+   jet_ast* ast = jet_ast_create(tok_da);
    if(!jet_ast_generate_nodes(ast))
         fprintf(stderr, "error: could not generate AST nodes.\n");
    
