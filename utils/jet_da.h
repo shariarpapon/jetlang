@@ -103,6 +103,8 @@ bool jet_da_clear(jet_da* v)
     {
        return false;
     }
+    if(v->count == 0)
+        return true;
     memset(v->data_array, 0, v->elm_size * v->count);
     v->count = 0;
     return true;
