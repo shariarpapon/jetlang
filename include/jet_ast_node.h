@@ -27,10 +27,6 @@ typedef struct jet_ast_node_ident
  
 typedef struct jet_ast_node_lit
 {
-   /*
-      -1       0       1       2       3       4
-      void/v  int/i  float/f  bool/b  char/c  str/s
-   */
    jet_token_type lit_type;
    union
    {
@@ -48,49 +44,49 @@ typedef struct jet_ast_node_block
   jet_da* stmt_nid_da;
 } jet_ast_node_block;
 
-typedef struct jet_ast_node_var_decl
-{  
-  node_id ident;
-  node_id type_decl;
-  node_id init_value;
-} jet_ast_node_var_decl;
+typedef struct jet_ast_node_vdecl
+{    
+  node_id tdecl_nid;
+  node_id ident_nid;
+  node_id init_value_nid;
+} jet_ast_node_vdecl;
 
-typedef struct jet_ast_node_type_decl 
+typedef struct jet_ast_node_tdecl 
 {
-  const char* type_name;
+  const char* tname;
   size_t byte_size;
   bool is_native;
-} jet_ast_node_type_decl;
+} jet_ast_node_tdecl;
 
-typedef struct jet_ast_node_func_decl
+typedef struct jet_ast_node_fdecl
 {
-  jet_ast_node* ident;
-  jet_da* ret_type_darray;
-  jet_da* param_darray; 
-} jet_ast_node_func_decl;
+  node_id ident_nid;
+  jet_da* ret_tdecl_nid_da;
+  jet_da* param_nid_da; 
+} jet_ast_node_fdecl;
 
-typedef struct jet_ast_node_func_def
+typedef struct jet_ast_node_fdef
 {
-  jet_ast_node* func_decl;
-  jet_ast_node* block;
-} jet_ast_node_func_def; 
+  node_id fdecl_nid;
+  node_id block_nid;
+} jet_ast_node_fdef; 
 
 typedef struct jet_ast_node_call
 {
-  jet_ast_node* ident;
-  jet_da* arg_darray;
+  node_id callee_nid;
+  jet_da* arg_nid_da;
 } jet_ast_node_call;
 
 typedef struct jet_ast_node_binop
 {
-    jet_ast_node* lhs;
-    jet_ast_node* rhs;
+    node_id lhs_nid;
+    node_id rhs_nid;
     jet_token_type op_type;
 } jet_ast_node_binop;
 
 typedef struct jet_ast_node_unop
 {
-    jet_ast_node* term;
+    node_id expr_nid;
     jet_token_type op_type;
 } jet_ast_node_unop;
 
@@ -100,24 +96,23 @@ struct jet_ast_node
     jet_ast_node_type node_type;
     union
     {
-        jet_ast_node_prog* prog;
-        jet_ast_node_mem* mem;
-        jet_ast_node_ident* ident;
-        jet_ast_node_lit* lit;
-        jet_ast_node_block* block; 
-        jet_ast_node_var_decl* var_decl;
-        jet_ast_node_type_decl* type_decl;
-        jet_ast_node_func_decl* func_decl;
-        jet_ast_node_func_def* func_def;
-        jet_ast_node_call* call;
-        jet_ast_node_binop* binop;
-        jet_ast_node_unop* unop;
+        jet_ast_node_prog prog;
+        jet_ast_node_mem mem;
+        jet_ast_node_ident ident;
+        jet_ast_node_lit lit;
+        jet_ast_node_block block; 
+        jet_ast_node_vdecl vdecl;
+        jet_ast_node_tdecl tdecl;
+        jet_ast_node_fdecl fdecl;
+        jet_ast_node_fdef fdef;
+        jet_ast_node_call call;
+        jet_ast_node_binop binop;
+        jet_ast_node_unop unop;
     } as;
 };
 
 jet_ast_node* jet_ast_node_create_base(jet_ast_node_type node_type);
-void jet_ast_node_dispose(jet_ast_node* node);
-void jet_ast_node_darray_print(jet_da* node_darray, size_t branch);
+void jet_ast_node_da_print(jet_da* node_darray, size_t branch);
 void jet_ast_node_print(jet_ast_node* node, size_t branch);
 
 

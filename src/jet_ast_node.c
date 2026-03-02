@@ -23,12 +23,6 @@ jet_ast_node* jet_ast_node_create_base(jet_ast_node_type node_type)
     return node;
 }
 
-void jet_ast_node_dispose(jet_ast_node* node)
-{
-    if(node)
-        free(node);
-}
-
 static const char* jet_ast_node_str(jet_ast_node* node)
 {
     assert(node != NULL);
@@ -46,7 +40,7 @@ static void jet_ast_depth_print(const char* name, size_t depth)
     printf("\033[38;5;49m%s\033[0m\033[0m%s\033[0m\n", BRANCH_LINE, name);
 }
 
-void jet_ast_node_darray_print(jet_da* node_darray, size_t depth)
+void jet_ast_node_da_print(jet_da* node_darray, size_t depth)
 {
     if(!node_darray) return;
     size_t count = jet_da_count(node_darray);
