@@ -224,7 +224,7 @@ static void jet_ast_reset(jet_ast* ast)
 
 static void jet_ast_push_nid(jet_ast* ast, node_id nid)
 {
-    jet_ast_node* node = jet_ast_node_get(nid);
+    const jet_ast_node* node = jet_ast_node_get(ast, nid);
     if(node == NULL)
     {
         fprintf(stderr, "err: nid=%zu does not exist in registry.\n", nid);
