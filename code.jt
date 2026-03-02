@@ -2,14 +2,9 @@ int x = (3 + 1) * 2 % 5;
 
 void add(int x, int y)
 {
-    int sum = x + y;
-    add(x, y);
+    int z = x + y;
 }
 
-prog 
-{
-    print("hello world");
-}
 
 
 
