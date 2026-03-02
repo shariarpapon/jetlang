@@ -75,6 +75,7 @@ jet_ast* jet_ast_create(jet_da* tok_da)
     
     ast->node_registry = NULL;
     ast->top_nid_da = NULL;
+    ast->tok_da = tok_da;
     ast->prog_nid = INVALID_NID;
     ast->tok_cursor = 0;
     ast->node_count = 0;
@@ -308,7 +309,6 @@ static jet_token_type jet_ast_peekn_tok_type(jet_ast* ast, size_t n)
 
 static const char* jet_ast_get_type_name(jet_token_type tok_type)
 {
-    const char* type_name;
     switch(tok_type)
     {
         default:
@@ -323,7 +323,6 @@ static const char* jet_ast_get_type_name(jet_token_type tok_type)
         case TOK_KWD_CHAR: return "char";
         case TOK_KWD_VOID: return "void";
     }
-    return type_name;
 }
 
 // PARSING ==============================================================================
@@ -600,9 +599,10 @@ static node_id jet_astn_func_parse(jet_ast* ast)
 {
     jet_ast_node_fdecl fdecl;
 
+    node_id ret_tdecl_nid = jet_astn_tdecl_parse(ast); 
     fdecl.ident_nid = jet_astn_ident_parse(ast);
+    
     fdecl.ret_tdecl_nid_da = jet_da_create(1, sizeof(node_id)); 
-    node_id ret_tdecl_nid = jet_astn_tdecl_parse(ast);
     jet_da_append(fdecl.ret_tdecl_nid_da, (const void*)&ret_tdecl_nid);
 
     jet_ast_expect_tok(ast, TOK_LPAR);
@@ -808,7 +808,7 @@ static node_id jet_astn_parse_primary(jet_ast* ast)
         case TOK_MINUS:
         {
             jet_ast_consume_tok(ast);
-            node_id rhs_nid = jet_astn_parse_expr(ast, 0);
+            node_id rhs_nid = jet_astn_parse_expr(ast, PREC_PREFIX);
             if(rhs_nid == INVALID_NID)
             {
                 fprintf(stderr, "error: expected expr after '-'\n");
