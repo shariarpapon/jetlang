@@ -6,6 +6,7 @@
 #include <jet_io.h>
 #include <jet_da.h>
 #include <jet_ast.h>
+#include <jet_ast_print.h>
 
 #define ARG_PRINT_ALL "pAll"
 #define ARG_PRINT_TOKENS "pTok"

@@ -30,7 +30,6 @@ struct jet_ast
 };
 
 static node_id jet_ast_register_node(jet_ast* ast, const jet_ast_node* node);
-static jet_ast_node* jet_ast_node_get(jet_ast* ast, node_id nid);
 static void jet_ast_reset(jet_ast* ast);
 
 // TOKEN TRAVERSING/UTILITY
@@ -170,17 +169,19 @@ bool jet_ast_generate_nodes(jet_ast* ast)
     return true;
 }
 
-static node_id jet_ast_register_node(jet_ast* ast, const jet_ast_node* node)
+const jet_da* jet_ast_get_top_nid_da(jet_ast* ast)
 {
     assert(ast != NULL);
-    assert(node != NULL);
-
-    jet_da_append(ast->node_registry, (const void*)node);
-    ast->node_count++;
-    return ast->node_count;
+    return ast->top_nid_da;
 }
 
-static jet_ast_node* jet_ast_node_get(jet_ast* ast, node_id nid)
+const jet_da* jet_ast_get_prog_nid(jet_ast* ast)
+{
+    assert(ast != NULL);
+    return ast->prog_nid;
+}
+
+const jet_ast_node* jet_ast_node_get(jet_ast* ast, node_id nid)
 {
     assert(ast != NULL);
     if(nid == INVALID_NID)
@@ -190,13 +191,24 @@ static jet_ast_node* jet_ast_node_get(jet_ast* ast, node_id nid)
     }
 
     // force nid - 1 >= 0, because 0 represents invalid.
-    jet_ast_node* node = (jet_ast_node*)jet_da_get(ast->node_registry, nid - 1);
+    const jet_ast_node* node = (const jet_ast_node*)jet_da_get(ast->node_registry, nid - 1);
     if(!node)
     {
         fprintf(stderr, "err: node with id=%zu does not exist in registry.\n", nid);
         return NULL;
     }
     return node;
+}
+
+
+static node_id jet_ast_register_node(jet_ast* ast, const jet_ast_node* node)
+{
+    assert(ast != NULL);
+    assert(node != NULL);
+
+    jet_da_append(ast->node_registry, (const void*)node);
+    ast->node_count++;
+    return ast->node_count;
 }
 
 static void jet_ast_reset(jet_ast* ast)
@@ -476,8 +488,7 @@ static node_id jet_astn_block_parse(jet_ast* ast)
         if(t == TOK_EOF || t == TOK_INV)
         {
             fprintf(stderr, "err: cannot parse block, unexpected token.\n");
-            jet_da_dispose(block.stmt_nid_da);
-            return INVALID_NID;
+            goto fail;
         }
         else if(t == TOK_RBRC)
             break;
@@ -486,8 +497,7 @@ static node_id jet_astn_block_parse(jet_ast* ast)
         if(stmt_nid == INVALID_NID)
         {
             fprintf(stderr, "error: cannot parse block, unable to parse next stmt.\n");
-            jet_da_dispose(block.stmt_nid_da);
-            return INVALID_NID;
+            goto fail;
         }
         jet_da_append(block.stmt_nid_da, (const void*)&stmt_nid);
     }
@@ -497,6 +507,10 @@ static node_id jet_astn_block_parse(jet_ast* ast)
     node.node_type = AST_BLOCK;
     node.as.block = block;  
     return jet_ast_register_node(ast, (const jet_ast_node*)&node);
+
+fail:
+    jet_da_dispose(block.stmt_nid_da);
+    return INVALID_NID;
 }
 
 static node_id jet_astn_ident_parse(jet_ast* ast)
@@ -636,25 +650,29 @@ static node_id jet_astn_func_parse(jet_ast* ast)
     jet_ast_node fdecl_base;
     fdecl_base.node_type = AST_FUNC_DECL;
     fdecl_base.as.fdecl = fdecl;
-    node_id func_nid = jet_ast_register_node(ast, (const jet_ast_node*)&fdecl_base);
+    node_id out_func_nid = INVALID_NID;
 
     if(jet_ast_peekn_tok_type(ast, 0) == TOK_LBRC)
     {
         jet_ast_node_fdef fdef;
-        fdef.fdecl_nid = func_nid;
         fdef.block_nid = jet_astn_block_parse(ast);
         if(fdef.block_nid == INVALID_NID)
         {
             fprintf(stderr, "error: cannot parse func, unable to parse func definiton block.\n");
             goto fail;
         }
-
+        fdef.fdecl_nid = jet_ast_register_node(ast, (const jet_ast_node*)&fdecl_base);
+        
         jet_ast_node fdef_base;
         fdef_base.node_type = AST_FUNC_DEF;
         fdef_base.as.fdef = fdef;
-        func_nid = jet_ast_register_node(ast, (const jet_ast_node*)&fdef_base); 
+        out_func_nid = jet_ast_register_node(ast, (const jet_ast_node*)&fdef_base); 
     }
-    return func_nid;
+    else
+    {
+        out_func_nid = jet_ast_register_node(ast, (const jet_ast_node*)&fdecl_base);
+    }
+    return out_func_nid;
 
 fail:
     jet_da_dispose(fdecl.ret_tdecl_nid_da);
@@ -664,40 +682,44 @@ fail:
 
 static node_id jet_astn_parse_fparam(jet_ast* ast)
 {
-    jet_ast_node* tdecl = jet_astn_tdecl_parse(ast);
-    if(!tdecl)
+    jet_ast_node_vdecl;
+    vdecl.tdecl_nid = jet_astn_tdecl_parse(ast);
+    if(vdecl.tdecl_nid == INVALID_NID)
     {
         fprintf(stderr, "error: cannot parse vdecl, expected tdecl.\n");
-        return NULL;
+        return INVALID_NID;
     }
 
-    jet_ast_node* ident = jet_astn_ident_parse(ast);
-    if(!ident)
+    vdecl.ident_nid = jet_astn_ident_parse(ast);
+    if(!vdecl.ident_nid == INVALID_NID)
     {
         fprintf(stderr, "error: cannot parse vdecl, expected ident after tdecl.\n");
-        return NULL;
+        return INVALID_NID;
     }
 
-    jet_ast_node* init = NULL;
+    vdecl.init_value_nid = INVALID_NID;
     jet_token_type tok_type = jet_ast_peekn_tok_type(ast, 0);
     if(tok_type == TOK_ASG)
     {
         jet_ast_consume_tok(ast);    
-        init = jet_astn_parse_expr(ast, 0);
-        if(!init)
+        vdecl.init_value_nid = jet_astn_parse_expr(ast, 0);
+        if(!vdecl.init_value_nid)
         {
             fprintf(stderr, "error: cannot parse vdecl, expected expr value after asg operator.\n");
-            return NULL;
+            return INVALID_NID;
         } 
     }
-    jet_ast_node* vdecl = jet_astn_vdecl_create(tdecl, ident, init);
-    return vdecl; 
+    
+    jet_ast_node node;
+    node.node_type = AST_VAR_DECL;
+    node.as.vdecl = vdecl;
+    return jet_ast_register_node(ast, (const jet_ast_node*)&node);
 }
 
-static jet_ast_node* jet_astn_parse_expr(jet_ast* ast, size_t min_prec)
+static node_id jet_astn_parse_expr(jet_ast* ast, size_t min_prec)
 {
-    jet_ast_node* lhs_node = jet_astn_parse_primary(ast);
-    if(lhs_node == NULL)
+    node_id lhs_nid = jet_astn_parse_primary(ast);
+    if(lhs_nid == INVALID_NID)
     {
         fprintf(stderr, "wrn: cannot parse expression, expected primary lhs.\n");
         return NULL;
@@ -713,30 +735,39 @@ static jet_ast_node* jet_astn_parse_expr(jet_ast* ast, size_t min_prec)
         if(op_prec < min_prec)
             break;
         jet_ast_consume_tok(ast);
-        jet_ast_node* rhs_node = jet_astn_parse_expr(ast, op_prec + 1);        
-        if(rhs_node == NULL)
+        node_id rhs_nid = jet_astn_parse_expr(ast, op_prec + 1);        
+        if(rhs_nid == INVALID_NID)
         {
-            fprintf(stderr, "wrn: cannot parse expression, expected rhs after operator.\n");
-            return lhs_node;
+            fprintf(stderr, "wrn: cannot parse expression, expected rhs expr after operator.\n");
+            return lhs_nid;
         }
-        lhs_node = jet_astn_binop_create(lhs_node, rhs_node, op_tok->type);
+        
+        jet_ast_node_bino binop;
+        binop.lhs_nid = lhs_nid;
+        binop.rhs_nid = rhs_nid;
+        binop.op_type = op_tok->type;
+        
+        jet_ast_node node;
+        node.node_type = AST_BINOP;
+        node.as.binop = binop;
+        lhs_nid = jet_ast_register_node(ast, (const jet_ast_node*)&node);
     }
-    return lhs_node;
+    return lhs_nid;
 }
 
-static jet_ast_node* jet_astn_parse_primary(jet_ast* ast)
+static node_id jet_astn_parse_primary(jet_ast* ast)
 {
     jet_token* cur_tok = jet_ast_peek_tok(ast);
     if(cur_tok == NULL) 
-        return NULL;
+        return INVALID_NID;
 
-    jet_ast_node* out_node = NULL;
+    ndoe_id out_nid = INVALID_NID;
     switch(cur_tok->type)
     {
         default:
         {
             fprintf(stderr, "error: expected primary expression.\n");
-            return NULL;
+            return INVALID_NID;
         }
         case TOK_KWD_NULL:
         case TOK_KWD_TRUE:
@@ -747,28 +778,28 @@ static jet_ast_node* jet_astn_parse_primary(jet_ast* ast)
         case TOK_LIT_STR:
         {
             jet_ast_consume_tok(ast);
-            out_node = jet_astn_lit_create(cur_tok);
+            out_nid = jet_astn_lit_create(cur_tok);
             break;
         }
         case TOK_IDENT:
         {
-            out_node = jet_astn_ident_parse(ast);
-            if(!out_node)
+            out_nid = jet_astn_ident_parse(ast);
+            if(out_nid == INVALID_NID)
             {
                 fprintf(stderr, "error: cannot parse primary, unable to parse ident.\n");
-                return NULL;
+                return INVALID_NID;
             }
             break;
         }
         case TOK_LPAR:
         {
             jet_ast_consume_tok(ast);
-            out_node = jet_astn_parse_expr(ast, 0);
+            out_nid = jet_astn_parse_expr(ast, 0);
             cur_tok = jet_ast_peek_tok(ast);
             if(cur_tok == NULL || cur_tok->type != TOK_RPAR)
             {
                 fprintf(stderr, "error: expected ')' after primary expression.\n");
-                return NULL;
+                return INVALID_NID;
             }
             jet_ast_consume_tok(ast);
             break;
@@ -777,71 +808,72 @@ static jet_ast_node* jet_astn_parse_primary(jet_ast* ast)
         case TOK_MINUS:
         {
             jet_ast_consume_tok(ast);
-            jet_ast_node* rhs = jet_astn_parse_expr(ast, 0);
-            if(rhs == NULL)
+            node_nid rhs_nid = jet_astn_parse_expr(ast, 0);
+            if(rhs == INVALID_NID)
             {
                 fprintf(stderr, "error: expected expr after '-'\n");
-                return NULL;
+                return INVALID_NID;
             }
-            out_node = jet_astn_unop_create(rhs, cur_tok->type);
+            jet_ast_node_unop unop;
+            unop.op_type = cur_tok->type;
+            unop.expr_nid = rhs_nid;
+
+            jet_ast_node node;
+            node.node_type = AST_UNOP;
+            node.as.unop = unop;
+            out_nid = jet_ast_register_node(ast, (const jet_ast_node*)&node);
             break;
         }
     }  
 
-    if(out_node == NULL)
+    if(out_nid == INVALID_NID)
     {
         fprintf(stderr, "error: no valid primary expressions parsed.\n");
-        return NULL;
+        return INVALID_NID;
     }
 
+    jet_da* arg_da = NULL;
     //postfix expression call evaluation
     while(jet_ast_peekn_tok_type(ast, 0) == TOK_LPAR)
     {
         jet_ast_consume_tok(ast);        
-        jet_da* arg_darray = jet_da_create(4, sizeof(jet_ast_node));
+        arg_da = jet_da_create(2, sizeof(node_id));
 
         while(jet_ast_peekn_tok_type(ast, 0) != TOK_RPAR)
         {
-            jet_ast_node* arg = jet_astn_parse_expr(ast, 0);
-            if(!arg)
+            node_id arg_nid = jet_astn_parse_expr(ast, 0);
+            if(arg_nid == INVALID_NID)
             {
                 fprintf(stderr, "error: cannot parse primary expr, unable to parse call arg.\n");
-                return NULL;
+                goto call_parse_fail;
             }
-            jet_da_append(arg_darray, arg);
-
+            jet_da_append(arg_da, (const void*)&arg_nid);
             if(jet_ast_peekn_tok_type(ast, 0) == TOK_COMMA)
                 jet_ast_consume_tok(ast);
             else break;
         }
         jet_ast_expect_tok(ast, TOK_RPAR);
-        if(jet_da_is_empty(arg_darray))
+        if(jet_da_is_empty(arg_da))
         {
-            jet_da_dispose(arg_darray);
-            arg_darray = NULL;
+            jet_da_dispose(arg_da);
+            arg_da = NULL;
         }
-        out_node = jet_astn_call_create(out_node, arg_darray);
-    }
-    return out_node;
-}
+        
+        jet_ast_node_call call;
+        call.callee_nid = out_nid;
+        call.arg_nid_da = arg_da;
 
-// DEBUG ===================================================================================
+        jet_ast_node call_base;
+        call_base.node_type = AST_CALL;
+        call_base.as.call = call;
 
-void jet_ast_print(jet_ast* ast)
-{
-    if(!ast)
-    {
-        fprintf(stderr, "error: cannot print, given ast is null.\n");
-        return;
+        out_nid = jet_ast_register_node(ast, (const jet_ast_node*)&call_base);
     }
-    printf("\n=======================\n");
-    printf("TOP\n");
-    jet_ast_node_darray_print(ast->top_nid_da, 0);
-    
-    printf("=======================\n");
-    printf("PROG\n");
-    jet_ast_node_print(ast->prog_nid, 0); 
-    printf("=======================\n\n");
+    return out_nid;
+
+cal_parse_fail:
+    jet_da_dispose(arg_da);
+    return INVALID_NID;
 }
 
 

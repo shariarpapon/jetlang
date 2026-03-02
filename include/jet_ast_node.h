@@ -111,9 +111,5 @@ struct jet_ast_node
     } as;
 };
 
-jet_ast_node* jet_ast_node_create_base(jet_ast_node_type node_type);
-void jet_ast_node_da_print(jet_da* node_darray, size_t branch);
-void jet_ast_node_print(jet_ast_node* node, size_t branch);
-
 
 
