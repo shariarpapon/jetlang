@@ -738,8 +738,8 @@ static node_id jet_astn_parse_expr(jet_ast* ast, size_t min_prec)
         node_id rhs_nid = jet_astn_parse_expr(ast, op_prec + 1);        
         if(rhs_nid == INVALID_NID)
         {
-            fprintf(stderr, "wrn: cannot parse expression, expected rhs expr after operator.\n");
-            return lhs_nid;
+            fprintf(stderr, "error: cannot parse expression, expected rhs expr after operator.\n");
+            return INVALID_NID;
         }
         
         jet_ast_node_binop binop;
