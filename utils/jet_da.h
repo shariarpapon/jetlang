@@ -10,7 +10,7 @@ jet_da* jet_da_create_copy(jet_da* darray);
 
 bool jet_da_dispose(jet_da* darray);
 bool jet_da_clear(jet_da* darray);
-bool jet_da_is_empty(jet_da* darray);
+bool jet_da_is_empty(const jet_da* darray);
 bool jet_da_insert(jet_da* darray, size_t i, const void* data);
 bool jet_da_append(jet_da* darray, const void* data);
 bool jet_da_prepend(jet_da* darray, const void* data);
@@ -20,10 +20,10 @@ bool jet_da_remove_range(jet_da* darray, size_t start, size_t end);
 bool jet_da_remove_first(jet_da* darray);
 bool jet_da_remove_last(jet_da* darray);
 
-void* jet_da_get(jet_da* darray, size_t i);
-void* jet_da_get_first(jet_da* darray);
-void* jet_da_get_last(jet_da* darray);
-size_t jet_da_count(jet_da* darray);
+void* jet_da_get(const jet_da* darray, size_t i);
+void* jet_da_get_first(const jet_da* darray);
+void* jet_da_get_last(const jet_da* darray);
+size_t jet_da_count(const jet_da* darray);
 
 #ifdef JET_DA_IMPL
 
@@ -110,7 +110,7 @@ bool jet_da_clear(jet_da* v)
     return true;
 }
 
-bool jet_da_is_empty(jet_da* darray)
+bool jet_da_is_empty(const jet_da* darray)
 {
     if(!darray)
     {
@@ -238,7 +238,7 @@ bool jet_da_remove_last(jet_da* darray)
     return jet_da_remove(darray, darray->count - 1); 
 }
 
-void* jet_da_get(jet_da* darray, size_t i)
+void* jet_da_get(const jet_da* darray, size_t i)
 {
     if(!darray)
     {
@@ -259,17 +259,17 @@ void* jet_da_get(jet_da* darray, size_t i)
     return (char*)darray->data_array + darray->elm_size * i;
 }
 
-void* jet_da_get_first(jet_da* darray)
+void* jet_da_get_first(const jet_da* darray)
 {
     return jet_da_get(darray, 0);
 }
 
-void* jet_da_get_last(jet_da* darray)
+void* jet_da_get_last(const jet_da* darray)
 {
     return jet_da_get(darray, darray->count - 1);
 }
 
-size_t jet_da_count(jet_da* v)
+size_t jet_da_count(const jet_da* v)
 {
     if(!v)
     {

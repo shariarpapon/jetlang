@@ -17,11 +17,12 @@
 #include <jet_ast.h>
 #include <jet_ast_node.h>
 #include <jet_ast_op_prec.h>
+#include <jet_conv.h>
 
 struct jet_ast 
 {
+    const jet_da* tok_da;
     jet_da* node_registry;
-    jet_da* tok_da;
     jet_da* top_nid_da;
 
     node_id prog_nid;
@@ -55,12 +56,13 @@ static node_id jet_astn_block_parse(jet_ast* ast);
 static node_id jet_astn_ident_parse(jet_ast* ast);
 static node_id jet_astn_tdecl_parse(jet_ast* ast);
 static node_id jet_astn_vdecl_parse(jet_ast* ast);
+static node_id jet_astn_lit_parse(jet_ast* ast);
 
 static node_id jet_astn_func_parse(jet_ast* ast);
 static node_id jet_astn_parse_fparam(jet_ast* ast);
 
 
-jet_ast* jet_ast_create(jet_da* tok_da)
+jet_ast* jet_ast_create(const jet_da* tok_da)
 {    
     if(!tok_da)
     {
@@ -170,24 +172,24 @@ bool jet_ast_generate_nodes(jet_ast* ast)
     return true;
 }
 
-const jet_da* jet_ast_get_top_nid_da(jet_ast* ast)
+const jet_da* jet_ast_get_top_nid_da(const jet_ast* ast)
 {
     assert(ast != NULL);
-    return ast->top_nid_da;
+    return (const jet_da*)ast->top_nid_da;
 }
 
-const node_id jet_ast_get_prog_nid(jet_ast* ast)
+node_id jet_ast_get_prog_nid(const jet_ast* ast)
 {
     assert(ast != NULL);
     return ast->prog_nid;
 }
 
-const jet_ast_node* jet_ast_node_get(jet_ast* ast, node_id nid)
+const jet_ast_node* jet_ast_node_get(const jet_ast* ast, node_id nid)
 {
     assert(ast != NULL);
     if(nid == INVALID_NID)
     {
-        fprintf(stderr, "err: cannot get node with id=%zu, this id internally represents invalid node.\n", INVALID_NID);
+        fprintf(stderr, "err: cannot get node with id=%zu, this id internally represents invalid node.\n", (size_t)INVALID_NID);
         return NULL;
     }
 
@@ -542,6 +544,60 @@ static node_id jet_astn_ident_parse(jet_ast* ast)
     return jet_ast_register_node(ast, (const jet_ast_node*)&node);
 }
 
+static node_id jet_astn_lit_parse(jet_ast* ast)
+{
+    assert(ast != NULL);
+    jet_token* tok = jet_ast_peek_tok(ast);
+    jet_ast_node_lit lit;
+    lit.lit_type = tok->type;
+    switch(lit.lit_type)
+    {
+        default:
+            fprintf(stderr, "error: could not parse lit, unrecognized lit_type (tok_type:%d).\n", (int)lit.lit_type);
+            return INVALID_NID;
+        case TOK_KWD_NULL:
+        {
+            lit.as.v = NULL;
+            break;
+        }
+        case TOK_KWD_TRUE:
+        {
+            lit.as.b = true;
+            break;
+        }
+        case TOK_KWD_FALSE:
+        {
+            lit.as.b = false;
+            break;
+        }
+        case TOK_LIT_INT:
+        {
+           lit.as.i = jet_conv_stoi(tok->source + tok->origin, tok->len); 
+           break;
+        }
+        case TOK_LIT_FLOAT:
+        {
+            lit.as.f = jet_conv_stof(tok->source + tok->origin, tok->len);
+            break;
+        }
+        case TOK_LIT_CHAR:
+        {
+            lit.as.c = *(tok->source + tok->origin);
+            break;
+        }
+        case TOK_LIT_STR:
+        {
+            lit.as.s = jet_token_strdup(tok); 
+            break;
+        }
+    }
+    jet_ast_consume_tok(ast);
+    jet_ast_node node;
+    node.node_type = AST_LIT;
+    node.as.lit = lit;
+    return jet_ast_register_node(ast, (const jet_ast_node*)&node);
+}
+
 static node_id jet_astn_tdecl_parse(jet_ast* ast)
 {
     jet_token* tok = jet_ast_consume_tok(ast);
@@ -777,8 +833,7 @@ static node_id jet_astn_parse_primary(jet_ast* ast)
         case TOK_LIT_CHAR:
         case TOK_LIT_STR:
         {
-            jet_ast_consume_tok(ast);
-            out_nid = jet_astn_lit_create(cur_tok);
+            out_nid = jet_astn_lit_parse(ast);
             break;
         }
         case TOK_IDENT:

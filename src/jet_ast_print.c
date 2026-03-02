@@ -1,3 +1,4 @@
+#include <jet_ast_print.h>
 #include <jet_ast.h>
 #include <jet_io.h>
 #include <stdlib.h>
@@ -9,7 +10,7 @@
 
 static void jet_ast_depth_print(const char* name, size_t depth);
 
-static const char* jet_ast_node_str(jet_ast_node* node)
+static const char* jet_ast_node_str(const jet_ast_node* node)
 {
     assert(node != NULL);
     const char* str = jet_ast_node_type_str(node->node_type);
@@ -26,7 +27,7 @@ static void jet_ast_depth_print(const char* name, size_t depth)
     printf("\033[38;5;49m%s\033[0m\033[0m%s\033[0m\n", BRANCH_LINE, name);
 }
 
-void jet_ast_print(jet_ast* ast)
+void jet_ast_print(const jet_ast* ast)
 {
     if(!ast)
     {
@@ -35,14 +36,15 @@ void jet_ast_print(jet_ast* ast)
     }
     printf("\n=======================\n");
     printf("TOP\n");
-    jet_ast_node_da_print(ast, jet_ast_get_top_nid_da(ast), 0);
+    jet_ast_nid_da_print(ast, jet_ast_get_top_nid_da(ast), 0);
     
     printf("=======================\n");
     printf("PROG\n");
     jet_ast_nid_print(ast, jet_ast_get_prog_nid(ast), 0); 
     printf("=======================\n\n");
 }
-void jet_ast_nid_da_print(jet_ast* ast, jet_da* nid_da, size_t depth)
+
+void jet_ast_nid_da_print(const jet_ast* ast, const jet_da* nid_da, size_t depth)
 {
     assert(ast != NULL);
     if(!nid_da) return;
@@ -59,23 +61,22 @@ void jet_ast_nid_da_print(jet_ast* ast, jet_da* nid_da, size_t depth)
     }
 }
 
-void jet_ast_nid_print(jet_ast* ast, node_id nid, size_t depth)
+void jet_ast_nid_print(const jet_ast* ast, node_id nid, size_t depth)
 {
     assert(ast != NULL);
     if(nid == INVALID_NID)
-        return;
+        return; 
 
-    const char* depth_name = jet_ast_node_str(node);
-    jet_ast_depth_print(depth_name, depth);
-    
-    size_t child_depth = depth + 1;
     const jet_ast_node* node = jet_ast_node_get(ast, nid); 
     if(!node)
     {
-        fpritnf(stderr, "err: could not print ast, nid=%zu corresponds to a NULL node.\n", nid);
+        fprintf(stderr, "err: could not print ast, nid=%zu corresponds to a NULL node.\n", nid);
         return;
     }
+    const char* depth_name = jet_ast_node_str(node);
+    jet_ast_depth_print(depth_name, depth);
 
+    size_t child_depth = depth + 1;
     //print child nodes
     switch(node->node_type)
     {

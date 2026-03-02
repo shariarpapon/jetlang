@@ -84,7 +84,7 @@ static jet_ast* ast_generate(jet_da* tok_da)
         fprintf(stderr, "error: could not generate AST nodes.\n");
    
    if(find_arg(ARG_PRINT_ALL) == true || find_arg(ARG_PRINT_AST) == true)
-       jet_ast_print(ast); 
+       jet_ast_print((const jet_ast*)ast); 
    
    return ast;
 }
