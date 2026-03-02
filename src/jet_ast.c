@@ -468,16 +468,28 @@ static node_id jet_astn_block_parse(jet_ast* ast)
         return INVALID_NID;
     }
 
-    while(jet_ast_peekn_tok_type(ast, 0) != TOK_RBRC)
+    node_id stmt_nid = INVALID_NID;
+    jet_token_type t = TOK_EOF;
+    while(true)
     {
-        node_id stmt_nid = jet_astn_parse_next_stmt(ast);
+        t = jet_ast_peekn_tok_type(ast, 0);
+        if(t == TOK_EOF || t == TOK_INV)
+        {
+            fprintf(stderr, "err: cannot parse block, unexpected token.\n");
+            jet_da_dispose(block.stmt_nid_da);
+            return INVALID_NID;
+        }
+        else if(t == TOK_RBRC)
+            break;
+
+        stmt_nid = jet_astn_parse_next_stmt(ast);
         if(stmt_nid == INVALID_NID)
         {
             fprintf(stderr, "error: cannot parse block, unable to parse next stmt.\n");
             jet_da_dispose(block.stmt_nid_da);
             return INVALID_NID;
         }
-        jet_da_append(block.stmt_nid_da, (const void*)stmt_nid);
+        jet_da_append(block.stmt_nid_da, (const void*)&stmt_nid);
     }
     jet_ast_expect_tok(ast, TOK_RBRC);
    
@@ -567,7 +579,7 @@ static node_id jet_astn_vdecl_parse(jet_ast* ast)
     jet_ast_node node;
     node.node_type = AST_VAR_DECL;
     node.as.vdecl = vdecl;
-    return jet_ast_register_nod(ast, (const jet_ast_node*)&node);
+    return jet_ast_register_node(ast, (const jet_ast_node*)&node);
 }
 
 static node_id jet_astn_func_parse(jet_ast* ast) 
@@ -576,7 +588,8 @@ static node_id jet_astn_func_parse(jet_ast* ast)
 
     fdecl.ident_nid = jet_astn_ident_parse(ast);
     fdecl.ret_tdecl_nid_da = jet_da_create(1, sizeof(node_id)); 
-    jet_da_append(fdecl.ret_tdecl_nid_da, jet_astn_tdecl_parse(ast));
+    node_id ret_tdecl_nid = jet_astn_tdecl_parse(ast);
+    jet_da_append(fdecl.ret_tdecl_nid_da, (const void*)&ret_tdecl_nid);
 
     jet_ast_expect_tok(ast, TOK_LPAR);
     fdecl.param_nid_da = jet_da_create(4, sizeof(node_id));
@@ -589,6 +602,8 @@ static node_id jet_astn_func_parse(jet_ast* ast)
         if(vdecl_nid == INVALID_NID)
         {
             fprintf(stderr, "error: cannot parse func, unable to parse parameter.\n");
+            jet_da_dispose(fdecl.ret_tdecl_nid_da);
+            jet_da_dispose(fdecl.param_nid_da);
             return INVALID_NID;
         }
         t = jet_ast_peekn_tok_type(ast, 0);
@@ -601,15 +616,21 @@ static node_id jet_astn_func_parse(jet_ast* ast)
                 break;
             case TOK_EOF:
                 fprintf(stderr, "error: cannot parse func, EOF reached.\n");
+                jet_da_dispose(fdecl.ret_tdecl_nid_da);
+                jet_da_dispose(fdecl.param_nid_da);
                 return INVALID_NID;
             case TOK_INV:
                 fprintf(stderr, "error: cannot parse func, invalid token encountered.\n");
+                jet_da_dispose(fdecl.ret_tdecl_nid_da);
+                jet_da_dispose(fdecl.param_nid_da);
                 return INVALID_NID;
             default:
                 fprintf(stderr, "error: cannot parse func, unexpected token (type-enum-id: %d) encountered.\n", (int)t);
+                jet_da_dispose(fdecl.ret_tdecl_nid_da);
+                jet_da_dispose(fdecl.param_nid_da);
                 return INVALID_NID;
         }
-        jet_da_append(fdecl.param_nid_da, (const void*)vdecl_nid);
+        jet_da_append(fdecl.param_nid_da, (const void*)&vdecl_nid);
     }
     jet_ast_expect_tok(ast, TOK_RPAR); 
 
@@ -632,7 +653,7 @@ static node_id jet_astn_func_parse(jet_ast* ast)
         if(fdef.block_nid == INVALID_NID)
         {
             fprintf(stderr, "error: cannot parse func, unable to parse func definiton block.\n");
-            return INVALID_NID;
+            return fdef.fdecl_nid;
         }
 
         jet_ast_node fdef_base;
