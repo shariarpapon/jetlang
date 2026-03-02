@@ -596,16 +596,16 @@ static node_id jet_astn_func_parse(jet_ast* ast)
 
     node_id vdecl_nid = INVALID_NID;
     jet_token_type t = TOK_EOF;
-    while(jet_ast_peekn_tok_type(ast, 0) != TOK_RPAR)
+    while(jet_ast_peekn_tok_type(ast, 0) != TOK_RPAR && jet_ast_peekn_tok_type(ast, 0) != TOK_EOF)
     {
         vdecl_nid = jet_astn_parse_fparam(ast);
         if(vdecl_nid == INVALID_NID)
         {
             fprintf(stderr, "error: cannot parse func, unable to parse parameter.\n");
-            jet_da_dispose(fdecl.ret_tdecl_nid_da);
-            jet_da_dispose(fdecl.param_nid_da);
-            return INVALID_NID;
+            goto fdecl_fail;
         }
+        jet_da_append(fdecl.param_nid_da, (const void*)&vdecl_nid);
+        
         t = jet_ast_peekn_tok_type(ast, 0);
         switch(t)
         {
@@ -616,21 +616,14 @@ static node_id jet_astn_func_parse(jet_ast* ast)
                 break;
             case TOK_EOF:
                 fprintf(stderr, "error: cannot parse func, EOF reached.\n");
-                jet_da_dispose(fdecl.ret_tdecl_nid_da);
-                jet_da_dispose(fdecl.param_nid_da);
-                return INVALID_NID;
+                goto fdecl_fail;
             case TOK_INV:
                 fprintf(stderr, "error: cannot parse func, invalid token encountered.\n");
-                jet_da_dispose(fdecl.ret_tdecl_nid_da);
-                jet_da_dispose(fdecl.param_nid_da);
-                return INVALID_NID;
+                goto fdecl_fail;
             default:
                 fprintf(stderr, "error: cannot parse func, unexpected token (type-enum-id: %d) encountered.\n", (int)t);
-                jet_da_dispose(fdecl.ret_tdecl_nid_da);
-                jet_da_dispose(fdecl.param_nid_da);
-                return INVALID_NID;
+                goto fdecl_fail;
         }
-        jet_da_append(fdecl.param_nid_da, (const void*)&vdecl_nid);
     }
     jet_ast_expect_tok(ast, TOK_RPAR); 
 
@@ -662,6 +655,11 @@ static node_id jet_astn_func_parse(jet_ast* ast)
         func_nid = jet_ast_register_node(ast, (const jet_ast_node*)&fdef_base); 
     }
     return func_nid;
+
+fdecl_fail:
+    jet_da_dispose(fdecl.ret_tdecl_nid_da);
+    jet_da_dispose(fdecl.param_nid_da);
+    return INVALID_NID;
 }
 
 static node_id jet_astn_parse_fparam(jet_ast* ast)
