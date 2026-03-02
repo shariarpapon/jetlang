@@ -602,7 +602,7 @@ static node_id jet_astn_func_parse(jet_ast* ast)
         if(vdecl_nid == INVALID_NID)
         {
             fprintf(stderr, "error: cannot parse func, unable to parse parameter.\n");
-            goto fdecl_fail;
+            goto fail;
         }
         jet_da_append(fdecl.param_nid_da, (const void*)&vdecl_nid);
         
@@ -616,13 +616,13 @@ static node_id jet_astn_func_parse(jet_ast* ast)
                 break;
             case TOK_EOF:
                 fprintf(stderr, "error: cannot parse func, EOF reached.\n");
-                goto fdecl_fail;
+                goto fail;
             case TOK_INV:
                 fprintf(stderr, "error: cannot parse func, invalid token encountered.\n");
-                goto fdecl_fail;
+                goto fail;
             default:
                 fprintf(stderr, "error: cannot parse func, unexpected token (type-enum-id: %d) encountered.\n", (int)t);
-                goto fdecl_fail;
+                goto fail;
         }
     }
     jet_ast_expect_tok(ast, TOK_RPAR); 
@@ -646,7 +646,7 @@ static node_id jet_astn_func_parse(jet_ast* ast)
         if(fdef.block_nid == INVALID_NID)
         {
             fprintf(stderr, "error: cannot parse func, unable to parse func definiton block.\n");
-            return fdef.fdecl_nid;
+            goto fail;
         }
 
         jet_ast_node fdef_base;
@@ -656,7 +656,7 @@ static node_id jet_astn_func_parse(jet_ast* ast)
     }
     return func_nid;
 
-fdecl_fail:
+fail:
     jet_da_dispose(fdecl.ret_tdecl_nid_da);
     jet_da_dispose(fdecl.param_nid_da);
     return INVALID_NID;
