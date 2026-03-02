@@ -175,7 +175,7 @@ const jet_da* jet_ast_get_top_nid_da(jet_ast* ast)
     return ast->top_nid_da;
 }
 
-const jet_da* jet_ast_get_prog_nid(jet_ast* ast)
+const node_id jet_ast_get_prog_nid(jet_ast* ast)
 {
     assert(ast != NULL);
     return ast->prog_nid;
@@ -186,7 +186,7 @@ const jet_ast_node* jet_ast_node_get(jet_ast* ast, node_id nid)
     assert(ast != NULL);
     if(nid == INVALID_NID)
     {
-        fprintf(stderr, "err: cannot get node with id=%zu, %zu internally represents invalid.\n", INVALID_NID);
+        fprintf(stderr, "err: cannot get node with id=%zu, this id internally represents invalid node.\n", INVALID_NID);
         return NULL;
     }
 
@@ -223,7 +223,7 @@ static void jet_ast_reset(jet_ast* ast)
 
 static void jet_ast_push_nid(jet_ast* ast, node_id nid)
 {
-    jet_ast_node* node = jet_astn_get(nid);
+    jet_ast_node* node = jet_ast_node_get(nid);
     if(node == NULL)
     {
         fprintf(stderr, "err: nid=%zu does not exist in registry.\n", nid);
@@ -239,7 +239,7 @@ static void jet_ast_push_nid(jet_ast* ast, node_id nid)
             return;
         }
     }
-    else jet_da_append(ast->top_nid_da, nid);
+    else jet_da_append(ast->top_nid_da, (const void*)&nid);
 }
 
 static jet_token* jet_ast_peek_tok(jet_ast* ast)
@@ -550,7 +550,7 @@ static node_id jet_astn_tdecl_parse(jet_ast* ast)
     jet_ast_node_tdecl tdecl;
     tdecl.tname = jet_ast_get_type_name(tok->type);
     tdecl.byte_size = 4;
-    tdecl.is_native = strcmp(tname, "invalid" ) != 0;
+    tdecl.is_native = strcmp(tdecl.tname, "invalid" ) != 0;
 
     jet_ast_node node;
     node.node_type = AST_TYPE_DECL;
@@ -682,7 +682,7 @@ fail:
 
 static node_id jet_astn_parse_fparam(jet_ast* ast)
 {
-    jet_ast_node_vdecl;
+    jet_ast_node_vdecl vdecl;
     vdecl.tdecl_nid = jet_astn_tdecl_parse(ast);
     if(vdecl.tdecl_nid == INVALID_NID)
     {
@@ -691,7 +691,7 @@ static node_id jet_astn_parse_fparam(jet_ast* ast)
     }
 
     vdecl.ident_nid = jet_astn_ident_parse(ast);
-    if(!vdecl.ident_nid == INVALID_NID)
+    if(vdecl.ident_nid == INVALID_NID)
     {
         fprintf(stderr, "error: cannot parse vdecl, expected ident after tdecl.\n");
         return INVALID_NID;
@@ -722,7 +722,7 @@ static node_id jet_astn_parse_expr(jet_ast* ast, size_t min_prec)
     if(lhs_nid == INVALID_NID)
     {
         fprintf(stderr, "wrn: cannot parse expression, expected primary lhs.\n");
-        return NULL;
+        return INVALID_NID;
     }
     while(jet_ast_peek_tok(ast) != NULL)
     {
@@ -742,7 +742,7 @@ static node_id jet_astn_parse_expr(jet_ast* ast, size_t min_prec)
             return lhs_nid;
         }
         
-        jet_ast_node_bino binop;
+        jet_ast_node_binop binop;
         binop.lhs_nid = lhs_nid;
         binop.rhs_nid = rhs_nid;
         binop.op_type = op_tok->type;
@@ -761,7 +761,7 @@ static node_id jet_astn_parse_primary(jet_ast* ast)
     if(cur_tok == NULL) 
         return INVALID_NID;
 
-    ndoe_id out_nid = INVALID_NID;
+    node_id out_nid = INVALID_NID;
     switch(cur_tok->type)
     {
         default:
@@ -808,8 +808,8 @@ static node_id jet_astn_parse_primary(jet_ast* ast)
         case TOK_MINUS:
         {
             jet_ast_consume_tok(ast);
-            node_nid rhs_nid = jet_astn_parse_expr(ast, 0);
-            if(rhs == INVALID_NID)
+            node_id rhs_nid = jet_astn_parse_expr(ast, 0);
+            if(rhs_nid == INVALID_NID)
             {
                 fprintf(stderr, "error: expected expr after '-'\n");
                 return INVALID_NID;
@@ -871,7 +871,7 @@ static node_id jet_astn_parse_primary(jet_ast* ast)
     }
     return out_nid;
 
-cal_parse_fail:
+call_parse_fail:
     jet_da_dispose(arg_da);
     return INVALID_NID;
 }
