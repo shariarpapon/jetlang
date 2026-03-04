@@ -12,6 +12,7 @@ void* jet_arena_alloc(jet_arena* arena, size_t bytes);
 
 #ifdef JET_ARENA_IMPL
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include <stdio.h>
 
@@ -148,9 +149,17 @@ static jet_arena* jet_arena_get_next_available(jet_arena* arena, size_t bytes)
     {
         if(!arena->next) 
         {
-            size_t next_cap = arena->cap * JET_ARENA_CAP_GROWTH_FAC;
+            size_t next_cap = arena->cap; 
             while(next_cap < bytes)
+            {
+                if(next_cap > SIZE_MAX / JET_ARENA_CAP_GROWTH_FAC)
+                {
+                    fprintf(stderr, "err: failed to create new arena, capacity overflow.\n");
+                    return NULL;
+                }
                 next_cap *= JET_ARENA_CAP_GROWTH_FAC;
+            }
+
             arena->next = jet_arena_create(next_cap);
             if(!arena->next)
             {
