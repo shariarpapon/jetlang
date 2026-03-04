@@ -2,13 +2,19 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-typedef struct jet_arena jet_arena;
+typedef struct jet_arena 
+{
+    char* block;
+    size_t cap;
+    size_t offset;
+    struct jet_arena* next;
+} jet_arena;
 
 bool jet_arena_init(jet_arena* arena, size_t cap);
 void jet_arena_dispose(jet_arena* arena);
 void jet_arena_reset(jet_arena* arena);
+void jet_arena_zero_reset(jet_arena* arena);
 void* jet_arena_alloc(jet_arena* arena, size_t bytes);
-
 
 #ifdef JET_ARENA_IMPL
 #include <stdlib.h>
@@ -20,14 +26,6 @@ void* jet_arena_alloc(jet_arena* arena, size_t bytes);
 
 static jet_arena* jet_arena_create(size_t cap);
 static jet_arena* jet_arena_get_next_available(jet_arena* arena, size_t bytes);
-
-struct jet_arena
-{
-    char* block;
-    size_t cap;
-    size_t offset;
-    jet_arena* next;
-};
 
 // caller should zero initialize the arena before initializing.
 bool jet_arena_init(jet_arena* arena, size_t cap)
@@ -83,13 +81,24 @@ void jet_arena_dispose(jet_arena* arena)
     arena->next = NULL;
 }
 
-void jet_arena_reset(jet_arena* arena)
+void jet_arena_zero_reset(jet_arena* arena)
 {
     if(!arena)
         return;
     while(arena != NULL)
     {
         memset(arena->block, 0, arena->cap);
+        arena->offset = 0;
+        arena = arena->next;
+    }
+}
+
+void jet_arena_reset(jet_arena* arena)
+{
+    if(!arena)
+        return;
+    while(arena != NULL)
+    {
         arena->offset = 0;
         arena = arena->next;
     }
