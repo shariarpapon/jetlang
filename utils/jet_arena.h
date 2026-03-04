@@ -1,15 +1,18 @@
 #pragma once
 #include <stddef.h>
+#include <stdbool.h>
+
 typedef struct jet_arena jet_arena;
 
-bool jet_arena_init(jet_arena* arena);
+bool jet_arena_init(jet_arena* arena, size_t capacity);
 void jet_arena_dispose(jet_arena* arena);
 void jet_arena_reset(jet_arena* arena);
-void* jet_arena_alloc(size_t bytes);
+void* jet_arena_alloc(jet_arena* arena, size_t bytes);
 
 
 #ifdef JET_ARENA_IMPL
 #include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 
 #define JET_ARENA_CAPACITY_GROWTH_FAC (2)
@@ -39,7 +42,7 @@ bool jet_arena_init(jet_arena* arena, size_t capacity)
         return false;
     }
 
-    if(capacity = 0)
+    if(capacity == 0)
     {
         fprintf(stderr, "err: cannot init, arena capacity must be > 0.\n");
         return false;
@@ -83,7 +86,7 @@ void jet_arena_reset(jet_arena* arena)
         return;
     while(arena != NULL)
     {
-        memset(arena->block, 0, arena->capacity);
+        memset(arena->block, 0, arena->cap);
         arena->offset = 0;
         arena = arena->next;
     }
@@ -109,6 +112,12 @@ void* jet_arena_alloc(jet_arena* arena, size_t bytes)
     }
 
     jet_arena* a = jet_arena_get_next_available(arena, bytes);
+    if(!a)
+    {
+        fprintf(stderr, "err: unable to alloc, failed to aquire available arena.\n");
+        return NULL;
+    }
+
     void* base = (void*)(a->block + a->offset);
     a->offset += bytes;
     return base;
@@ -133,11 +142,11 @@ static jet_arena* jet_arena_create(size_t cap)
 
 static jet_arena* jet_arena_get_next_available(jet_arena* arena, size_t bytes)
 {
-    while(bytes > arena->capacity - arena->offset)
+    while(bytes > arena->cap - arena->offset)
     {
         if(!arena->next) 
         { 
-            arena->next = jet_arena_create(arena->cap * JET_ARENA_CAPACITY_GROWTH_FAC);
+            arena->next = jet_arena_create(arena->cap * JET_ARENA_CAP_GROWTH_FAC);
             if(!arena->next)
             {
                 fprintf(stderr, "err: unable to create new arena.\n"); 
