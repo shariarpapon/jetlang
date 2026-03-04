@@ -4,7 +4,7 @@
 
 typedef struct jet_arena jet_arena;
 
-bool jet_arena_init(jet_arena* arena, size_t capacity);
+bool jet_arena_init(jet_arena* arena, size_t cap);
 void jet_arena_dispose(jet_arena* arena);
 void jet_arena_reset(jet_arena* arena);
 void* jet_arena_alloc(jet_arena* arena, size_t bytes);
@@ -15,7 +15,7 @@ void* jet_arena_alloc(jet_arena* arena, size_t bytes);
 #include <string.h>
 #include <stdio.h>
 
-#define JET_ARENA_CAPACITY_GROWTH_FAC (2)
+#define JET_ARENA_CAP_GROWTH_FAC (2)
 
 static jet_arena* jet_arena_create(size_t cap);
 static jet_arena* jet_arena_get_next_available(jet_arena* arena, size_t bytes);
@@ -28,7 +28,8 @@ struct jet_arena
     jet_arena* next;
 };
 
-bool jet_arena_init(jet_arena* arena, size_t capacity)
+// caller should zero initialize the arena before initializing.
+bool jet_arena_init(jet_arena* arena, size_t cap)
 {
     if(!arena)
     {
@@ -36,22 +37,22 @@ bool jet_arena_init(jet_arena* arena, size_t capacity)
         return false;
     }
 
-    if(arena->block)
+    if(arena->block != NULL)
     {
         fprintf(stderr, "err: calling init on already initialized arena.\n");
         return false;
     }
 
-    if(capacity == 0)
+    if(cap == 0)
     {
-        fprintf(stderr, "err: cannot init, arena capacity must be > 0.\n");
+        fprintf(stderr, "err: cannot init, arena cap must be > 0.\n");
         return false;
     }
     
-    arena->cap = capacity;
+    arena->cap = cap;
     arena->offset = 0;
     arena->next = NULL;
-    arena->block = malloc(capacity);
+    arena->block = malloc(cap);
 
     if(!arena->block)
     {
@@ -76,6 +77,7 @@ void jet_arena_dispose(jet_arena* arena)
     }
     free((void*)arena->block);
     arena->offset = 0;
+    arena->cap = 0;
     arena->block = NULL;
     arena->next = NULL;
 }
@@ -145,8 +147,11 @@ static jet_arena* jet_arena_get_next_available(jet_arena* arena, size_t bytes)
     while(bytes > arena->cap - arena->offset)
     {
         if(!arena->next) 
-        { 
-            arena->next = jet_arena_create(arena->cap * JET_ARENA_CAP_GROWTH_FAC);
+        {
+            size_t next_cap = arena->cap * JET_ARENA_CAP_GROWTH_FAC;
+            while(next_cap < bytes)
+                next_cap *= JET_ARENA_CAP_GROWTH_FAC;
+            arena->next = jet_arena_create(next_cap);
             if(!arena->next)
             {
                 fprintf(stderr, "err: unable to create new arena.\n"); 
