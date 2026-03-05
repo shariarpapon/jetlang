@@ -11,7 +11,6 @@ typedef struct jet_da
     void* block;
 } jet_da;
 
-jet_da jet_da_default(size_t capacity, size_t elm_size);
 bool jet_da_init(jet_da* da, size_t capacity, size_t elm_size);
 bool jet_da_clone(jet_da* dest, const jet_da* source);
 
@@ -44,14 +43,7 @@ size_t jet_da_count(const jet_da* da);
 
 static bool jet_da_ensure_capacity(jet_da* da, size_t min_cap);
 
-jet_da jet_da_create(size_t capacity, size_t elm_size)
-{
-   jet_da da = {0};
-   if(!jet_da_init(&da, capacity, elm_size))
-        fprintf(stderr, "err: failed to init da block.\n"); 
-   return da;
-}
-
+//da should be zero initialized
 bool jet_da_init(jet_da* da, size_t capacity, size_t elm_size)
 {
     if(!da) 
@@ -117,16 +109,16 @@ bool jet_da_dispose(jet_da* da)
     return true;
 }
 
-bool jet_da_clear(jet_da* v)
+bool jet_da_clear(jet_da* da)
 {
-    if(!v || !v->block)
+    if(!da || !da->block)
     {
        return false;
     }
-    if(v->count == 0)
+    if(da->count == 0)
         return true;
-    memset(v->block, 0, v->elm_size * v->count);
-    v->count = 0;
+    memset(da->block, 0, da->elm_size * da->count);
+    da->count = 0;
     return true;
 }
 

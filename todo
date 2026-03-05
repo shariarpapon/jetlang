@@ -1,3 +1,4 @@
+- lexer->len shouldnt count null terminator
 - complete overhauling da-stack based creation
 - complete jet_err system
 

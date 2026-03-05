@@ -107,99 +107,55 @@ static char jet_lexer_consume(jet_lexer* lexer);
 static char jet_lexer_peek(jet_lexer* lexer);
 static char jet_lexer_peek_next(jet_lexer* lexer);
 
-jet_lexer* jet_lexer_create()
+//lexer should be zero initialized, otherwise memory leak may occure if called with already initialized lexer.
+bool jet_lexer_init(jet_lexer* lexer, const char* source)
 {
-    jet_lexer* lexer = malloc(sizeof(jet_lexer));
-    if(!lexer)
-    {
-        fprintf(stderr, "error: could not allocate lexer memory\n");
-        return NULL;
-    }
-
-    lexer->source = NULL;
-    lexer->len = 0;
-    lexer->cursor = 0;
-    lexer->cur_line = 0;
-    lexer->token_darray = jet_da_create(INIT_TOK_CAPACITY, sizeof(jet_token));
-
-    if(!lexer->token_darray)
-    {
-        lexer->token_darray = NULL;
-        fprintf(stderr, "err: could not allocate token-darray memory\n");
-        free((void*)lexer);
-        return NULL;
-    }
-
-    printf("lexer created successfully!\n");
-    return lexer;
-}
-
-bool jet_lexer_init(jet_lexer* lexer, const char* filepath)
-{
-    assert(lexer != NULL);
-    assert(filepath != NULL); 
-    size_t src_len = 0;
-    const char* source = jet_io_read_text(filepath, &src_len);
+    assert(lexer != NULL && "cannot init, param lexer is null");
     if(!source)
     {
-        fprintf(stderr, "err: cannot read file at path %s\n", filepath);
+        fprintf(stderr, "err: cannot init, invalid source stirng.\n");
         return false;
     }
-
-    if(src_len == 0)
-    {
-        fprintf(stderr, "wrn: loaded file is empty.\n");
-        free((void*)source);
-        return false;
-    }
-
-    jet_lexer_reset(lexer);
+    
+    lexer->len = strlen(source);
     lexer->source = source;
-    lexer->len = src_len + 1;
+    lexer->cursor = 0;
+    lexer->cur_line = 0;
+    lexer->cur_col = 0;
+    memset(&lexer->token_darray, 0, sizeof(lexer->token_darray));
+    if(!jet_da_init(&lexer->token_darray, INIT_TOK_CAPACITY, sizeof(jet_token)))
+    {
+        fprintf(stderr, "err: cannot init, failed to init token da.\n");
+        return false;
+    }
     return true;
 }
 
 void jet_lexer_reset(jet_lexer* lexer)
 {
-    assert(lexer != NULL);
-    if(lexer->source)
-        free((void*)lexer->source);
-    lexer->source = NULL;
-    lexer->len = 0;
+    assert(lexer != NULL && "cannot reset, param lexer is null.");
     lexer->cursor = 0;
     lexer->cur_line = 0;
-    jet_da_clear(lexer->token_darray);
+    lexer->cur_col = 0;
+    jet_da_clear(&lexer->token_darray);
 }
 
 void jet_lexer_dispose(jet_lexer* lexer)
 {
-    if(!lexer) 
-    {
-        perror("error: attempting to free invalid lexer pointer.\n");
-        return;
-    }
-
-    if(lexer->source)
-    {
-        free((void*)lexer->source);
-    }
-
-    if(!lexer->token_darray)
-    {
-        free((void*)lexer);
-        return;
-    }
-    jet_da_dispose(lexer->token_darray);
-    free((void*)lexer);
-    printf("lexer disposed!\n");
+    if(!lexer) return;
+    lexer->source = NULL;
+    lexer->len = 0;
+    lexer->cursor = 0;
+    lexer->cur_line = 0;
+    lexer->cur_col = 0;
+    jet_da_dispose(&lexer->token_darray);
 }
 
 bool jet_lexer_tokenize(jet_lexer* lexer)
 {
-    printf("tokenizing...\n");
-    if(!lexer || !lexer->token_darray) 
+    if(!lexer) 
     {
-        fprintf(stderr, "error: cannot tokenize, lexer or lexer->token_darray is invalid.\n");
+        fprintf(stderr, "error: cannot tokenize, lexer is null.\n");
         return false;
     }
     //TEST
@@ -237,7 +193,7 @@ static void jet_lexer_emit_token(jet_lexer* lexer, size_t origin, size_t len, je
     tok.column = lexer->cursor - len;
     tok.type = tok_type;    
 
-    if(jet_da_append(lexer->token_darray, (const void*)&tok) == false)
+    if(jet_da_append(&lexer->token_darray, (const void*)&tok) == false)
     {
         fprintf(stderr, "error: could not add new token to lexer->token_darray.\n");
         return;
@@ -526,7 +482,7 @@ static bool jet_lexer_try_scan_whitespace(jet_lexer* lexer)
 static char jet_lexer_peek_next(jet_lexer* lexer)
 {
     size_t next = lexer->cursor + 1;
-    if(next >= lexer->len - 1)
+    if(next >= lexer->len)
     {
         printf("wrn: cannot peek next, EOF reached\n");
         return NULL_TERM;
@@ -541,7 +497,7 @@ static char jet_lexer_peek(jet_lexer* lexer)
 
 static char jet_lexer_consume(jet_lexer* lexer)
 {
-    if(lexer->cursor >= lexer->len - 1)
+    if(lexer->cursor >= lexer->len)
     {
         fprintf(stderr, "wrn: cannot consume, EOF reached.\n");
         return NULL_TERM;
