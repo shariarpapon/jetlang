@@ -44,7 +44,7 @@ size_t jet_da_count(const jet_da* da);
 
 static bool jet_da_ensure_capacity(jet_da* da, size_t min_cap);
 
-jet_da jet_da_create_default(size_t capacity, size_t elm_size)
+jet_da jet_da_create(size_t capacity, size_t elm_size)
 {
    jet_da da = {0};
    if(!jet_da_init(&da, capacity, elm_size))

@@ -6,7 +6,8 @@
 
 typedef struct jet_sb jet_sb;
 
-jet_sb* jet_sb_create(size_t cap);
+jet_sb jet_sb_create(size_t cap);
+bool jet_sb_init(jet_sb* sb, size_t cap);
 void jet_sb_dispose(jet_sb* sb);
 void jet_sb_clear(jet_sb* sb);
 size_t jet_sb_len(const jet_sb* sb);
@@ -28,8 +29,8 @@ void jet_sb_append_int(jet_sb* sb, int i);
 #include <stdint.h>
 #include <stdio.h>
 
-#define JET_SB_GROWTH_FAC 2
-#define JET_SB_MIN_CAP 2
+#define JET_SB_GROWTH_FAC (2)
+#define JET_SB_MIN_CAP (2)
 
 struct jet_sb 
 {
@@ -41,37 +42,46 @@ struct jet_sb
 static void jet_sb_ensure_extra_cap(jet_sb* sb, size_t n);
 static void jet_sb_grow(jet_sb* sb);
 
-jet_sb* jet_sb_create(size_t cap)
+jet_sb jet_sb_create(size_t cap)
 {
-    jet_sb* sb = malloc(sizeof(jet_sb));
-    if(!sb)
+    jet_sb sb = {0};
+    if(!jet_sb_init(&sb, cap))
+        fprintf(stderr, "err: failed to init sb.\n");
+    return sb;
+}
+
+bool jet_sb_init(jet_sb* sb, size_t cap)
+{
+    assert(sb != NULL && "param sb is null.");
+    
+    if(cap > SIZE_MAX - 1)
     {
-        fprintf(stderr, "err: couldn't allocate sb mem.\n");
-        return NULL;
-    }
-    cap++;
+        fprintf(stderr, "err: failed to create sb, capacity overflow.\n");
+        return false;
+    } 
+    cap = cap + 1;
     if(cap < JET_SB_MIN_CAP)
         cap = JET_SB_MIN_CAP;
     sb->buf = malloc(cap);
     if(!sb->buf)
     {
-        free(sb);
-        fprintf(stderr, "err: couldn't allocate sb buffer mem.\n");
-        return NULL;
-    } 
+        fprintf(stderr, "err: failed to alloc sb buffer.\n");
+        return false;
+    }
     sb->cap = cap;
     sb->len = 0;
-    sb->buf[sb->len] = '\0';
-    return sb;
+    sb->buf[0] = '\0';
+    return true;
 }
 
 void jet_sb_dispose(jet_sb* sb)
 {
-    if(sb == NULL) 
-        return;
-    if(sb->buf) 
-        free((void*)sb->buf);
-    free((void*)sb);
+    if(!sb) return;
+    free(
+            (void*)sb->buf);
+    sb->buf = NULL;
+    sb->len = 0;
+    sb->cap = 0;
 }
 
 void jet_sb_clear(jet_sb* sb)
@@ -181,10 +191,7 @@ void jet_sb_append_int(jet_sb* sb, int i)
         uint64_t magnitude = (uint64_t)(-(int64_t)i);
         jet_sb_append_u64(sb, magnitude);
     }
-    else
-    {
-        jet_sb_append_u64(sb, (uint64_t)i);
-    }
+    else jet_sb_append_u64(sb, (uint64_t)i);
 }
 
 void jet_sb_append_sizet(jet_sb* sb, size_t v)

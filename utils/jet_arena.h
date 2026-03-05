@@ -10,7 +10,7 @@ typedef struct jet_arena
     struct jet_arena* next;
 } jet_arena;
 
-jet_arena jet_arena_create_default(size_t cap);
+jet_arena jet_arena_create(size_t cap);
 bool jet_arena_init(jet_arena* arena, size_t cap);
 void jet_arena_dispose(jet_arena* arena);
 void jet_arena_reset(jet_arena* arena);
@@ -28,7 +28,7 @@ void* jet_arena_alloc(jet_arena* arena, size_t bytes);
 static jet_arena* jet_arena_create(size_t cap);
 static jet_arena* jet_arena_get_next_available(jet_arena* arena, size_t bytes);
 
-jet_arena jet_arena_create_default(size_t cap)
+jet_arena jet_arena_create(size_t cap)
 {
     jet_arena arena = {0};
     if(!jet_arena_init(&arena, cap))
