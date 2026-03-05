@@ -3,6 +3,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdarg.h>
+#include <stdbool.h>
 
 typedef struct jet_sb jet_sb;
 

@@ -25,7 +25,6 @@ void* jet_arena_alloc(jet_arena* arena, size_t bytes);
 
 #define JET_ARENA_CAP_GROWTH_FAC (2)
 
-static jet_arena* jet_arena_create(size_t cap);
 static jet_arena* jet_arena_get_next_available(jet_arena* arena, size_t bytes);
 
 jet_arena jet_arena_create(size_t cap)
@@ -143,22 +142,6 @@ void* jet_arena_alloc(jet_arena* arena, size_t bytes)
     return base;
 }
 
-static jet_arena* jet_arena_create(size_t cap)
-{
-    jet_arena* arena = malloc(sizeof(jet_arena));
-    if(!arena)
-    {
-        fprintf(stderr, "err: failed to create new arena.\n");
-        return NULL;
-    }
-    if(!jet_arena_init(arena, cap))
-    {
-        free(arena);
-        fprintf(stderr, "err: unable to create new arena, failed init.\n");
-        return NULL;
-    }
-    return arena;
-}
 
 static jet_arena* jet_arena_get_next_available(jet_arena* arena, size_t bytes)
 {
@@ -177,10 +160,18 @@ static jet_arena* jet_arena_get_next_available(jet_arena* arena, size_t bytes)
                 next_cap *= JET_ARENA_CAP_GROWTH_FAC;
             }
 
-            arena->next = jet_arena_create(next_cap);
+            arena->next = malloc(sizeof(jet_arena));
             if(!arena->next)
             {
-                fprintf(stderr, "err: unable to create new arena.\n"); 
+                fprintf(stderr, "err: failed to alloc new arena.\n");
+                return NULL;
+            }
+            arena->next->block = NULL;
+            if(!jet_arena_init(arena->next, next_cap))
+            {
+                fprintf(stderr, "err: failed to init arena.\n");
+                free(arena->next);
+                arena->next = NULL;
                 return NULL;
             }
         }
