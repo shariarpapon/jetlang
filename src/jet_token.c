@@ -7,7 +7,7 @@
 #define TOK_TB_HEADER_FMT "%-7s %-17s %-10s %-10s %s\n\n"
 #define TOK_TB_ENTRY_FMT "%-7zu %-17s %-10zu %-10zu %.*s\n"
 
-void jet_token_print_darray(jet_da* tokens)
+void jet_token_print_darray(const jet_da* tokens)
 {
     if(!tokens)
     {
@@ -117,7 +117,7 @@ const char* jet_token_type_str(jet_token_type type)
     }
 }
 
-char* jet_token_strdup(jet_token* tok)
+char* jet_token_strdup(const jet_token* tok)
 {
     char* s = malloc(tok->len + 1);
     if(!s)

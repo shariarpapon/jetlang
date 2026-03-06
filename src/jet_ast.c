@@ -31,7 +31,6 @@ struct jet_ast
 };
 
 static node_id jet_ast_register_node(jet_ast* ast, const jet_ast_node* node);
-static const jet_ast_node* jet_ast_node_get(const jet_ast* ast, node_id nid);
 
 // TOKEN TRAVERSING/UTILITY
 static void jet_ast_push_nid(jet_ast* ast, node_id nid);
@@ -149,19 +148,7 @@ bool jet_ast_generate_nodes(jet_ast* ast)
     return true;
 }
 
-const jet_da* jet_ast_get_top_nid_da(const jet_ast* ast)
-{
-    assert(ast != NULL && "cannot get top_nid_da, ast is null");
-    return (const jet_da*)&ast->top_nid_da;
-}
-
-node_id jet_ast_get_prog_nid(const jet_ast* ast)
-{
-    assert(ast != NULL && "cannot get prog nid, ast is null");
-    return ast->prog_nid;
-}
-
-static const jet_ast_node* jet_ast_node_get(const jet_ast* ast, node_id nid)
+const jet_ast_node* jet_ast_node_get(const jet_ast* ast, node_id nid)
 {
     assert(ast != NULL && "cannot get node with specified nid, ast is null");
     if(nid == INVALID_NID)
@@ -184,6 +171,18 @@ static const jet_ast_node* jet_ast_node_get(const jet_ast* ast, node_id nid)
         return NULL;
     }
     return node;
+}
+
+const jet_da* jet_ast_get_top_nid_da(const jet_ast* ast)
+{
+    assert(ast != NULL && "cannot get top_nid_da, ast is null");
+    return (const jet_da*)&ast->top_nid_da;
+}
+
+node_id jet_ast_get_prog_nid(const jet_ast* ast)
+{
+    assert(ast != NULL && "cannot get prog nid, ast is null");
+    return ast->prog_nid;
 }
 
 static node_id jet_ast_register_node(jet_ast* ast, const jet_ast_node* node)

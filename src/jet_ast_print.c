@@ -89,7 +89,7 @@ void jet_ast_nid_print(const jet_ast* ast, node_id nid, size_t depth)
         }
         case AST_BLOCK:
         {
-            jet_ast_nid_da_print(ast,node->as.block.stmt_nid_da, child_depth);
+            jet_ast_nid_da_print(ast,&node->as.block.stmt_nid_da, child_depth);
             break;
         }
         case AST_VAR_DECL:
@@ -102,8 +102,8 @@ void jet_ast_nid_print(const jet_ast* ast, node_id nid, size_t depth)
         case AST_FUNC_DECL:
         {
             jet_ast_nid_print(ast,node->as.fdecl.ident_nid, child_depth);
-            jet_ast_nid_da_print(ast,node->as.fdecl.ret_tdecl_nid_da, child_depth);
-            jet_ast_nid_da_print(ast,node->as.fdecl.param_nid_da, child_depth);
+            jet_ast_nid_da_print(ast,&node->as.fdecl.ret_tdecl_nid_da, child_depth);
+            jet_ast_nid_da_print(ast,&node->as.fdecl.param_nid_da, child_depth);
             break;
         }
         case AST_FUNC_DEF:
@@ -115,7 +115,7 @@ void jet_ast_nid_print(const jet_ast* ast, node_id nid, size_t depth)
         case AST_CALL:
         {
             jet_ast_nid_print(ast,node->as.call.callee_nid, child_depth);
-            jet_ast_nid_da_print(ast,node->as.call.arg_nid_da, child_depth);
+            jet_ast_nid_da_print(ast,&node->as.call.arg_nid_da, child_depth);
             break;
         }
         case AST_BINOP:
