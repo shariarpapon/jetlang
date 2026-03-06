@@ -102,7 +102,7 @@ typedef struct
 } jet_token;
 
 const char* jet_token_type_str(jet_token_type type);
-void jet_token_print_darray(const jet_da* da);
+void jet_token_print_da(const jet_da* da);
 char* jet_token_strdup(const jet_token* tok);
 
 

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <assert.h>
+#include <stdbool.h>
 #include <jet_io.h>
 #include <jet_lexer.h>
 #include <jet_ast.h>
@@ -27,6 +28,14 @@ int main(int argc, char** argv)
         printf("read file is empty.\n");
         return 0;
     }
+
+    jet_lexer lexer;
+    assert(jet_lexer_init(&lexer, src) && "could not init lexer");
+    assert(jet_lexer_tokenize(&lexer) && "could not tokenize");
+    jet_token_print_da(&lexer.token_da);
+
+    jet_lexer_dispose(&lexer);
+    free((void*)src);
     return 0;
 }
 

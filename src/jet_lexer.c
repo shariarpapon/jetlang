@@ -174,7 +174,6 @@ bool jet_lexer_tokenize(jet_lexer* lexer)
         jet_lexer_emit_token(lexer, lexer->cursor, 1, TOK_INV);
         jet_lexer_consume(lexer);
     } 
-    printf("tokenization complete!\n");
     return true;
 }
 
@@ -185,7 +184,7 @@ static void jet_lexer_emit_token(jet_lexer* lexer, size_t origin, size_t len, je
     tok.origin = origin;
     tok.len = len;
     tok.line = lexer->cur_line;
-    tok.column = lexer->cursor - len;
+    tok.column = lexer->cur_col;
     tok.type = tok_type;    
 
     if(!jet_da_append(&lexer->token_da, (const void*)&tok))
@@ -458,6 +457,7 @@ static bool jet_lexer_try_scan_whitespace(jet_lexer* lexer)
     {
         case '\n': 
             lexer->cur_line++;
+            lexer->cur_col = 0;
             break;
 
         case ' ' :
@@ -478,10 +478,7 @@ static char jet_lexer_peek_next(jet_lexer* lexer)
 {
     size_t next = lexer->cursor + 1;
     if(next >= lexer->len)
-    {
-        printf("wrn: cannot peek next, EOF reached\n");
         return NULL_TERM;
-    }
     return lexer->source[next];
 }
 
@@ -493,12 +490,10 @@ static char jet_lexer_peek(jet_lexer* lexer)
 static char jet_lexer_consume(jet_lexer* lexer)
 {
     if(lexer->cursor >= lexer->len)
-    {
-        fprintf(stderr, "wrn: cannot consume, EOF reached.\n");
         return NULL_TERM;
-    }
     char c = jet_lexer_peek(lexer);
     lexer->cursor++;
+    lexer->cur_col++;
     return c;
 }
 

@@ -137,9 +137,9 @@ bool jet_da_insert(jet_da* da, size_t i, const void* data)
         return false;
     }
     
-    if(i >= da->count)
+    if(i > da->count)
     {
-        fprintf(stderr, "err: index out of bounds.\n");
+        fprintf(stderr, "err: cannot insert past index = da->count.\n");
         return false;
     }
     

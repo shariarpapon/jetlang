@@ -7,7 +7,7 @@
 #define TOK_TB_HEADER_FMT "%-7s %-17s %-10s %-10s %s\n\n"
 #define TOK_TB_ENTRY_FMT "%-7zu %-17s %-10zu %-10zu %.*s\n"
 
-void jet_token_print_darray(const jet_da* tokens)
+void jet_token_print_da(const jet_da* tokens)
 {
     if(!tokens)
     {
@@ -31,7 +31,6 @@ void jet_token_print_darray(const jet_da* tokens)
         printf(TOK_TB_ENTRY_FMT, i, type_str, token->line, token->column, (int)token->len, token->source + token->origin);        
     }
     printf("\n");
-    printf("* generated %zu tokens\n\n", len);
 }
 
 const char* jet_token_type_str(jet_token_type type)
