@@ -122,8 +122,7 @@ bool jet_lexer_init(jet_lexer* lexer, const char* source)
     lexer->cursor = 0;
     lexer->cur_line = 0;
     lexer->cur_col = 0;
-    memset(&lexer->token_da, 0, sizeof(lexer->token_da));
-    if(!jet_da_init(&lexer->token_da, INIT_TOK_CAP, sizeof(jet_token)))
+    if( !jet_da_init(&lexer->token_da, INIT_TOK_CAP, sizeof(jet_token)) )
     {
         fprintf(stderr, "err: cannot init, failed to init token da.\n");
         return false;
@@ -143,12 +142,8 @@ void jet_lexer_reset(jet_lexer* lexer)
 void jet_lexer_dispose(jet_lexer* lexer)
 {
     if(!lexer) return;
-    lexer->source = NULL;
-    lexer->len = 0;
-    lexer->cursor = 0;
-    lexer->cur_line = 0;
-    lexer->cur_col = 0;
     jet_da_dispose(&lexer->token_da);
+    memset(lexer, 0, sizeof(*lexer));
 }
 
 bool jet_lexer_tokenize(jet_lexer* lexer)
@@ -193,7 +188,7 @@ static void jet_lexer_emit_token(jet_lexer* lexer, size_t origin, size_t len, je
     tok.column = lexer->cursor - len;
     tok.type = tok_type;    
 
-    if(jet_da_append(&lexer->token_da, (const void*)&tok) == false)
+    if(!jet_da_append(&lexer->token_da, (const void*)&tok))
     {
         fprintf(stderr, "error: could not add new token to lexer->token_da.\n");
         return;

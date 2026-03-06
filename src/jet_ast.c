@@ -100,7 +100,7 @@ void jet_ast_dispose(jet_ast* ast)
     jet_da_dispose(&ast->tok_da);
     jet_da_dispose(&ast->node_registry);
     jet_da_dispose(&ast->top_nid_da);
-    memset(ast, 0, sizeof(*ast));
+    memset(ast, 0, sizeof(*ast)); 
 }
 
 //persists ast->tok_da
@@ -250,10 +250,7 @@ static const jet_token* jet_ast_consume_tok(jet_ast* ast)
 {
     assert(ast != NULL && "cannot consume tok, ast is null");
     if(ast->tok_cursor >= jet_da_count(&ast->tok_da))
-    {
-        fprintf(stderr, "wrn: cannot consume token, cursor already at end.\n");
         return NULL;
-    }
     ast->tok_cursor++;
     return (const jet_token*)jet_da_get(&ast->tok_da , ast->tok_cursor - 1);
 }
@@ -342,10 +339,7 @@ static node_id jet_astn_parse_next_stmt(jet_ast* ast)
     jet_token_type t = jet_ast_peekn_tok_type(ast, 0);
     
     if(t == TOK_EOF)
-    {
-        printf("* ast parsing complete, end of file reached.\n");
         return INVALID_NID;
-    }
     else if(t == TOK_INV)
     {
         fprintf(stderr, "error: cannot parse next stmt, invalid token.\n");
@@ -440,8 +434,7 @@ static node_id jet_astn_block_parse(jet_ast* ast)
         fprintf(stderr, "err: cannot parse block, expected TOK_LBRC.\n");
         return INVALID_NID;
     }
-    jet_ast_node_block block = {0};
-
+    jet_ast_node_block block;
     if(!jet_da_init(&block.stmt_nid_da, 4, sizeof(node_id)))
     {
         fprintf(stderr, "err: cannot parse block, could not init block.stmt_nid_da.\n");
@@ -641,7 +634,7 @@ static node_id jet_astn_vdecl_parse(jet_ast* ast)
 
 static node_id jet_astn_func_parse(jet_ast* ast) 
 {
-    jet_ast_node_fdecl fdecl = {0};
+    jet_ast_node_fdecl fdecl;
 
     node_id ret_tdecl_nid = jet_astn_tdecl_parse(ast); 
     fdecl.ident_nid = jet_astn_ident_parse(ast);
@@ -651,7 +644,13 @@ static node_id jet_astn_func_parse(jet_ast* ast)
         fprintf(stderr, "err: cannot parse func, unable to init fdecl.ret_tdecl_nid_da.\n");
         return INVALID_NID;
     }
-    jet_da_append(&fdecl.ret_tdecl_nid_da, (const void*)&ret_tdecl_nid);
+
+    if(!jet_da_append(&fdecl.ret_tdecl_nid_da, (const void*)&ret_tdecl_nid))
+    {
+        fprintf(stderr, "err: cannot prase func, failed to append to ret_tdecl_nid_da.\n");
+        jet_da_dispose(&fdecl.ret_tdecl_nid_da);
+        return INVALID_NID;
+    }
 
     if(jet_ast_expect_tok(ast, TOK_LPAR) == NULL)
     {
@@ -677,7 +676,12 @@ static node_id jet_astn_func_parse(jet_ast* ast)
             fprintf(stderr, "error: cannot parse func, unable to parse parameter.\n");
             goto fail;
         }
-        jet_da_append(&fdecl.param_nid_da, (const void*)&vdecl_nid);
+
+        if(!jet_da_append(&fdecl.param_nid_da, (const void*)&vdecl_nid))
+        {
+            fprintf(stderr, "err: cannot parse func, failed to append to param_nid_da.\n");
+            goto fail;
+        }
         
         t = jet_ast_peekn_tok_type(ast, 0);
         switch(t)
@@ -892,7 +896,7 @@ static node_id jet_astn_parse_primary(jet_ast* ast)
     //postfix expression call evaluation
     while(jet_ast_peekn_tok_type(ast, 0) == TOK_LPAR)
     {
-        jet_da arg_da = {0};
+        jet_da arg_da;
         if( !jet_da_init(&arg_da, 2, sizeof(node_id)) )
         {
             fprintf(stderr, "err: cannot parse primary expr, unable to init arg_da.\n");

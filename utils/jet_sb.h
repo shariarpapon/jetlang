@@ -69,10 +69,8 @@ bool jet_sb_init(jet_sb* sb, size_t cap)
 void jet_sb_dispose(jet_sb* sb)
 {
     if(!sb) return;
-    free((void*)sb->buf);
-    sb->buf = NULL;
-    sb->len = 0;
-    sb->cap = 0;
+    free(sb->buf);
+    memset(sb, 0, sizeof(*sb));
 }
 
 void jet_sb_clear(jet_sb* sb)

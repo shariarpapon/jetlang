@@ -102,10 +102,7 @@ void jet_da_dispose(jet_da* da)
 {
     if(!da) return;
     free(da->block);
-    da->block = NULL;
-    da->capacity = 0;
-    da->count = 0;
-    da->elm_size = 0;
+    memset(da, 0, sizeof(*da));
 }
 
 bool jet_da_clear(jet_da* da)

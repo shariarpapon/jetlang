@@ -58,7 +58,6 @@ void jet_arena_dispose(jet_arena* arena)
 {
     if(!arena)
         return;
-
     jet_arena* cur = arena->next;
     jet_arena* temp = NULL;
     while(cur != NULL)
@@ -69,10 +68,7 @@ void jet_arena_dispose(jet_arena* arena)
         cur = temp;
     }
     free(arena->block);
-    arena->offset = 0;
-    arena->cap = 0;
-    arena->block = NULL;
-    arena->next = NULL;
+    memset(arena, 0, sizeof(*arena));
 }
 
 void jet_arena_zero_reset(jet_arena* arena)
