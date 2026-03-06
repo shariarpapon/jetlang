@@ -827,7 +827,7 @@ static node_id jet_astn_parse_primary(jet_ast* ast)
             node_id rhs_nid = jet_astn_parse_expr(ast, PREC_PREFIX);
             if(rhs_nid == INVALID_NID)
             {
-                fprintf(stderr, "error: expected expr after '-'\n");
+                fprintf(stderr, "error: expected expr after unary operator\n");
                 return INVALID_NID;
             }
             jet_ast_node_unop unop;
@@ -852,7 +852,7 @@ static node_id jet_astn_parse_primary(jet_ast* ast)
     while(jet_ast_peekn_tok_type(ast, 0) == TOK_LPAR)
     {
         jet_da arg_da = {0};
-        if( !jet_da_init(&arg_da, 2, sizeof(jet_ast_node)) )
+        if( !jet_da_init(&arg_da, 2, sizeof(node_id)) )
         {
             fprintf(stderr, "err: cannot parse primary expr, unable to init arg_da.\n");
             return INVALID_NID;
@@ -868,12 +868,25 @@ static node_id jet_astn_parse_primary(jet_ast* ast)
                 jet_da_dispose(&arg_da);
                 return INVALID_NID;
             }
-            jet_da_append(&arg_da, (const void*)&arg_nid);
+            if(!jet_da_append(&arg_da, (const void*)&arg_nid))
+            {
+                fprintf(stderr, "err: cannot parse primary expr, unable append to arg_da.\n");
+                jet_da_dispose(&arg_da);
+                return INVALID_NID;
+            }
+
             if(jet_ast_peekn_tok_type(ast, 0) == TOK_COMMA)
                 jet_ast_consume_tok(ast);
             else break;
         }
-        jet_ast_expect_tok(ast, TOK_RPAR);
+        
+        if(jet_ast_expect_tok(ast, TOK_RPAR) == INVALID_NID)
+        {
+            fprintf(stderr, "err: cannot parse, expected TOK_RPAR.\n");
+            jet_da_dispose(&arg_da);
+            return INVALID_NID;
+        }
+
         if(jet_da_is_empty(&arg_da))
             jet_da_dispose(&arg_da);
         
