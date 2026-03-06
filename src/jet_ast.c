@@ -128,6 +128,7 @@ bool jet_ast_generate_nodes(jet_ast* ast)
 
     jet_ast_reset(ast);
     jet_token_type t = TOK_EOF;
+    
     while(true)
     {
         t = jet_ast_peekn_tok_type(ast, 0);
@@ -234,7 +235,7 @@ static const jet_token* jet_ast_peekn_tok(jet_ast* ast, size_t n)
 static const jet_token* jet_ast_expect_tok(jet_ast* ast, jet_token_type tok_type)
 {
     assert(ast != NULL && "cannot expect tok, ast is null");
-    jet_token* tok = jet_ast_peek_tok(ast);
+    const jet_token* tok = jet_ast_peek_tok(ast);
     if(!tok) return NULL;
     if(tok->type != tok_type)
     {
@@ -258,7 +259,7 @@ static const jet_token* jet_ast_consume_tok(jet_ast* ast)
 
 static jet_token_type jet_ast_peekn_tok_type(jet_ast* ast, size_t n)
 {
-    jet_token* tok = jet_ast_peekn_tok(ast, n);
+    const jet_token* tok = jet_ast_peekn_tok(ast, n);
     if(tok == NULL)
         return TOK_EOF;
     return tok->type;
@@ -469,7 +470,7 @@ fail:
 
 static node_id jet_astn_ident_parse(jet_ast* ast)
 {
-    jet_token* tok = jet_ast_peek_tok(ast);
+    const jet_token* tok = jet_ast_peek_tok(ast);
     if(!tok)
     {
         fprintf(stderr, "error: cannot parse ident, no valid tokens to peek.\n");
@@ -501,7 +502,7 @@ static node_id jet_astn_ident_parse(jet_ast* ast)
 static node_id jet_astn_lit_parse(jet_ast* ast)
 {
     assert(ast != NULL);
-    jet_token* tok = jet_ast_peek_tok(ast);
+    const jet_token* tok = jet_ast_peek_tok(ast);
     jet_ast_node_lit lit;
     lit.lit_type = tok->type;
     switch(lit.lit_type)
@@ -554,7 +555,7 @@ static node_id jet_astn_lit_parse(jet_ast* ast)
 
 static node_id jet_astn_tdecl_parse(jet_ast* ast)
 {
-    jet_token* tok = jet_ast_consume_tok(ast);
+    const jet_token* tok = jet_ast_consume_tok(ast);
 
     jet_ast_node_tdecl tdecl;
     tdecl.tname = jet_ast_get_type_name(tok->type);
@@ -773,7 +774,7 @@ static node_id jet_astn_parse_expr(jet_ast* ast, size_t min_prec)
 
 static node_id jet_astn_parse_primary(jet_ast* ast)
 {
-    jet_token* cur_tok = jet_ast_peek_tok(ast);
+    const jet_token* cur_tok = jet_ast_peek_tok(ast);
     if(cur_tok == NULL) 
         return INVALID_NID;
 
