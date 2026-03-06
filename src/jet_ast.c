@@ -193,6 +193,7 @@ static node_id jet_ast_register_node(jet_ast* ast, const jet_ast_node* node)
     if(!jet_da_append(&ast->node_registry, (const void*)node))
     {
         fprintf(stderr, "err: failed to register node, unable to append.\n");
+        abort();
         return INVALID_NID;
     }
     ast->node_count++;
