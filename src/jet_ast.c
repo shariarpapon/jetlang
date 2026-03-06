@@ -699,9 +699,6 @@ static node_id jet_astn_func_parse(jet_ast* ast)
         goto fail;
     }
 
-    if(jet_da_is_empty(&fdecl.param_nid_da))
-        jet_da_dispose(&fdecl.param_nid_da);
-
     jet_ast_node fdecl_base;
     fdecl_base.node_type = AST_FUNC_DECL;
     fdecl_base.as.fdecl = fdecl;
