@@ -2,6 +2,7 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdlib.h>
 
 typedef struct jet_da
 {
@@ -14,7 +15,7 @@ typedef struct jet_da
 bool jet_da_init(jet_da* da, size_t capacity, size_t elm_size);
 bool jet_da_clone(jet_da* dest, const jet_da* source);
 
-bool jet_da_dispose(jet_da* da);
+void jet_da_dispose(jet_da* da);
 bool jet_da_clear(jet_da* da);
 bool jet_da_is_empty(const jet_da* da);
 bool jet_da_insert(jet_da* da, size_t i, const void* data);
@@ -43,7 +44,7 @@ size_t jet_da_count(const jet_da* da);
 
 static bool jet_da_ensure_capacity(jet_da* da, size_t min_cap);
 
-//da should be zero initialized
+//da should be zero initialized before init is called
 bool jet_da_init(jet_da* da, size_t capacity, size_t elm_size)
 {
     if(!da) 
@@ -97,16 +98,14 @@ bool jet_da_clone(jet_da* dest, const jet_da* source)
     return true;
 }
 
-bool jet_da_dispose(jet_da* da)
+void jet_da_dispose(jet_da* da)
 {
-    if(da == NULL)
-        return false;
+    if(!da) return;
     free(da->block);
     da->block = NULL;
     da->capacity = 0;
     da->count = 0;
     da->elm_size = 0;
-    return true;
 }
 
 bool jet_da_clear(jet_da* da)

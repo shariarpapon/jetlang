@@ -10,7 +10,6 @@ typedef struct jet_arena
     struct jet_arena* next;
 } jet_arena;
 
-jet_arena jet_arena_create(size_t cap);
 bool jet_arena_init(jet_arena* arena, size_t cap);
 void jet_arena_dispose(jet_arena* arena);
 void jet_arena_reset(jet_arena* arena);
@@ -27,13 +26,6 @@ void* jet_arena_alloc(jet_arena* arena, size_t bytes);
 
 static jet_arena* jet_arena_get_next_available(jet_arena* arena, size_t bytes);
 
-jet_arena jet_arena_create(size_t cap)
-{
-    jet_arena arena = {0};
-    if(!jet_arena_init(&arena, cap))
-        fprintf(stderr, "err: unable to create arena, failed to initialize.\n");
-    return arena;
-}
 // caller should zero initialize the arena before initializing.
 bool jet_arena_init(jet_arena* arena, size_t cap)
 {
@@ -43,19 +35,12 @@ bool jet_arena_init(jet_arena* arena, size_t cap)
         return false;
     }
 
-    if(arena->block != NULL)
-    {
-        fprintf(stderr, "err: calling init on already initialized arena.\n");
-        return false;
-    }
-
     if(cap == 0)
     {
         fprintf(stderr, "err: cannot init, arena cap must be > 0.\n");
         return false;
     }
     
-    arena->cap = cap;
     arena->offset = 0;
     arena->next = NULL;
     arena->block = malloc(cap);
@@ -65,6 +50,7 @@ bool jet_arena_init(jet_arena* arena, size_t cap)
         fprintf(stderr, "err: cannot init, failed to allocate block memory.\n");
         return false;
     }
+    arena->cap = cap;
     return true;
 }
 
@@ -74,14 +60,15 @@ void jet_arena_dispose(jet_arena* arena)
         return;
 
     jet_arena* cur = arena->next;
+    jet_arena* temp = NULL;
     while(cur != NULL)
     {
-        free((void*)cur->block);
-        jet_arena* temp = cur->next;
-        free((void*)cur);
+        free(cur->block);
+        temp = cur->next;
+        free(cur);
         cur = temp;
     }
-    free((void*)arena->block);
+    free(arena->block);
     arena->offset = 0;
     arena->cap = 0;
     arena->block = NULL;
@@ -94,7 +81,8 @@ void jet_arena_zero_reset(jet_arena* arena)
         return;
     while(arena != NULL)
     {
-        memset(arena->block, 0, arena->cap);
+        if(arena->block)
+            memset(arena->block, 0, arena->cap);
         arena->offset = 0;
         arena = arena->next;
     }

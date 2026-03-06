@@ -7,7 +7,6 @@
 
 typedef struct jet_sb jet_sb;
 
-jet_sb jet_sb_create(size_t cap);
 bool jet_sb_init(jet_sb* sb, size_t cap);
 void jet_sb_dispose(jet_sb* sb);
 void jet_sb_clear(jet_sb* sb);
@@ -43,14 +42,6 @@ struct jet_sb
 static void jet_sb_ensure_extra_cap(jet_sb* sb, size_t n);
 static void jet_sb_grow(jet_sb* sb);
 
-jet_sb jet_sb_create(size_t cap)
-{
-    jet_sb sb = {0};
-    if(!jet_sb_init(&sb, cap))
-        fprintf(stderr, "err: failed to init sb.\n");
-    return sb;
-}
-
 bool jet_sb_init(jet_sb* sb, size_t cap)
 {
     assert(sb != NULL && "param sb is null.");
@@ -78,8 +69,7 @@ bool jet_sb_init(jet_sb* sb, size_t cap)
 void jet_sb_dispose(jet_sb* sb)
 {
     if(!sb) return;
-    free(
-            (void*)sb->buf);
+    free((void*)sb->buf);
     sb->buf = NULL;
     sb->len = 0;
     sb->cap = 0;

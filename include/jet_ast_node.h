@@ -41,7 +41,7 @@ typedef struct jet_ast_node_lit
 
 typedef struct jet_ast_node_block
 {
-  jet_da* stmt_nid_da;
+  jet_da stmt_nid_da;
 } jet_ast_node_block;
 
 typedef struct jet_ast_node_vdecl
@@ -61,8 +61,8 @@ typedef struct jet_ast_node_tdecl
 typedef struct jet_ast_node_fdecl
 {
   node_id ident_nid;
-  jet_da* ret_tdecl_nid_da;
-  jet_da* param_nid_da; 
+  jet_da ret_tdecl_nid_da;
+  jet_da param_nid_da; 
 } jet_ast_node_fdecl;
 
 typedef struct jet_ast_node_fdef
@@ -74,7 +74,7 @@ typedef struct jet_ast_node_fdef
 typedef struct jet_ast_node_call
 {
   node_id callee_nid;
-  jet_da* arg_nid_da;
+  jet_da arg_nid_da;
 } jet_ast_node_call;
 
 typedef struct jet_ast_node_binop

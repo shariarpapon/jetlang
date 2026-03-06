@@ -12,7 +12,7 @@
 #define DECIMAL_CHAR '.'
 #define ESCAPE_CHAR '\\'
 
-#define INIT_TOK_CAPACITY 32
+#define INIT_TOK_CAP 32
 
 typedef struct jet_tok_def 
 {
@@ -122,8 +122,8 @@ bool jet_lexer_init(jet_lexer* lexer, const char* source)
     lexer->cursor = 0;
     lexer->cur_line = 0;
     lexer->cur_col = 0;
-    memset(&lexer->token_darray, 0, sizeof(lexer->token_darray));
-    if(!jet_da_init(&lexer->token_darray, INIT_TOK_CAPACITY, sizeof(jet_token)))
+    memset(&lexer->token_da, 0, sizeof(lexer->token_da));
+    if(!jet_da_init(&lexer->token_da, INIT_TOK_CAP, sizeof(jet_token)))
     {
         fprintf(stderr, "err: cannot init, failed to init token da.\n");
         return false;
@@ -137,7 +137,7 @@ void jet_lexer_reset(jet_lexer* lexer)
     lexer->cursor = 0;
     lexer->cur_line = 0;
     lexer->cur_col = 0;
-    jet_da_clear(&lexer->token_darray);
+    jet_da_clear(&lexer->token_da);
 }
 
 void jet_lexer_dispose(jet_lexer* lexer)
@@ -148,7 +148,7 @@ void jet_lexer_dispose(jet_lexer* lexer)
     lexer->cursor = 0;
     lexer->cur_line = 0;
     lexer->cur_col = 0;
-    jet_da_dispose(&lexer->token_darray);
+    jet_da_dispose(&lexer->token_da);
 }
 
 bool jet_lexer_tokenize(jet_lexer* lexer)
@@ -193,9 +193,9 @@ static void jet_lexer_emit_token(jet_lexer* lexer, size_t origin, size_t len, je
     tok.column = lexer->cursor - len;
     tok.type = tok_type;    
 
-    if(jet_da_append(&lexer->token_darray, (const void*)&tok) == false)
+    if(jet_da_append(&lexer->token_da, (const void*)&tok) == false)
     {
-        fprintf(stderr, "error: could not add new token to lexer->token_darray.\n");
+        fprintf(stderr, "error: could not add new token to lexer->token_da.\n");
         return;
     }
 }

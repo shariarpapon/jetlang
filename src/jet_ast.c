@@ -21,9 +21,9 @@
 
 struct jet_ast 
 {
-    const jet_da* tok_da;
-    jet_da* node_registry;
-    jet_da* top_nid_da;
+    jet_da tok_da;
+    jet_da node_registry;
+    jet_da top_nid_da;
 
     node_id prog_nid;
     size_t node_count;
@@ -31,7 +31,7 @@ struct jet_ast
 };
 
 static node_id jet_ast_register_node(jet_ast* ast, const jet_ast_node* node);
-static void jet_ast_reset(jet_ast* ast);
+static const jet_ast_node* jet_ast_node_get(const jet_ast* ast, node_id nid);
 
 // TOKEN TRAVERSING/UTILITY
 static void jet_ast_push_nid(jet_ast* ast, node_id nid);
@@ -61,94 +61,70 @@ static node_id jet_astn_lit_parse(jet_ast* ast);
 static node_id jet_astn_func_parse(jet_ast* ast);
 static node_id jet_astn_parse_fparam(jet_ast* ast);
 
-
-jet_ast* jet_ast_create(const jet_da* tok_da)
-{    
-    if(!tok_da)
-    {
-        fprintf(stderr, "error: cannot create ast, invalid token darray.\n");
-        return NULL;
-    }
-    
-    jet_ast* ast = malloc(sizeof(jet_ast));
-    
-    if(!ast) 
-        goto fail;
-    
-    ast->node_registry = NULL;
-    ast->top_nid_da = NULL;
-    ast->tok_da = tok_da;
-    ast->prog_nid = INVALID_NID;
-    ast->tok_cursor = 0;
-    ast->node_count = 0;
-    
-    ast->node_registry = jet_da_create(64, sizeof(jet_ast_node));
-    if(!ast->node_registry) 
-        goto fail;
-
-    ast->top_nid_da = jet_da_create(32, sizeof(node_id));
-    if(!ast->top_nid_da)
-        goto fail;
-
-    return ast;
-
-fail:
-    if(ast)
-    {
-        if(ast->node_registry) jet_da_dispose(ast->node_registry);
-        if(ast->top_nid_da) jet_da_dispose(ast->top_nid_da);
-        free(ast);
-        fprintf(stderr, "err: ast data couldn't be initialized.\n");
-    }
-    else
-    {
-        fprintf(stderr, "err: ast memory couldn't be allocated\n");
-    }
-    return NULL;
-}
-
-
-bool jet_ast_dispose(jet_ast* ast)
+//ast should be zero initialized before init is called or risks mem leak
+bool jet_ast_init(jet_ast* ast, const jet_da* tok_da)
 {
-    if(!ast)
+    assert(ast != NULL && tok_da != NULL && "cannot init, ast or tok_da is null");
+    
+    //clone lexers token DA, allowing for safe disposal of lexer
+    if(!jet_da_clone(&ast->tok_da, tok_da))
     {
-        fprintf(stderr, "error: cannot dispose, given jet_ast ptr is NULL.\n");
+        fprintf(stderr, "err: failed to init ast, unable to clone tok_da DA.\n");
+        return false;
+    }
+    
+    ast->prog_nid = INVALID_NID;
+    ast->node_count = 0;
+    ast->tok_cursor = 0;
+    
+    if( !jet_da_init(&ast->node_registry, 32, sizeof(jet_ast_node)) )
+    {
+        fprintf(stderr, "err: failed to init node_registry DA.\n");
+        jet_da_dispose(&ast->tok_da);
+        return false;
+    }
+    
+    if( !jet_da_init(&ast->top_nid_da, 16, sizeof(node_id)) )
+    {
+        fprintf(stderr, "err: failed to init top_node_nid_da DA.\n");
+        jet_da_dispose(&ast->tok_da);
+        jet_da_dispose(&ast->node_registry);
         return false;
     }
 
-    if(ast->node_registry)
-        jet_da_dispose(ast->node_registry);
-    if(ast->top_nid_da)
-        jet_da_dispose(ast->top_nid_da);
-    free(ast);
     return true;
+}
+
+void jet_ast_dispose(jet_ast* ast)
+{
+    if(!ast) return;
+    jet_da_dispose(&ast->tok_da);
+    jet_da_dispose(&ast->node_registry);
+    jet_da_dispose(&ast->top_nid_da);
+    memset(ast, 0, sizeof(*ast));
+}
+
+//persists ast->tok_da
+void jet_ast_reset(jet_ast* ast)
+{
+    assert(ast != NULL && "cannot reset, ast is null");
+    jet_da_clear(&ast->node_registry);
+    jet_da_clear(&ast->top_nid_da);
+    ast->prog_nid = INVALID_NID;
+    ast->node_count = 0;
+    ast->tok_cursor = 0;
 }
 
 bool jet_ast_generate_nodes(jet_ast* ast)
 {
     if(ast == NULL)
     {
-        fprintf(stderr, "error: cannot generate ast nodes, given ast is NULL.\n");
+        fprintf(stderr, "error: cannot generate ast nodes, ast is null.\n");
         return false;
     }
 
-    if(ast->tok_da == NULL)
-    {
-        fprintf(stderr, "error: cannot generate ast nodes, ast was not initialized with valid token darray.\n");
-        return false;
-    }
-
-    if(ast->node_registry == NULL)
-    {
-        fprintf(stderr, "err: cannot generate ast nodes, node_registry was not initialized.\n");
-        return false;
-    }
-    
-    if(ast->top_nid_da == NULL)
-    {
-        fprintf(stderr, "error: cannot generate ast nodes, ast did not initialize top_nid_da.\n");
-        return false;
-    }
+    if(jet_da_count(&ast->tok_da) == 0)
+        return true;
 
     jet_ast_reset(ast);
     jet_token_type t = TOK_EOF;
@@ -174,19 +150,19 @@ bool jet_ast_generate_nodes(jet_ast* ast)
 
 const jet_da* jet_ast_get_top_nid_da(const jet_ast* ast)
 {
-    assert(ast != NULL);
-    return (const jet_da*)ast->top_nid_da;
+    assert(ast != NULL && "cannot get top_nid_da, ast is null");
+    return (const jet_da*)&ast->top_nid_da;
 }
 
 node_id jet_ast_get_prog_nid(const jet_ast* ast)
 {
-    assert(ast != NULL);
+    assert(ast != NULL && "cannot get prog nid, ast is null");
     return ast->prog_nid;
 }
 
-const jet_ast_node* jet_ast_node_get(const jet_ast* ast, node_id nid)
+static const jet_ast_node* jet_ast_node_get(const jet_ast* ast, node_id nid)
 {
-    assert(ast != NULL);
+    assert(ast != NULL && "cannot get node with specified nid, ast is null");
     if(nid == INVALID_NID)
     {
         fprintf(stderr, "err: cannot get node with id=%zu, this id internally represents invalid node.\n", (size_t)INVALID_NID);
@@ -194,7 +170,7 @@ const jet_ast_node* jet_ast_node_get(const jet_ast* ast, node_id nid)
     }
 
     // force nid - 1 >= 0, because 0 represents invalid.
-    const jet_ast_node* node = (const jet_ast_node*)jet_da_get(ast->node_registry, nid - 1);
+    const jet_ast_node* node = (const jet_ast_node*)jet_da_get(&ast->node_registry, nid - 1);
     if(!node)
     {
         fprintf(stderr, "err: node with id=%zu does not exist in registry.\n", nid);
@@ -203,25 +179,13 @@ const jet_ast_node* jet_ast_node_get(const jet_ast* ast, node_id nid)
     return node;
 }
 
-
 static node_id jet_ast_register_node(jet_ast* ast, const jet_ast_node* node)
 {
-    assert(ast != NULL);
-    assert(node != NULL);
-
-    jet_da_append(ast->node_registry, (const void*)node);
+    assert(ast != NULL && "cannot register node, ast is null");
+    assert(node != NULL && "cannot register node, param node is null");
+    jet_da_append(&ast->node_registry, (const void*)node);
     ast->node_count++;
     return ast->node_count;
-}
-
-static void jet_ast_reset(jet_ast* ast)
-{
-    assert(ast != NULL); 
-    jet_da_clear(ast->node_registry);
-    jet_da_clear(ast->top_nid_da);  
-    ast->tok_cursor = 0;
-    ast->node_count = 0;
-    ast->prog_nid = INVALID_NID;
 }
 
 static void jet_ast_push_nid(jet_ast* ast, node_id nid)
@@ -242,7 +206,7 @@ static void jet_ast_push_nid(jet_ast* ast, node_id nid)
             return;
         }
     }
-    else jet_da_append(ast->top_nid_da, (const void*)&nid);
+    else jet_da_append(&ast->top_nid_da, (const void*)&nid);
 }
 
 static jet_token* jet_ast_peek_tok(jet_ast* ast)
@@ -252,34 +216,26 @@ static jet_token* jet_ast_peek_tok(jet_ast* ast)
 
 static jet_token* jet_ast_peekn_tok(jet_ast* ast, size_t n)
 { 
-    assert(ast != NULL);
-    assert(ast->tok_da != NULL);
-    size_t count = jet_da_count(ast->tok_da);
-    if(count <= 0)
+    assert(ast != NULL && "cannot peek tok, ast is null");
+    size_t count = jet_da_count(&ast->tok_da);
+    if(count == 0)
     {
         fprintf(stderr, "wrn: ast->tok_da is empty.\n");        
         return NULL; 
     }
-    else if(ast->tok_cursor + n >= count)
+    else if(n >= count - ast->tok_cursor)
     {
         fprintf(stderr, "wrn: cannot peak ahead %zu tokens (cursor=%zu), index out of bounds.\n", n, ast->tok_cursor);
         return NULL;
     }
-    return (jet_token*)jet_da_get(ast->tok_da, ast->tok_cursor + n);
+    return (jet_token*)jet_da_get(&ast->tok_da, ast->tok_cursor + n);
 }
 
 static jet_token* jet_ast_expect_tok(jet_ast* ast, jet_token_type tok_type)
 {
-    assert(ast != NULL);
-    assert(ast->tok_da != NULL);
-    if(ast->tok_cursor >= jet_da_count(ast->tok_da))
-    {
-        puts("end of token-darray reached.");
-        return NULL;
-    }
+    assert(ast != NULL && "cannot expect tok, ast is null");
     jet_token* tok = jet_ast_peek_tok(ast);
-    assert(tok != NULL);
-    
+    if(!tok) return NULL;
     if(tok->type != tok_type)
     {
         fprintf(stderr, "error: expected token type (id: %d) but encountered (id: %d).\n", (int)tok_type, (int)tok->type);

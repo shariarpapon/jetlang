@@ -10,7 +10,7 @@ typedef struct jet_lexer
     size_t cur_line;
     size_t cur_col;
     const char* source;
-    jet_da token_darray;
+    jet_da token_da;
 } jet_lexer;
 
 bool jet_lexer_init(jet_lexer* lexer, const char* source);
