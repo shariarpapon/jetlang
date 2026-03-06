@@ -248,7 +248,7 @@ static const jet_token* jet_ast_expect_tok(jet_ast* ast, jet_token_type tok_type
 static const jet_token* jet_ast_consume_tok(jet_ast* ast)
 {
     assert(ast != NULL && "cannot consume tok, ast is null");
-    if(ast->tok_cursor >= jet_da_count(ast->tok_da))
+    if(ast->tok_cursor >= jet_da_count(&ast->tok_da))
     {
         fprintf(stderr, "wrn: cannot consume token, cursor already at end.\n");
         return NULL;
