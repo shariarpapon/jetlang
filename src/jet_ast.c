@@ -190,7 +190,11 @@ static node_id jet_ast_register_node(jet_ast* ast, const jet_ast_node* node)
 {
     assert(ast != NULL && "cannot register node, ast is null");
     assert(node != NULL && "cannot register node, param node is null");
-    jet_da_append(&ast->node_registry, (const void*)node);
+    if(!jet_da_append(&ast->node_registry, (const void*)node))
+    {
+        fprintf(stderr, "err: failed to register node, unable to append.\n");
+        return INVALID_NID;
+    }
     ast->node_count++;
     return ast->node_count;
 }
@@ -225,16 +229,7 @@ static const jet_token* jet_ast_peekn_tok(jet_ast* ast, size_t n)
 { 
     assert(ast != NULL && "cannot peek tok, ast is null");
     size_t count = jet_da_count(&ast->tok_da);
-    if(count == 0)
-    {
-        fprintf(stderr, "wrn: ast->tok_da is empty.\n");        
-        return NULL; 
-    }
-    else if(n >= count - ast->tok_cursor)
-    {
-        fprintf(stderr, "wrn: cannot peak ahead %zu tokens (cursor=%zu), index out of bounds.\n", n, ast->tok_cursor);
-        return NULL;
-    }
+    if(count == 0 || n >= count - ast->tok_cursor) return NULL;
     return (const jet_token*)jet_da_get(&ast->tok_da, ast->tok_cursor + n);
 }
 
