@@ -401,7 +401,7 @@ static node_id jet_astn_parse_expr_stmt(jet_ast* ast)
         fprintf(stderr, "error: cannot parse expr stmt, expected expr node.\n");
         return INVALID_NID;
     }
-    if(jet_ast_expect_tok(ast, TOK_SEMI) == INVALID_NID)
+    if(jet_ast_expect_tok(ast, TOK_SEMI) == NULL)
     {
         fprintf(stderr, "err: cannot parse expr_stmt, expected TOK_SEMI.\n");
         return INVALID_NID;
@@ -411,7 +411,7 @@ static node_id jet_astn_parse_expr_stmt(jet_ast* ast)
 
 static node_id jet_astn_prog_parse(jet_ast* ast)
 {
-    if(jet_ast_expect_tok(ast, TOK_KWD_PROG) == INVALID_NID)
+    if(jet_ast_expect_tok(ast, TOK_KWD_PROG) == NULL)
     {
         fprintf(stderr, "err: cannot parse prog, expected TOK_KWD_PROG\n");
         return INVALID_NID;
@@ -434,7 +434,7 @@ static node_id jet_astn_prog_parse(jet_ast* ast)
 
 static node_id jet_astn_block_parse(jet_ast* ast)
 {
-    if(jet_ast_expect_tok(ast, TOK_LBRC) == INVALID_NID)
+    if(jet_ast_expect_tok(ast, TOK_LBRC) == NULL)
     {
         fprintf(stderr, "err: cannot parse block, expected TOK_LBRC.\n");
         return INVALID_NID;
@@ -468,7 +468,7 @@ static node_id jet_astn_block_parse(jet_ast* ast)
         }
         jet_da_append(&block.stmt_nid_da, (const void*)&stmt_nid);
     }
-    if(jet_ast_expect_tok(ast, TOK_RBRC) == INVALID_NID)
+    if(jet_ast_expect_tok(ast, TOK_RBRC) == NULL)
     {
         fprintf(stderr, "err: cannot parse block, expected TOK_RBRC.\n");
         return INVALID_NID;
@@ -522,7 +522,7 @@ static node_id jet_astn_lit_parse(jet_ast* ast)
     const jet_token* tok = jet_ast_peek_tok(ast);
     if(!tok)
     {
-        fpritnf(stderr, "err: cannot parse lit, unable to peek tok.\n");
+        fprintf(stderr, "err: cannot parse lit, unable to peek tok.\n");
         return INVALID_NID;
     }
     jet_ast_node_lit lit;
@@ -621,7 +621,7 @@ static node_id jet_astn_vdecl_parse(jet_ast* ast)
         } 
     }
      
-    if(jet_ast_expect_tok(ast, TOK_SEMI) == INVALID_NID)
+    if(jet_ast_expect_tok(ast, TOK_SEMI) == NULL)
     {
         fprintf(stderr, "err: cannot parse, expected TOK_SEMI.\n");
         return INVALID_NID;
@@ -647,7 +647,7 @@ static node_id jet_astn_func_parse(jet_ast* ast)
     }
     jet_da_append(&fdecl.ret_tdecl_nid_da, (const void*)&ret_tdecl_nid);
 
-    if(jet_ast_expect_tok(ast, TOK_LPAR) == INVALID_NID)
+    if(jet_ast_expect_tok(ast, TOK_LPAR) == NULL)
     {
         fprintf(stderr, "err: cannot parse, expected TOK_LPAR.\n");
         jet_da_dispose(&fdecl.ret_tdecl_nid_da);
@@ -693,7 +693,7 @@ static node_id jet_astn_func_parse(jet_ast* ast)
         }
     }
 
-    if(jet_ast_expect_tok(ast, TOK_RPAR) == INVALID_NID)
+    if(jet_ast_expect_tok(ast, TOK_RPAR) == NULL)
     {
         fprintf(stderr, "err: cannot parse func, expected TOK_RPAR.\n");
         goto fail;
@@ -915,7 +915,7 @@ static node_id jet_astn_parse_primary(jet_ast* ast)
             else break;
         }
         
-        if(jet_ast_expect_tok(ast, TOK_RPAR) == INVALID_NID)
+        if(jet_ast_expect_tok(ast, TOK_RPAR) == NULL)
         {
             fprintf(stderr, "err: cannot parse, expected TOK_RPAR.\n");
             jet_da_dispose(&arg_da);
