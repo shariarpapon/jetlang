@@ -170,6 +170,12 @@ static const jet_ast_node* jet_ast_node_get(const jet_ast* ast, node_id nid)
         return NULL;
     }
 
+    if(nid - 1 >= jet_da_count(&ast->node_registry))
+    {
+        fprintf(stderr, "err: cannot get node, index out of bounds.\n");
+        return NULL;
+    }
+
     // force nid - 1 >= 0, because 0 represents invalid.
     const jet_ast_node* node = (const jet_ast_node*)jet_da_get(&ast->node_registry, nid - 1);
     if(!node)
@@ -471,7 +477,7 @@ static node_id jet_astn_block_parse(jet_ast* ast)
     if(jet_ast_expect_tok(ast, TOK_RBRC) == NULL)
     {
         fprintf(stderr, "err: cannot parse block, expected TOK_RBRC.\n");
-        return INVALID_NID;
+        goto fail;
     }
 
    
@@ -565,6 +571,11 @@ static node_id jet_astn_lit_parse(jet_ast* ast)
         case TOK_LIT_STR:
         {
             lit.as.s = jet_token_strdup(tok); 
+            if(!lit.as.s)
+            {
+                fprintf(stderr, "err: cannot parse lit, failed to create tok strdup.\n");
+                return INVALID_NID;
+            }
             break;
         }
     }
