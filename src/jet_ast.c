@@ -124,7 +124,7 @@ bool jet_ast_generate_nodes(jet_ast* ast)
         if(t == TOK_INV)
         {
             const jet_token* tk = jet_ast_peek_tok(ast);
-            fprintf(stderr, "err: at [%zu:%zu] cannot generate ast nodes, invalid token encountered.\n", tk->line, tk->column);
+            fprintf(stderr, "err: at [line:%zu, col:%zu] cannot generate ast nodes, invalid token encountered.\n", tk->line, tk->column);
             return false;
         }
         node_id nid = jet_astn_parse_next_stmt(ast);

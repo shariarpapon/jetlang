@@ -1,9 +1,10 @@
 #pragma once
 
-typedef enum jet_err_kind
+typedef enum jet_err_module
 {
-    JET_ERR_LEXER,
-    JET_ERR_AST,
+    JET_LEXER,
+    JET_AST,
+    JET_SEMANTIC,
 }
 
 

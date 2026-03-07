@@ -33,12 +33,11 @@ int main(int argc, char** argv)
     jet_lexer lexer;
     assert(jet_lexer_init(&lexer, src) && "could not init lexer");
     assert(jet_lexer_tokenize(&lexer) && "could not tokenize");
-    jet_token_print_da(&lexer.token_da);
+    //jet_token_print_da(&lexer.token_da);
 
 
     jet_ast ast;
-    assert(jet_ast_init(&ast, (const jet_da*)&lexer.token_da) && "could not init ast");
-    
+    assert(jet_ast_init(&ast, (const jet_da*)&lexer.token_da) && "could not init ast"); 
     assert(jet_ast_generate_nodes(&ast) && "node generation failed, ast in corrupted state");
     jet_ast_print((const jet_ast*)&ast);
 
