@@ -14,6 +14,13 @@ typedef struct jet_ast
     size_t tok_cursor;
 } jet_ast;
 
+typedef struct jet_parse
+{
+    jet_da* tok_da;
+    size_t tok_cursor;
+} jet_parser;
+
+
 bool jet_ast_init(jet_ast* ast, const jet_da* tok_da);
 void jet_ast_dispose(jet_ast* ast);
 void jet_ast_reset(jet_ast* ast);
@@ -38,3 +45,4 @@ struct jet_ast
     size_t tok_cursor;
 };
 */
+

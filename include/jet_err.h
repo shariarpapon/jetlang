@@ -3,7 +3,7 @@
 typedef enum jet_err_module
 {
     JET_LEXER,
-    JET_AST,
+    JET_PRASER,
     JET_SEMANTIC,
 }
 
