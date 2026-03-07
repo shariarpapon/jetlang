@@ -19,17 +19,6 @@
 #include <jet_ast_op_prec.h>
 #include <jet_conv.h>
 
-struct jet_ast 
-{
-    jet_da tok_da;
-    jet_da node_registry;
-    jet_da top_nid_da;
-
-    node_id prog_nid;
-    size_t node_count;
-    size_t tok_cursor;
-};
-
 static node_id jet_ast_register_node(jet_ast* ast, const jet_ast_node* node);
 
 // TOKEN TRAVERSING/UTILITY
@@ -70,8 +59,8 @@ bool jet_ast_init(jet_ast* ast, const jet_da* tok_da)
     {
         fprintf(stderr, "err: failed to init ast, unable to clone tok_da DA.\n");
         return false;
-    }
-    
+    } 
+   
     ast->prog_nid = INVALID_NID;
     ast->node_count = 0;
     ast->tok_cursor = 0;
@@ -82,15 +71,14 @@ bool jet_ast_init(jet_ast* ast, const jet_da* tok_da)
         jet_da_dispose(&ast->tok_da);
         return false;
     }
-    
+     
     if( !jet_da_init(&ast->top_nid_da, 16, sizeof(node_id)) )
     {
         fprintf(stderr, "err: failed to init top_node_nid_da DA.\n");
         jet_da_dispose(&ast->tok_da);
         jet_da_dispose(&ast->node_registry);
         return false;
-    }
-
+    } 
     return true;
 }
 
@@ -121,6 +109,7 @@ bool jet_ast_generate_nodes(jet_ast* ast)
         fprintf(stderr, "error: cannot generate ast nodes, ast is null.\n");
         return false;
     }
+    
 
     if(jet_da_count(&ast->tok_da) == 0)
         return true;
@@ -130,11 +119,12 @@ bool jet_ast_generate_nodes(jet_ast* ast)
     
     while(true)
     {
-        t = jet_ast_peekn_tok_type(ast, 0);
+        t = jet_ast_peekn_tok_type(ast, 0); 
         if(t == TOK_EOF) break;
         if(t == TOK_INV)
         {
-            fprintf(stderr, "error: cannot generate ast nodes, invalid token encountered.\n");
+            const jet_token* tk = jet_ast_peek_tok(ast);
+            fprintf(stderr, "err: at [%zu:%zu] cannot generate ast nodes, invalid token encountered.\n", tk->line, tk->column);
             return false;
         }
         node_id nid = jet_astn_parse_next_stmt(ast);
@@ -229,8 +219,18 @@ static const jet_token* jet_ast_peekn_tok(jet_ast* ast, size_t n)
 { 
     assert(ast != NULL && "cannot peek tok, ast is null");
     size_t count = jet_da_count(&ast->tok_da);
-    if(count == 0 || n >= count - ast->tok_cursor) return NULL;
+    if(count == 0 || n >= count - ast->tok_cursor) 
+        return NULL;
+   
     return (const jet_token*)jet_da_get(&ast->tok_da, ast->tok_cursor + n);
+}
+
+static jet_token_type jet_ast_peekn_tok_type(jet_ast* ast, size_t n)
+{
+    const jet_token* tok = jet_ast_peekn_tok(ast, n);
+    if(tok == NULL)
+        return TOK_EOF;
+    return tok->type;
 }
 
 static const jet_token* jet_ast_expect_tok(jet_ast* ast, jet_token_type tok_type)
@@ -255,13 +255,6 @@ static const jet_token* jet_ast_consume_tok(jet_ast* ast)
     return (const jet_token*)jet_da_get(&ast->tok_da , ast->tok_cursor - 1);
 }
 
-static jet_token_type jet_ast_peekn_tok_type(jet_ast* ast, size_t n)
-{
-    const jet_token* tok = jet_ast_peekn_tok(ast, n);
-    if(tok == NULL)
-        return TOK_EOF;
-    return tok->type;
-}
 
 static const char* jet_ast_get_type_name(jet_token_type tok_type)
 {

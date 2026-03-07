@@ -1,10 +1,4 @@
-int x = (3 + 1) * 2 % 5; 
-
-void add(int x, int y)
-{
-    int z = x + y;
-}
-
+int x = 0;
 
 
 

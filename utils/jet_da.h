@@ -87,10 +87,9 @@ bool jet_da_clone(jet_da* dest, const jet_da* source)
     if(dest == source)
         return true;
     
-    dest->elm_size = source->elm_size; 
-    if(!jet_da_ensure_capacity(dest, source->capacity))
+    if(!jet_da_init(dest, source->capacity, source->elm_size))
     {
-        fprintf(stderr, "err: unable to copy, failed to ensure capacity.\n");
+        fprintf(stderr, "err: failed to init clone da.\n");
         return false;
     }
     memcpy(dest->block, source->block, source->elm_size * source->count);
