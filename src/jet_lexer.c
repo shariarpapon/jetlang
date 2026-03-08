@@ -108,25 +108,21 @@ static char jet_lexer_peek(jet_lexer* lexer);
 static char jet_lexer_peek_next(jet_lexer* lexer);
 
 //lexer should be zero initialized, otherwise memory leak may occure if called with already initialized lexer.
-bool jet_lexer_init(jet_lexer* lexer, const char* source)
+bool jet_lexer_init(jet_lexer* lexer, const char* source, jet_da* token_da)
 {
     assert(lexer != NULL && "cannot init, param lexer is null");
-    if(!source)
+    if(!source || !token_da)
     {
-        fprintf(stderr, "err: cannot init, invalid source stirng.\n");
+        fprintf(stderr, "err: cannot init, invalid param/s.\n");
         return false;
     }
-    
+    memset(lexer, 0, sizeof(*lexer)); 
     lexer->len = strlen(source);
     lexer->source = source;
     lexer->cursor = 0;
     lexer->cur_line = 0;
     lexer->cur_col = 0;
-    if( !jet_da_init(&lexer->token_da, INIT_TOK_CAP, sizeof(jet_token)) )
-    {
-        fprintf(stderr, "err: cannot init, failed to init token da.\n");
-        return false;
-    }
+    lexer->token_da = token_da;
     return true;
 }
 
@@ -136,23 +132,18 @@ void jet_lexer_reset(jet_lexer* lexer)
     lexer->cursor = 0;
     lexer->cur_line = 0;
     lexer->cur_col = 0;
-    jet_da_clear(&lexer->token_da);
+    jet_da_clear(lexer->token_da);
 }
 
 void jet_lexer_dispose(jet_lexer* lexer)
 {
     if(!lexer) return;
-    jet_da_dispose(&lexer->token_da);
     memset(lexer, 0, sizeof(*lexer));
 }
 
 bool jet_lexer_tokenize(jet_lexer* lexer)
 {
-    if(!lexer) 
-    {
-        fprintf(stderr, "error: cannot tokenize, lexer is null.\n");
-        return false;
-    }
+    assert(lexer != NULL && "cannot tokenizer, lexer is null.");
     //TEST
     while(true)
     {
@@ -187,7 +178,7 @@ static void jet_lexer_emit_token(jet_lexer* lexer, size_t origin, size_t len, je
     tok.column = lexer->cur_col;
     tok.type = tok_type;    
 
-    if(!jet_da_append(&lexer->token_da, (const void*)&tok))
+    if(!jet_da_append(lexer->token_da, (const void*)&tok))
     {
         fprintf(stderr, "error: could not add new token to lexer->token_da.\n");
         return;

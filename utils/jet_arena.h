@@ -26,7 +26,7 @@ void* jet_arena_alloc(jet_arena* arena, size_t bytes);
 
 static jet_arena* jet_arena_get_next_available(jet_arena* arena, size_t bytes);
 
-// caller should zero initialize the arena before initializing.
+// must init fresh arenas only, otehrwise memory leak will occure
 bool jet_arena_init(jet_arena* arena, size_t cap)
 {
     if(!arena)
@@ -34,6 +34,7 @@ bool jet_arena_init(jet_arena* arena, size_t cap)
         fprintf(stderr, "err: cannot init, param arena is null.\n");
         return false;
     }
+    memset(arena, 0, sizeof(*arena));
 
     if(cap == 0)
     {

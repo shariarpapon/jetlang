@@ -52,6 +52,7 @@ bool jet_parser_init(jet_parser* p, jet_da* tok_da, jet_ast* ast)
 bool jet_parser_dispose(jet_parser* p)
 {
     if(!p) return false;
+    memset(p, 0, sizeof(*p));
     return true;
 }
 
@@ -189,7 +190,7 @@ static node_id jet_parser_parse_next_stmt(jet_parser* p)
 {
     assert(p != NULL && "cannot parse next stmt, parser is null.");
     node_id parsed_nid = INVALID_NID;
-    jet_token_type t = jet_parser_peekn_tok_type(ast, 0);
+    jet_token_type t = jet_parser_peekn_tok_type(p, 0);
     
     if(t == TOK_EOF)
         return INVALID_NID;
@@ -266,7 +267,7 @@ static node_id jet_parser_prog_parse(jet_parser* p)
         return INVALID_NID;
     }
     
-    jet_p_node_prog prog;
+    jet_ast_node_prog prog;
     prog.block_nid = jet_parser_block_parse(p);
 
     if(prog.block_nid == INVALID_NID)
@@ -275,7 +276,7 @@ static node_id jet_parser_prog_parse(jet_parser* p)
         return INVALID_NID;
     }
  
-    jet_p_node node;
+    jet_ast_node node;
     node.node_type = AST_PROG;
     node.as.prog = prog;
     return jet_ast_register_node(p->ast, (const jet_ast_node*)&node);
@@ -651,7 +652,7 @@ static node_id jet_parser_parse_expr(jet_parser* p, size_t min_prec)
         const jet_token* op_tok = jet_parser_peek_tok(p);
         if(op_tok == NULL)
             break;
-        size_t op_prec = jet_parser_get_op_prec(op_tok->type);
+        size_t op_prec = jet_ast_get_op_prec(op_tok->type);
         if(op_prec == 0)
             break;
         if(op_prec < min_prec)
@@ -672,7 +673,7 @@ static node_id jet_parser_parse_expr(jet_parser* p, size_t min_prec)
         jet_ast_node node;
         node.node_type = AST_BINOP;
         node.as.binop = binop;
-        lhs_nid = jet_ast_register_node(p, (const jet_ast_node*)&node);
+        lhs_nid = jet_ast_register_node(p->ast, (const jet_ast_node*)&node);
     }
     return lhs_nid;
 }

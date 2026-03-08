@@ -11,7 +11,7 @@ typedef struct jet_ast
     size_t node_count;
 } jet_ast;
 
-bool jet_ast_init(jet_ast* ast, const jet_da* tok_da);
+bool jet_ast_init(jet_ast* ast);
 void jet_ast_dispose(jet_ast* ast);
 
 node_id jet_ast_register_node(jet_ast* ast, const jet_ast_node* node);

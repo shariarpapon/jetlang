@@ -1,10 +1,13 @@
+#include <jet_lexer.h>
+#include <jet_parser.h>
+#include <jet_ast.h>
+#include <jet_ast_print.h>
+
 #include <stdio.h>
 #include <assert.h>
 #include <stdbool.h>
 #include <jet_io.h>
-#include <jet_lexer.h>
-#include <jet_ast.h>
-#include <jet_ast_print.h>
+
 
 static int arg_count = 0;
 static char** args = NULL;
@@ -30,19 +33,24 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    jet_lexer lexer;
-    assert(jet_lexer_init(&lexer, src) && "could not init lexer");
-    assert(jet_lexer_tokenize(&lexer) && "could not tokenize");
-    //jet_token_print_da(&lexer.token_da);
-
+    jet_da token_da;
+    assert(jet_da_init(&token_da, 32, sizeof(jet_token)) && "could not init token da");
 
     jet_ast ast;
-    assert(jet_ast_init(&ast, (const jet_da*)&lexer.token_da) && "could not init ast"); 
-    assert(jet_ast_generate_nodes(&ast) && "node generation failed, ast in corrupted state");
-    jet_ast_print((const jet_ast*)&ast);
+    assert(jet_ast_init(&ast) && "could not init ast."); 
 
+    jet_lexer lexer;
+    assert(jet_lexer_init(&lexer, src, &token_da) && "could not init lexer.");    
+    assert(jet_lexer_tokenize(&lexer) && "could not tokenize.");
+
+    jet_parser parser;
+    assert(jet_parser_init(&parser, &token_da, &ast) && "could not init parser.");
+    assert(jet_parser_parse(&parser) && "could not finish parsing.");
+
+    jet_parser_dispose(&parser);
+    jet_ast_dispose(&ast);
     jet_lexer_dispose(&lexer);
-    jet_lexer_dispose(&lexer);
+
     free((void*)src);
     return 0;
 }

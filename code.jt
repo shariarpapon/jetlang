@@ -1,6 +1,7 @@
-int x = 0;
-
-
+void add (int x, int y)
+{
+    int z = x + y;
+}
 
 
     

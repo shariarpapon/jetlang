@@ -44,7 +44,7 @@ size_t jet_da_count(const jet_da* da);
 
 static bool jet_da_ensure_capacity(jet_da* da, size_t min_cap);
 
-//da should be zero initialized before init is called
+//must init fresh da only, otherwise mem leak will occur
 bool jet_da_init(jet_da* da, size_t capacity, size_t elm_size)
 {
     if(!da) 
@@ -52,6 +52,8 @@ bool jet_da_init(jet_da* da, size_t capacity, size_t elm_size)
         fprintf(stderr, "err: cannot initialize, given da is null.\n");
         return false;
     }
+    
+    memset(da, 0, sizeof(*da));
 
     if(capacity == 0)
     {
@@ -64,7 +66,6 @@ bool jet_da_init(jet_da* da, size_t capacity, size_t elm_size)
         fprintf(stderr, "err: cannot initialize, element size must > 0\n");
         return false;
     }
-
     da->block = malloc(capacity * elm_size);
     if(!da->block)
     {

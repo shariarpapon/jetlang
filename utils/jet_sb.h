@@ -42,10 +42,11 @@ struct jet_sb
 static void jet_sb_ensure_extra_cap(jet_sb* sb, size_t n);
 static void jet_sb_grow(jet_sb* sb);
 
+//must init fresh sb only, otherwise mem leak will occur
 bool jet_sb_init(jet_sb* sb, size_t cap)
 {
     assert(sb != NULL && "param sb is null.");
-    
+    memset(sb, 0, sizeof(*sb));
     if(cap > SIZE_MAX - 1)
     {
         fprintf(stderr, "err: failed to create sb, capacity overflow.\n");
