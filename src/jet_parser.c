@@ -171,10 +171,11 @@ static bool jet_parser_is_type_tok(jet_token_type tok_type)
 static bool jet_parser_is_vdecl(jet_parser* p)
 {
     assert(p != NULL && "cannot parse next stmt, parser is null.");
-    jet_token_type t = jet_parser_peekn_tok_type(p, 0);
-    return jet_parser_is_type_tok(t) && 
+    jet_token_type t0 = jet_parser_peekn_tok_type(p, 0);
+    return jet_parser_is_type_tok(t0) && 
            jet_parser_peekn_tok_type(p, 1) == TOK_IDENT &&
-           jet_parser_peekn_tok_type(p, 2) == TOK_SEMI;
+           (jet_parser_peekn_tok_type(p, 2) == TOK_ASG || 
+            jet_parser_peekn_tok_type(p, 2) == TOK_SEMI);
 }
 
 static bool jet_parser_is_func_head(jet_parser* p)
