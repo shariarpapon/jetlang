@@ -108,17 +108,17 @@ static char jet_lexer_peek(jet_lexer* lexer);
 static char jet_lexer_peek_next(jet_lexer* lexer);
 
 //lexer should be zero initialized, otherwise memory leak may occure if called with already initialized lexer.
-bool jet_lexer_init(jet_lexer* lexer, const char* source, jet_da* token_da)
+bool jet_lexer_init(jet_lexer* lexer, const char* input, jet_da* token_da)
 {
     assert(lexer != NULL && "cannot init, param lexer is null");
-    if(!source || !token_da)
+    if(!input || !token_da)
     {
         fprintf(stderr, "err: cannot init, invalid param/s.\n");
         return false;
     }
     memset(lexer, 0, sizeof(*lexer)); 
-    lexer->source = source;
-    lexer->len = strlen(source);
+    lexer->input = input;
+    lexer->input_len = strlen(input);
     lexer->cursor = 0;
     lexer->cur_line = 1;
     lexer->cur_col = 1;
@@ -171,7 +171,7 @@ bool jet_lexer_tokenize(jet_lexer* lexer)
 static void jet_lexer_emit_token(jet_lexer* lexer, size_t offset, size_t len, jet_token_type tok_type)
 {
     jet_token tok;
-    const char* lexeme = lexer->source + offset;
+    const char* lexeme = lexer->input + offset;
     if(!jet_token_init(&tok, tok_type, lexeme, len, lexer->cur_line, lexer->cur_col - len))
     {
         fprintf(stderr, "err: failed to emit token, could not init token.\n");
@@ -375,7 +375,7 @@ static bool jet_lexer_try_scan_ident(jet_lexer* lexer)
         jet_lexer_consume(lexer);
     }
     jet_token_type tok_type = TOK_IDENT;
-    jet_lexer_try_get_kwd_type(lexer->source + origin, lexer->cursor - origin, &tok_type);
+    jet_lexer_try_get_kwd_type(lexer->input + origin, lexer->cursor - origin, &tok_type);
     jet_lexer_emit_token(lexer, origin, lexer->cursor - origin, tok_type); 
     return true;
 }
@@ -468,19 +468,19 @@ static bool jet_lexer_try_scan_whitespace(jet_lexer* lexer)
 static char jet_lexer_peek_next(jet_lexer* lexer)
 {
     size_t next = lexer->cursor + 1;
-    if(next >= lexer->len)
+    if(next >= lexer->input_len)
         return NULL_TERM;
-    return lexer->source[next];
+    return lexer->input[next];
 }
 
 static char jet_lexer_peek(jet_lexer* lexer)
 {
-    return lexer->source[lexer->cursor];
+    return lexer->input[lexer->cursor];
 }
 
 static char jet_lexer_consume(jet_lexer* lexer)
 {
-    if(lexer->cursor >= lexer->len)
+    if(lexer->cursor >= lexer->input_len)
         return NULL_TERM;
     char c = jet_lexer_peek(lexer);
     lexer->cursor++;
