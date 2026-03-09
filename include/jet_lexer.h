@@ -5,8 +5,8 @@
 
 typedef struct jet_lexer
 {
-    size_t len;
     size_t cursor;
+    size_t len;
     size_t cur_line;
     size_t cur_col;
     const char* source;

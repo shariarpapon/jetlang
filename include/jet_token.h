@@ -1,5 +1,8 @@
 #pragma once
 #include <jet_da.h>
+#include <jet_span.h>
+
+#include <stdint.h>
 
 typedef enum
 {
@@ -90,17 +93,18 @@ typedef enum
 
 } jet_token_type;
 
-
-typedef struct 
+typedef struct jet_token
 {
     const char* source;
     size_t origin;
     size_t len;
     size_t line;
     size_t column;
+    jet_span span;
     jet_token_type type;
 } jet_token;
 
+bool jet_token_init(jet_token* token, jet_token_type tok_type, size_t origin, size_t len, uint32_t line, uint32_t col);
 const char* jet_token_type_str(jet_token_type type);
 void jet_token_print_da(const jet_da* da);
 char* jet_token_strdup(const jet_token* tok);

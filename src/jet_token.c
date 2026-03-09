@@ -7,6 +7,20 @@
 #define TOK_TB_HEADER_FMT "%-7s %-17s %-10s %-10s %s\n\n"
 #define TOK_TB_ENTRY_FMT "%-7zu %-17s %-10zu %-10zu %.*s\n"
 
+bool jet_token_init(jet_token* token, jet_token_type tok_type, size_t origin, size_t len, uint32_t line, uint32_t col)
+{
+    if(!token) return false; 
+    memset(token, 0, sizeof(*token));
+    token->type = tok_type;
+    token->origin = origin;
+    if(!jet_span_init(&token->span, len, line, col))
+    {
+        fprintf(stderr, "err: failed to init token, unable to init span.\n");
+        return false;
+    }
+    return true;
+}
+
 void jet_token_print_da(const jet_da* tokens)
 {
     if(!tokens)
