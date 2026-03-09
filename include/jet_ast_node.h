@@ -2,8 +2,10 @@
 #include <jet_token.h>
 #include <jet_ast_node_type.h>
 #include <jet_da.h>
+#include <jet_span.h>
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #define INVALID_NID 0
 typedef size_t node_id;
@@ -110,7 +112,11 @@ struct jet_ast_node
         jet_ast_node_binop binop;
         jet_ast_node_unop unop;
     } as;
+    jet_span span;
 };
+
+bool jet_ast_node_init(jet_ast_node* node, jet_ast_node_type type, size_t len, uint32_t line, uint32_t col);
+bool jet_ast_node_dispose(jet_ast_node* node);
 
 
 

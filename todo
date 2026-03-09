@@ -2,6 +2,8 @@
     * lexer done
     * working on ast_node now
 
+- dispose nodes according to type
+
 - create some portable pretty printer lib that can print across platforms
 
 - implement proper tree pretty-printing for AST

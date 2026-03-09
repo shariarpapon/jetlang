@@ -263,12 +263,13 @@ static node_id jet_parser_parse_expr_stmt(jet_parser* p)
 
 static node_id jet_parser_prog_parse(jet_parser* p)
 {
-    if(jet_parser_expect_tok(p, TOK_KWD_PROG) == NULL)
+    const jet_token* beg_tok = jet_parser_expect_tok(p, TOK_KWD_PROG);
+    if(beg_tok == NULL)
     {
         fprintf(stderr, "err: cannot parse prog, expected TOK_KWD_PROG\n");
         return INVALID_NID;
     }
-    
+
     jet_ast_node_prog prog;
     prog.block_nid = jet_parser_block_parse(p);
 
