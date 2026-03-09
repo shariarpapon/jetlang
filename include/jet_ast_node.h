@@ -2,6 +2,7 @@
 #include <jet_token.h>
 #include <jet_ast_node_type.h>
 #include <jet_da.h>
+
 #include <stdbool.h>
 
 #define INVALID_NID 0

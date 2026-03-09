@@ -1,5 +1,6 @@
 - complete jet_span integration
-    - lexer done
+    * lexer done
+    * working on ast_node now
 
 - create some portable pretty printer lib that can print across platforms
 
@@ -12,3 +13,7 @@
 - create jet_logger system
     * writes to files
     * injectable writer function
+
+
+- invalid token fallback system
+    * sync to next end of statement
