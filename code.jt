@@ -1,3 +1,10 @@
+prog
+{
+    bool is_verified = true;
+    print(is_verified);
+}
+
 int x = 2;
+
 
     

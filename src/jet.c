@@ -60,6 +60,7 @@ int main(int argc, char** argv)
     jet_da_dispose(&token_da);
     // TOK_DA LIFE END
     
+    jet_ast_print(&ast);
     jet_ast_dispose(&ast);
     // AST LIFE END
     

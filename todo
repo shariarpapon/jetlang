@@ -1,3 +1,11 @@
+- complete jet_span integration
+
+- implement proper tree pretty-printing for AST
+
 - complete jet_err system
     * core err arg => token (contains line/col #)
     * maybe container err_ctx { module, tok, filename }
+
+- create jet_logger system
+    * writes to files
+    * injectable writer function
