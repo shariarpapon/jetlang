@@ -23,6 +23,15 @@ bool jet_token_init(jet_token* token, jet_token_type tok_type, const char* lexem
     return true;
 }
 
+bool jet_token_dispose(jet_token* token)
+{
+    if(!token) 
+        return false;
+    jet_span_dispose(&token->span);
+    memset(token, 0, sizeof(*token));
+    return true;
+}
+
 void jet_token_print_da(const jet_da* tokens)
 {
     if(!tokens)

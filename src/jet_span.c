@@ -20,6 +20,14 @@ bool jet_span_init_copy(jet_span* target, jet_span* src)
     return jet_span_init(target, src->len, src->line, src->col);
 }
 
+bool jet_span_dispose(jet_span* span)
+{
+    if(!span) 
+        return false;
+    memset(span, 0, sizeof(*span));
+    return true;
+}
+
 
 
 
