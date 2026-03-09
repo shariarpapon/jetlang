@@ -4,6 +4,7 @@
 #include <jet_ast_op_prec.h>
 #include <jet_conv.h>
 
+#include <inttypes.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
@@ -70,7 +71,7 @@ bool jet_parser_parse(jet_parser* p)
         if(t == TOK_INV)
         {
             const jet_token* tk = jet_parser_peek_tok(p);
-            fprintf(stderr, "err: at [line:%zu, col:%zu] cannot continue parsing, invalid token encountered.\n", tk->line, tk->column);
+            fprintf(stderr, "err: at [line:%"PRIu32", col:%"PRIu32"] cannot continue parsing, invalid token encountered.\n", tk->span.line, tk->span.col);
             return false;
         }
         node_id nid = jet_parser_parse_next_stmt(p);
@@ -400,17 +401,17 @@ static node_id jet_parser_lit_parse(jet_parser* p)
         }
         case TOK_LIT_INT:
         {
-           lit.as.i = jet_conv_stoi(tok->source + tok->origin, tok->len); 
+           lit.as.i = jet_conv_stoi(tok->lexeme, tok->span.len); 
            break;
         }
         case TOK_LIT_FLOAT:
         {
-            lit.as.f = jet_conv_stof(tok->source + tok->origin, tok->len);
+            lit.as.f = jet_conv_stof(tok->lexeme, tok->span.len);
             break;
         }
         case TOK_LIT_CHAR:
         {
-            lit.as.c = *(tok->source + tok->origin);
+            lit.as.c = *(tok->lexeme);
             break;
         }
         case TOK_LIT_STR:
@@ -425,6 +426,7 @@ static node_id jet_parser_lit_parse(jet_parser* p)
         }
     }
     jet_parser_consume_tok(p);
+
     jet_ast_node node;
     node.node_type = AST_LIT;
     node.as.lit = lit;

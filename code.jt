@@ -1,7 +1,7 @@
 prog
 {
     bool is_verified = true;
-    print(is_verified);
+    print(y);
 }
 
 int x = 2;

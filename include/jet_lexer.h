@@ -1,14 +1,16 @@
 #pragma once
-#include <stdlib.h>
 #include <jet_token.h>
 #include <jet_da.h>
 
+#include <stdlib.h>
+#include <stdint.h>
+
 typedef struct jet_lexer
 {
+    uint32_t cur_line;
+    uint32_t cur_col;
     size_t cursor;
     size_t len;
-    size_t cur_line;
-    size_t cur_col;
     const char* source;
     jet_da* token_da;
 } jet_lexer;

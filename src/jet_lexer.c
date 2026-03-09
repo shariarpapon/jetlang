@@ -86,7 +86,7 @@ static const cmpd_punct_tok_def cmpd_punct_table[] =
     {'^', '=', TOK_XOREQ  },
 };
 
-static void jet_lexer_emit_token(jet_lexer* lexer, size_t origin, size_t len, jet_token_type tok_type);
+static void jet_lexer_emit_token(jet_lexer* lexer, size_t offset, size_t len, jet_token_type tok_type);
 static bool jet_lexer_is_digit(char c);
 static bool jet_lexer_is_ident(char c);
 
@@ -117,11 +117,11 @@ bool jet_lexer_init(jet_lexer* lexer, const char* source, jet_da* token_da)
         return false;
     }
     memset(lexer, 0, sizeof(*lexer)); 
-    lexer->len = strlen(source);
     lexer->source = source;
+    lexer->len = strlen(source);
     lexer->cursor = 0;
-    lexer->cur_line = 0;
-    lexer->cur_col = 0;
+    lexer->cur_line = 1;
+    lexer->cur_col = 1;
     lexer->token_da = token_da;
     return true;
 }
@@ -130,8 +130,8 @@ void jet_lexer_reset(jet_lexer* lexer)
 {
     assert(lexer != NULL && "cannot reset, param lexer is null.");
     lexer->cursor = 0;
-    lexer->cur_line = 0;
-    lexer->cur_col = 0;
+    lexer->cur_line = 1;
+    lexer->cur_col = 1;
     jet_da_clear(lexer->token_da);
 }
 
@@ -168,19 +168,19 @@ bool jet_lexer_tokenize(jet_lexer* lexer)
     return true;
 }
 
-static void jet_lexer_emit_token(jet_lexer* lexer, size_t origin, size_t len, jet_token_type tok_type)
+static void jet_lexer_emit_token(jet_lexer* lexer, size_t offset, size_t len, jet_token_type tok_type)
 {
     jet_token tok;
-    tok.source = lexer->source;
-    tok.origin = origin;
-    tok.len = len;
-    tok.line = lexer->cur_line;
-    tok.column = lexer->cur_col;
-    tok.type = tok_type;    
+    const char* lexeme = lexer->source + offset;
+    if(!jet_token_init(&tok, tok_type, lexeme, len, lexer->cur_line, lexer->cur_col - len))
+    {
+        fprintf(stderr, "err: failed to emit token, could not init token.\n");
+        return;
+    }
 
     if(!jet_da_append(lexer->token_da, (const void*)&tok))
     {
-        fprintf(stderr, "error: could not add new token to lexer->token_da.\n");
+        fprintf(stderr, "error: failed to emit token, could not push token.\n");
         return;
     }
 }

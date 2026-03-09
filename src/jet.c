@@ -57,13 +57,13 @@ int main(int argc, char** argv)
     jet_parser_dispose(&parser);
     // PARSER LIFE END
 
+    jet_token_print_da(&token_da);
+    //jet_ast_print(&ast);
+
     jet_da_dispose(&token_da);
     // TOK_DA LIFE END
-    
-    jet_ast_print(&ast);
     jet_ast_dispose(&ast);
     // AST LIFE END
-    
     free((void*)src);
     // COMP_UNIT LIFE END
 

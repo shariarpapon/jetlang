@@ -1,18 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <jet_token.h>
 #include <jet_io.h>
 
-#define TOK_TB_HEADER_FMT "%-7s %-17s %-10s %-10s %s\n\n"
-#define TOK_TB_ENTRY_FMT "%-7zu %-17s %-10zu %-10zu %.*s\n"
+#include <string.h>
+#include <inttypes.h>
 
-bool jet_token_init(jet_token* token, jet_token_type tok_type, size_t origin, size_t len, uint32_t line, uint32_t col)
+#define TOK_TB_HEADER_FMT "%-7s %-17s %-10s %-10s %s\n\n"
+#define TOK_TB_ENTRY_FMT "%-7zu %-17s %-10" PRIu32 " %-10" PRIu32 " %.*s\n"
+
+bool jet_token_init(jet_token* token, jet_token_type tok_type, const char* lexeme, size_t len, uint32_t line, uint32_t col)
 {
-    if(!token) return false; 
+    if(!token || !lexeme) return false; 
     memset(token, 0, sizeof(*token));
     token->type = tok_type;
-    token->origin = origin;
+    token->lexeme = lexeme;
     if(!jet_span_init(&token->span, len, line, col))
     {
         fprintf(stderr, "err: failed to init token, unable to init span.\n");
@@ -42,9 +44,22 @@ void jet_token_print_da(const jet_da* tokens)
     {  
         jet_token* token = jet_da_get(tokens, i);
         const char* type_str = jet_token_type_str(token->type);
-        printf(TOK_TB_ENTRY_FMT, i, type_str, token->line, token->column, (int)token->len, token->source + token->origin);        
+        printf(TOK_TB_ENTRY_FMT, i, type_str, token->span.line, token->span.col, (int)token->span.len, token->lexeme);        
     }
     printf("\n");
+}
+
+char* jet_token_strdup(const jet_token* tok)
+{
+    char* s = malloc(tok->span.len + 1);
+    if(!s)
+    {
+        fprintf(stderr, "error: unable to allocate memory for str slice.\n");
+        return NULL;
+    }
+    memcpy(s, tok->lexeme, tok->span.len);
+    s[tok->span.len] = '\0';
+    return s;
 }
 
 const char* jet_token_type_str(jet_token_type type)
@@ -130,18 +145,6 @@ const char* jet_token_type_str(jet_token_type type)
     }
 }
 
-char* jet_token_strdup(const jet_token* tok)
-{
-    char* s = malloc(tok->len + 1);
-    if(!s)
-    {
-        fprintf(stderr, "error: unable to allocate memory for str slice.\n");
-        return NULL;
-    }
-    memcpy(s, tok->source + tok->origin, tok->len);
-    s[tok->len] = '\0';
-    return s;
-}
 
 
 
