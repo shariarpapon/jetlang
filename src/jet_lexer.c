@@ -11,6 +11,7 @@
 #define CHAR_QUOTE '\''
 #define DECIMAL_CHAR '.'
 #define ESCAPE_CHAR '\\'
+#define TAB_WIDTH (4)
 
 #define INIT_TOK_CAP 32
 
@@ -357,13 +358,14 @@ static bool jet_lexer_try_scan_char_lit(jet_lexer* lexer)
     if(jet_lexer_peek(lexer) != CHAR_QUOTE) 
         return false;
     
+    size_t start_cursor = lexer->cursor;
     jet_lexer_consume(lexer);
     if(jet_lexer_peek_next(lexer) != CHAR_QUOTE) 
         return false;
 
-    jet_lexer_emit_token(lexer, lexer->cursor, 1, TOK_LIT_CHAR);
     jet_lexer_consume(lexer);
     jet_lexer_consume(lexer);
+    jet_lexer_emit_token(lexer, start_cursor, 3, TOK_LIT_CHAR);
     return true;
 }
 
@@ -374,7 +376,7 @@ static bool jet_lexer_try_scan_ident(jet_lexer* lexer)
         return false;
     }
 
-    size_t origin = lexer->cursor;
+    size_t start_cursor = lexer->cursor;
     jet_lexer_consume(lexer);
 
     while(jet_lexer_is_ident(jet_lexer_peek(lexer))
@@ -383,28 +385,24 @@ static bool jet_lexer_try_scan_ident(jet_lexer* lexer)
         jet_lexer_consume(lexer);
     }
     jet_token_type tok_type = TOK_IDENT;
-    jet_lexer_try_get_kwd_type(lexer->input + origin, lexer->cursor - origin, &tok_type);
-    jet_lexer_emit_token(lexer, origin, lexer->cursor - origin, tok_type); 
+    jet_lexer_try_get_kwd_type(lexer->input + start_cursor, lexer->cursor - start_cursor, &tok_type);
+    jet_lexer_emit_token(lexer, start_cursor, lexer->cursor - start_cursor, tok_type); 
     return true;
 }
 
 static bool jet_lexer_try_scan_punct(jet_lexer* lexer)
 {
-    size_t origin = lexer->cursor;
     char left = jet_lexer_peek(lexer);
 
     jet_token_type emit_tok_type = TOK_INV;
     if(!jet_lexer_try_get_punct_type(left, &emit_tok_type))
-    {
         return false;
-    } 
+    size_t start_cursor = lexer->cursor;
     jet_lexer_consume(lexer);
     char right = jet_lexer_peek(lexer);
     if(jet_lexer_try_get_cmpd_punct_type(left, right, &emit_tok_type))
-    {
         jet_lexer_consume(lexer);
-    }
-    jet_lexer_emit_token(lexer, origin, lexer->cursor - origin, emit_tok_type);
+    jet_lexer_emit_token(lexer, start_cursor, lexer->cursor - start_cursor, emit_tok_type);
     return true;
 }
 
@@ -454,18 +452,13 @@ static bool jet_lexer_try_scan_whitespace(jet_lexer* lexer)
 {
     switch(jet_lexer_peek(lexer))
     {
-        case '\n': 
-            lexer->cur_line++;
-            lexer->cur_col = 1;
-            break;
-
+        case '\n':
         case ' ' :
         case '\t':
         case '\v':
         case '\f':
         case '\r':
             break;
-
         default: 
             return false;
     }
@@ -491,8 +484,19 @@ static char jet_lexer_consume(jet_lexer* lexer)
     if(lexer->cursor >= lexer->input_len)
         return NULL_TERM;
     char c = jet_lexer_peek(lexer);
+
     lexer->cursor++;
-    lexer->cur_col++;
+
+    if(c == '\t')
+        lexer->cur_col += TAB_WIDTH - ((lexer->cur_col  - 1) % TAB_WIDTH);
+    else if(c == '\n')
+    {
+        lexer->cur_line++;
+        lexer->cur_col = 1;
+    }
+    else 
+        lexer->cur_col++;
+
     return c;
 }
 
