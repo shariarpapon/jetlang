@@ -2,22 +2,21 @@
 
 #include <string.h>
 
-bool jet_span_init(jet_span* span, size_t len, uint32_t line, uint32_t col)
+bool jet_span_init(jet_span* span, size_t start, size_t end)
 {
     if(!span)
         return false;
     memset(span, 0, sizeof(*span));
-    span->len = len;
-    span->line = line;
-    span->col = col;
+    span->start = start;
+    span->end = end;
     return true;
 }
 
 bool jet_span_init_copy(jet_span* target, jet_span* src)
 {
-    if(!target || !src) return false;
-    if(target == src) return true;
-    return jet_span_init(target, src->len, src->line, src->col);
+    if(!target || !src)
+        return false;
+    return jet_span_init(target, src->start, src->end);
 }
 
 bool jet_span_dispose(jet_span* span)

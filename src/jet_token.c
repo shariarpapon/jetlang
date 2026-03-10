@@ -9,13 +9,15 @@
 #define TOK_TB_HEADER_FMT "%-7s %-17s %-10s %-10s %s\n\n"
 #define TOK_TB_ENTRY_FMT "%-7zu %-17s %-10" PRIu32 " %-10" PRIu32 " %.*s\n"
 
-bool jet_token_init(jet_token* token, jet_token_type tok_type, const char* lexeme, size_t len, uint32_t line, uint32_t col)
+bool jet_token_init(jet_token* token, jet_token_type tok_type, const char* lexeme, size_t start_cursor, size_t end_cursor, uint32_t line, uint32_t col)
 {
     if(!token || !lexeme) return false; 
     memset(token, 0, sizeof(*token));
     token->type = tok_type;
     token->lexeme = lexeme;
-    if(!jet_span_init(&token->span, len, line, col))
+    token->line = line;
+    token->col = col;
+    if(!jet_span_init(&token->span, start_cursor, end_cursor))
     {
         fprintf(stderr, "err: failed to init token, unable to init span.\n");
         return false;
@@ -53,21 +55,22 @@ void jet_token_print_da(const jet_da* tokens)
     {  
         jet_token* token = jet_da_get(tokens, i);
         const char* type_str = jet_token_type_str(token->type);
-        printf(TOK_TB_ENTRY_FMT, i, type_str, token->span.line, token->span.col, (int)token->span.len, token->lexeme);        
+        size_t len = token->span.end - token->span.start;
+        printf(TOK_TB_ENTRY_FMT, i, type_str, token->line, token->col, (int)len, token->lexeme);        
     }
     printf("\n");
 }
 
 char* jet_token_strdup(const jet_token* tok)
 {
-    char* s = malloc(tok->span.len + 1);
+    char* s = malloc(tok->span.end - tok->span.start + 1);
     if(!s)
     {
         fprintf(stderr, "error: unable to allocate memory for str slice.\n");
         return NULL;
     }
-    memcpy(s, tok->lexeme, tok->span.len);
-    s[tok->span.len] = '\0';
+    memcpy(s, tok->lexeme, tok->span.end - tok->span.start);
+    s[tok->span.end - tok->span.start] = '\0';
     return s;
 }
 

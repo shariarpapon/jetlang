@@ -1,3 +1,6 @@
+//#define PRINT_AST
+#define PRINT_TOK
+
 #include <jet_lexer.h>
 #include <jet_parser.h>
 #include <jet_ast.h>
@@ -57,8 +60,13 @@ int main(int argc, char** argv)
     jet_parser_dispose(&parser);
     // PARSER LIFE END
 
-    //jet_token_print_da(&token_da);
+#ifdef PRINT_TOK
+    jet_token_print_da(&token_da);
+#endif
+
+#ifdef PRINT_AST
     jet_ast_print(&ast);
+#endif
 
     jet_da_dispose(&token_da);
     // TOK_DA LIFE END

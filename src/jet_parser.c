@@ -71,7 +71,7 @@ bool jet_parser_parse(jet_parser* p)
         if(t == TOK_INV)
         {
             const jet_token* tk = jet_parser_peek_tok(p);
-            fprintf(stderr, "err: at [line:%"PRIu32", col:%"PRIu32"] cannot continue parsing, invalid token encountered.\n", tk->span.line, tk->span.col);
+            fprintf(stderr, "err: at [line:%"PRIu32", col:%"PRIu32"] cannot continue parsing, invalid token encountered.\n", tk->line, tk->col);
             return false;
         }
         node_id nid = jet_parser_parse_next_stmt(p);
@@ -402,12 +402,12 @@ static node_id jet_parser_lit_parse(jet_parser* p)
         }
         case TOK_LIT_INT:
         {
-           lit.as.i = jet_conv_stoi(tok->lexeme, tok->span.len); 
+           lit.as.i = jet_conv_stoi(tok->lexeme, tok->span.end - tok->span.start); 
            break;
         }
         case TOK_LIT_FLOAT:
         {
-            lit.as.f = jet_conv_stof(tok->lexeme, tok->span.len);
+            lit.as.f = jet_conv_stof(tok->lexeme, tok->span.end - tok->span.start);
             break;
         }
         case TOK_LIT_CHAR:

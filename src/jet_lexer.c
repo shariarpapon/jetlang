@@ -168,11 +168,18 @@ bool jet_lexer_tokenize(jet_lexer* lexer)
     return true;
 }
 
-static void jet_lexer_emit_token(jet_lexer* lexer, size_t offset, size_t len, jet_token_type tok_type)
+static void jet_lexer_emit_token(jet_lexer* lexer, size_t start_cursor, size_t len, jet_token_type tok_type)
 {
     jet_token tok;
-    const char* lexeme = lexer->input + offset;
-    if(!jet_token_init(&tok, tok_type, lexeme, len, lexer->cur_line, lexer->cur_col - len))
+    const char* lexeme = lexer->input + start_cursor;
+    if(!jet_token_init(
+                &tok, 
+                tok_type, 
+                lexeme, 
+                start_cursor, 
+                start_cursor + len,
+                lexer->cur_line, 
+                lexer->cur_col - len))
     {
         fprintf(stderr, "err: failed to emit token, could not init token.\n");
         return;
@@ -287,8 +294,9 @@ static bool jet_lexer_try_scan_str_lit(jet_lexer* lexer)
     if(jet_lexer_peek(lexer) != STRING_QUOTE)
         return false;
 
+    size_t start_cursor = lexer->cursor;
+    
     jet_lexer_consume(lexer);
-    size_t origin = lexer->cursor;
     bool escaped = false;
     while(jet_lexer_peek(lexer) != NULL_TERM)
     {
@@ -296,8 +304,8 @@ static bool jet_lexer_try_scan_str_lit(jet_lexer* lexer)
         
         if(jet_lexer_peek(lexer) == STRING_QUOTE && !escaped)
         {
-            jet_lexer_emit_token(lexer, origin, lexer->cursor - origin, TOK_LIT_STR);
             jet_lexer_consume(lexer);
+            jet_lexer_emit_token(lexer, start_cursor, lexer->cursor - start_cursor, TOK_LIT_STR);
             return true;
         }
         
@@ -310,7 +318,7 @@ static bool jet_lexer_try_scan_str_lit(jet_lexer* lexer)
 static bool jet_lexer_try_scan_num_lit(jet_lexer* lexer)
 {
     bool float_flag = false;
-    size_t origin = lexer->cursor;
+    size_t start_cursor = lexer->cursor;
     if(!jet_lexer_is_digit(jet_lexer_peek(lexer)))
     {
         if(jet_lexer_peek(lexer) != DECIMAL_CHAR || !jet_lexer_is_digit(jet_lexer_peek_next(lexer)) )
@@ -340,7 +348,7 @@ static bool jet_lexer_try_scan_num_lit(jet_lexer* lexer)
 
     }
     jet_token_type tok_type = float_flag ? TOK_LIT_FLOAT : TOK_LIT_INT;
-    jet_lexer_emit_token(lexer, origin, lexer->cursor - origin, tok_type);
+    jet_lexer_emit_token(lexer, start_cursor, lexer->cursor - start_cursor, tok_type);
     return true;
 }
 
@@ -448,7 +456,7 @@ static bool jet_lexer_try_scan_whitespace(jet_lexer* lexer)
     {
         case '\n': 
             lexer->cur_line++;
-            lexer->cur_col = 0;
+            lexer->cur_col = 1;
             break;
 
         case ' ' :

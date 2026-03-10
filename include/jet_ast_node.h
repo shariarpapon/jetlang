@@ -115,7 +115,7 @@ struct jet_ast_node
     jet_span span;
 };
 
-bool jet_ast_node_init(jet_ast_node* node, jet_ast_node_type type, size_t len, uint32_t line, uint32_t col);
+bool jet_ast_node_init(jet_ast_node* node, jet_ast_node_type type, size_t start_cursor, size_t end_cursor);
 bool jet_ast_node_dispose(jet_ast_node* node);
 
 

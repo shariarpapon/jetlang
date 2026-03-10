@@ -1,5 +1,6 @@
 prog
 {
+    str s = "this is a literal";
     bool is_verified = true;
     print(y);
 }
