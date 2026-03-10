@@ -1,6 +1,6 @@
 prog
 {
-    str s = "this is a literal";
+    char c = 'a';
     bool is_verified = true;
     print(y);
 }
