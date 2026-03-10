@@ -97,6 +97,7 @@ typedef struct jet_ast_node_unop
 struct jet_ast_node
 {
     jet_ast_node_type node_type;
+    jet_span span;
     union
     {
         jet_ast_node_prog prog;
@@ -112,7 +113,6 @@ struct jet_ast_node
         jet_ast_node_binop binop;
         jet_ast_node_unop unop;
     } as;
-    jet_span span;
 };
 
 bool jet_ast_node_init(jet_ast_node* node, jet_ast_node_type type, size_t start_cursor, size_t end_cursor);
