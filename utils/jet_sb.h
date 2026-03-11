@@ -5,7 +5,12 @@
 #include <stdarg.h>
 #include <stdbool.h>
 
-typedef struct jet_sb jet_sb;
+typedef struct jet_sb 
+{
+     char* buf;
+     size_t cap;
+     size_t len;
+} jet_sb;
 
 bool jet_sb_init(jet_sb* sb, size_t cap);
 void jet_sb_dispose(jet_sb* sb);
@@ -32,12 +37,6 @@ void jet_sb_append_int(jet_sb* sb, int i);
 #define JET_SB_GROWTH_FAC (2)
 #define JET_SB_MIN_CAP (2)
 
-struct jet_sb 
-{
-     char* buf;
-     size_t cap;
-     size_t len;
-};
 
 static void jet_sb_ensure_extra_cap(jet_sb* sb, size_t n);
 static void jet_sb_grow(jet_sb* sb);

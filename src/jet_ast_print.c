@@ -1,135 +1,120 @@
 #include <jet_ast_print.h>
-#include <jet_ast.h>
-#include <jet_io.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include <jet_print.h>
+#include <jet_sb.h>
+
 #include <assert.h>
+#include <stdlib.h>
+#include <string.h>
 
-#define BRANCH_LINE "|_"
-#define HOR_LINK "+ "
+#define JET_ASTP_INDENT_WIDTH (4)
+#define JET_ASTP_COLS_CAP (16)
+#define JET_ASTP_SB_CAP (64)
 
-static void jet_ast_depth_print(const char* name, size_t depth);
-
-static const char* jet_ast_node_str(const jet_ast_node* node)
+typedef struct jet_ast_printer
 {
-    assert(node != NULL);
-    const char* str = jet_ast_node_type_str(node->node_type);
-    return str;
-}
+    const jet_ast* ast;
+    jet_da active_cols;
+    jet_sb sb;
+} jet_ast_printer;
 
-static void jet_ast_depth_print(const char* name, size_t depth)
+static bool jet_astp_init(jet_ast_printer* p, const jet_ast* ast);
+static void jet_astp_dispose(jet_ast_printer* p);
+static size_t jet_astp_add_col(jet_ast_printer* p, size_t col);
+static void jet_ast_print_node(jet_ast_printer* p, jet_ast_node* node, size_t depth);
+
+static bool jet_astp_init(jet_ast_printer* p, const jet_ast* ast)
 {
-    if(!name) return;
-    for(size_t i = 0; i < depth; i++)
+    if(!p || !ast) return false;
+    memset(p, 0, sizeof(*p));
+    p->ast = ast;
+    if( !jet_da_init(&p->active_cols, JET_ASTP_COLS_CAP, sizeof(size_t)) )
+        return false;
+
+    if( !jet_sb_init(&p->sb, JET_ASTP_SB_CAP) )
     {
-        printf("\033[38;5;244m%s\033[0m", HOR_LINK);
+        jet_da_dispose(&p->active_cols);
+        return false;
     }
-    printf("\033[38;5;49m%s\033[0m\033[0m%s\033[0m\n", BRANCH_LINE, name);
+    return true;
 }
 
+static void jet_astp_dispose(jet_ast_printer* p)
+{
+    if(!p) return;
+    jet_da_dispose(&p->active_cols);
+    jet_sb_dispose(&p->sb);
+    memset(p, 0, sizeof(*p));
+}
+
+static size_t jet_astp_add_col(jet_ast_printer* p, size_t col)
+{
+    assert(p != NULL && "err: cannot add column to jet_ast_printer, arg p is null.");
+    assert(jet_da_append(&p->active_cols, (const void*)&col) && "err: cannot add column to jet_ast_printer, failed to append to da.\n");
+    size_t index = jet_da_count(&p->active_cols) - 1;
+    return index;
+}
+
+static void jet_ast_print_node(jet_ast_printer* p, jet_ast_node* n, size_t depth)
+{
+    if(!p || !n) return;
+
+    const char* type_str = jet_ast_node_type_str(n->node_type);
+    size_t col_id = jet_astp_add_col(p, depth);
+    size_t child_depth = depth + 1;
+
+    switch(n->node_type)
+    {
+        case AST_PROG:      
+            break;
+        case AST_MEM:       
+            break;
+        case AST_IDENT:     
+            break;
+        case AST_LIT:       
+            break;
+        case AST_BLOCK:     
+            break;
+        case AST_VAR_DECL:  
+            break;
+        case AST_TYPE_DECL: 
+            break;
+        case AST_FUNC_DECL:
+            break;
+        case AST_FUNC_DEF: 
+            break;
+        case AST_CALL:      
+            break;
+        case AST_BINOP:     
+            break;
+        case AST_UNOP:      
+            break;
+        default:
+            JET_CPRINT(JETC_RED, "printing logic for node_type: %s has not been implemented.\n", type_str);
+            break;
+    }
+    assert(jet_da_remove(&p->active_cols, col_id) && "err: cannot continue printing ast, failed to remove column from da.");
+}
+
+// user entry
 void jet_ast_print(const jet_ast* ast)
 {
-    if(!ast)
+    jet_ast_printer p;
+    bool init_success = jet_astp_init(&p, ast);
+    if(!init_success)
     {
-        fprintf(stderr, "error: cannot print, given ast is null.\n");
+        JET_CPRINT(JETC_RED, "err: jet_ast_print.c/jet_ast_print - cannot print ast, failed to init printer.\n");
         return;
     }
-    printf("\n=======================\n");
-    printf("TOP\n");
-    jet_ast_nid_da_print(ast, jet_ast_get_top_nid_da(ast), 0);
-    
-    printf("=======================\n");
-    printf("PROG\n");
-    jet_ast_nid_print(ast, jet_ast_get_prog_nid(ast), 0); 
-    printf("=======================\n\n");
+    //todo: implement ast printing logic
+    jet_astp_dispose(&p);
 }
 
-void jet_ast_nid_da_print(const jet_ast* ast, const jet_da* nid_da, size_t depth)
-{
-    assert(ast != NULL);
-    if(!nid_da) return;
-    size_t count = jet_da_count(nid_da);
-    
-    jet_ast_depth_print("\033[38;5;215m[collection]\033[0m", depth);
-    size_t child_depth = depth + 1;
 
-    for(size_t i = 0; i < count; i++)
-    {
-        node_id* nid = (node_id*)jet_da_get(nid_da, i);
-        if(!nid || *nid == INVALID_NID) continue;
-        jet_ast_nid_print(ast, *nid, child_depth);
-    }
-}
 
-void jet_ast_nid_print(const jet_ast* ast, node_id nid, size_t depth)
-{
-    assert(ast != NULL);
-    if(nid == INVALID_NID)
-        return; 
 
-    const jet_ast_node* node = jet_ast_node_get(ast, nid); 
-    if(!node)
-    {
-        fprintf(stderr, "err: could not print ast, nid=%zu corresponds to a NULL node.\n", nid);
-        return;
-    }
-    const char* depth_name = jet_ast_node_str(node);
-    jet_ast_depth_print(depth_name, depth);
 
-    size_t child_depth = depth + 1;
-    //print child nodes
-    switch(node->node_type)
-    {
-        default: 
-            break;
-        case AST_PROG:
-        {
-            jet_ast_nid_print(ast,node->as.prog.block_nid, child_depth);
-            break;
-        }
-        case AST_BLOCK:
-        {
-            jet_ast_nid_da_print(ast,&node->as.block.stmt_nid_da, child_depth);
-            break;
-        }
-        case AST_VAR_DECL:
-        {
-            jet_ast_nid_print(ast,node->as.vdecl.ident_nid, child_depth);
-            jet_ast_nid_print(ast,node->as.vdecl.tdecl_nid, child_depth);
-            jet_ast_nid_print(ast,node->as.vdecl.init_value_nid, child_depth);
-            break;
-        }
-        case AST_FUNC_DECL:
-        {
-            jet_ast_nid_print(ast,node->as.fdecl.ident_nid, child_depth);
-            jet_ast_nid_da_print(ast,&node->as.fdecl.ret_tdecl_nid_da, child_depth);
-            jet_ast_nid_da_print(ast,&node->as.fdecl.param_nid_da, child_depth);
-            break;
-        }
-        case AST_FUNC_DEF:
-        {
-            jet_ast_nid_print(ast,node->as.fdef.fdecl_nid, child_depth);
-            jet_ast_nid_print(ast,node->as.fdef.block_nid, child_depth);
-            break;
-        }
-        case AST_CALL:
-        {
-            jet_ast_nid_print(ast,node->as.call.callee_nid, child_depth);
-            jet_ast_nid_da_print(ast,&node->as.call.arg_nid_da, child_depth);
-            break;
-        }
-        case AST_BINOP:
-        {
-            jet_ast_nid_print(ast,node->as.binop.lhs_nid, child_depth);
-            jet_ast_nid_print(ast,node->as.binop.rhs_nid, child_depth);
-            break;
-        }
-        case AST_UNOP:
-        {
-            jet_ast_nid_print(ast,node->as.unop.expr_nid, child_depth);
-            break;
-        }
-    }
-}
+
+
+
 
 
