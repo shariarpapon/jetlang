@@ -12,4 +12,9 @@ int print_sum(int a, int b)
     print(c);
 }
 
+void do_work()
+{
+    int r = 1 + 2 * 3 / (4 - 5) * 2;
+}
+
     
