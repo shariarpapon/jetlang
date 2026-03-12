@@ -11,6 +11,10 @@
 #include <stdbool.h>
 #include <jet_io.h>
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 
 static int arg_count = 0;
 static char** args = NULL;
@@ -19,6 +23,16 @@ static const char* jet_get_arg_at(size_t index);
 
 int main(int argc, char** argv)
 {
+
+//Enable ansi support on windows
+#ifdef _WIN32
+	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD dwMode = 0;
+    GetConsoleMode(hOut, &dwMode);
+    dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    SetConsoleMode(hOut, dwMode);
+#endif
+
     assert(argc >= 2 && "no filepath provided");
     printf("all modules compiled successfully.\n");
 
