@@ -174,7 +174,7 @@ static void jet_astp_print_node(jet_ast_printer* p, const jet_ast_node* n, size_
             jet_astp_print_by_nid(p, n->as.prog.block_nid, child_depth, true);
             break;
         case AST_BLOCK:     
-            jet_astp_print_nid_da(p, "[stmts]", &n->as.block.stmt_nid_da, child_depth);
+            jet_astp_print_nid_da(p, "stmts", &n->as.block.stmt_nid_da, child_depth);
             break;
         case AST_VAR_DECL:  
         {
@@ -185,8 +185,8 @@ static void jet_astp_print_node(jet_ast_printer* p, const jet_ast_node* n, size_
         }
         case AST_FUNC_DECL:
             jet_astp_print_by_nid(p, n->as.fdecl.ident_nid, child_depth, false);
-            jet_astp_print_nid_da(p, "[ret]", &n->as.fdecl.ret_tdecl_nid_da, child_depth);
-            jet_astp_print_nid_da(p, "[params]", &n->as.fdecl.param_nid_da, child_depth);
+            jet_astp_print_nid_da(p, "ret", &n->as.fdecl.ret_tdecl_nid_da, child_depth);
+            jet_astp_print_nid_da(p, "params", &n->as.fdecl.param_nid_da, child_depth);
             break;
         case AST_FUNC_DEF: 
             jet_astp_print_by_nid(p, n->as.fdef.fdecl_nid, child_depth, false);
@@ -194,7 +194,7 @@ static void jet_astp_print_node(jet_ast_printer* p, const jet_ast_node* n, size_
             break;
         case AST_CALL:      
             jet_astp_print_by_nid(p, n->as.call.callee_nid, child_depth, false);
-            jet_astp_print_nid_da(p, "[args]", &n->as.call.arg_nid_da, child_depth);
+            jet_astp_print_nid_da(p, "args", &n->as.call.arg_nid_da, child_depth);
             break;
         case AST_BINOP:     
             jet_astp_print_by_nid(p, n->as.binop.lhs_nid, child_depth, false);
@@ -212,15 +212,15 @@ static void jet_astp_print_node(jet_ast_printer* p, const jet_ast_node* n, size_
 
 static void jet_astp_print_nid_da(jet_ast_printer* p, const char* label, const jet_da* nid_da, size_t depth)
 {
-    if(!p || !nid_da) return;
-    if(!label) label = "[collection]";
-
+    if(!p || !nid_da || jet_da_is_empty(nid_da)) return;
+    if(!label) label = "collection";
     size_t count = jet_da_count(nid_da);
-    jet_astp_indent(p, depth);
-    ANSI_PRINTF(ANSI_ORANGE1, "%s[%zu]\n", label, count);
     
     jet_astp_indent(p, depth);
-    ANSI_PRINTF(ANSI_GREEN2, "%s\n", JET_ASTP_DOT);
+    ANSI_PRINTF(ANSI_GREEN2, "%s%s[%zu]\n",JET_ASTP_DOT, label, count);
+    
+    //jet_astp_indent(p, depth);
+    //ANSI_PRINTF(ANSI_GREEN2, "%s\n", JET_ASTP_DOT);
 
     size_t elm_depth = depth;
     for(size_t i = 0; i < count; i++)
@@ -245,7 +245,7 @@ void jet_ast_print(const jet_ast* ast)
         return;
     }
 
-    ANSI_PRINTF(ANSI_BLUE2, "\n[entry]\n");
+    ANSI_PRINTF(ANSI_BLUE2, "\nentry\n");
 
     const jet_ast_node* prog = jet_ast_node_get(ast, ast->prog_nid);
     jet_astp_print_node(&p, prog, 0, true);
@@ -253,7 +253,7 @@ void jet_ast_print(const jet_ast* ast)
 
     ANSI_PRINTF(ANSI_GREY1, "\n=====================================\n");
 
-    jet_astp_print_nid_da(&p, "[top_level]", &ast->top_nid_da, 0);
+    jet_astp_print_nid_da(&p, "top_level", &ast->top_nid_da, 0);
     
     jet_astp_dispose(&p);
 }
