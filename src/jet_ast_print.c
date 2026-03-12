@@ -10,11 +10,23 @@
 #define JET_ASTP_COLS_CAP (16)
 #define JET_ASTP_SB_CAP (64)
 
+#ifndef _WIN32
+
 #define JET_AST_FILL "  "
 #define JET_ASTP_VLINK "\u2502 "
 #define JET_ASTP_HLINK_MID "\u251C\u2500"
 #define JET_ASTP_HLINK_LAST "\u2514\u2500"
-#define JET_ASTP_UP_ARROW "\u2022"
+#define JET_ASTP_DOT "\u2022"
+
+#else //windows specific (basic ascii)
+
+#define JET_AST_FILL "  "
+#define JET_ASTP_VLINK "| "
+#define JET_ASTP_HLINK_MID "|-"
+#define JET_ASTP_HLINK_LAST "|_"
+#define JET_ASTP_DOT "*"
+
+#endif
 
 typedef struct jet_ast_printer
 {
@@ -208,7 +220,7 @@ static void jet_astp_print_nid_da(jet_ast_printer* p, const char* label, const j
     ANSI_PRINTF(ANSI_ORANGE1, "%s[%zu]\n", label, count);
     
     jet_astp_indent(p, depth);
-    ANSI_PRINTF(ANSI_GREEN2, "%s\n", JET_ASTP_UP_ARROW);
+    ANSI_PRINTF(ANSI_GREEN2, "%s\n", JET_ASTP_DOT);
 
     size_t elm_depth = depth;
     for(size_t i = 0; i < count; i++)

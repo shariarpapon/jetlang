@@ -29,7 +29,7 @@ int main(int argc, char** argv)
 	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
     DWORD dwMode = 0;
     GetConsoleMode(hOut, &dwMode);
-    dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    dwMode |= 0x0004;
     SetConsoleMode(hOut, dwMode);
 #endif
 
