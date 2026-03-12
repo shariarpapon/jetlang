@@ -5,10 +5,11 @@ prog
     print(y);
 }
 
-int x = 2;
-int y = 2;
-int z = 2;
-int a = 2;
 
+int print_sum(int a, int b)
+{
+    int c = a + b;
+    print(c);
+}
 
     
