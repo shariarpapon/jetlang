@@ -12,9 +12,10 @@ typedef struct jet_arena
 
 bool jet_arena_init(jet_arena* arena, size_t cap);
 void jet_arena_dispose(jet_arena* arena);
-void jet_arena_reset(jet_arena* arena);
+void jet_arena_clear(jet_arena* arena);
 void jet_arena_zero_reset(jet_arena* arena);
 void* jet_arena_alloc(jet_arena* arena, size_t bytes);
+void* jet_arena_galloc(void* arena_ctx, size_t bytes);
 
 #ifdef JET_ARENA_IMPL
 #include <stdlib.h>
@@ -85,7 +86,7 @@ void jet_arena_zero_reset(jet_arena* arena)
     }
 }
 
-void jet_arena_reset(jet_arena* arena)
+void jet_arena_clear(jet_arena* arena)
 {
     if(!arena)
         return;
@@ -127,6 +128,16 @@ void* jet_arena_alloc(jet_arena* arena, size_t bytes)
     return base;
 }
 
+void* jet_arena_galloc(void* arena_ctx, size_t bytes)
+{
+    if(!arena_ctx)
+    {
+        fprintf(stderr, "err: cannot agnostic arena alloc, arg arena_ptr is null.\n");
+        return NULL;
+    }
+    jet_arena* arena = (jet_arena*)arena_ctx;
+    return jet_arena_alloc(arena, bytes);
+}
 
 static jet_arena* jet_arena_get_next_available(jet_arena* arena, size_t bytes)
 {

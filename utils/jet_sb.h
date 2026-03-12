@@ -16,8 +16,14 @@ bool jet_sb_init(jet_sb* sb, size_t cap);
 void jet_sb_dispose(jet_sb* sb);
 void jet_sb_clear(jet_sb* sb);
 size_t jet_sb_len(const jet_sb* sb);
-char* jet_sb_dup(const jet_sb* sb);
 const char* jet_sb_view(const jet_sb* sb);
+
+char* jet_sb_dup(const jet_sb* sb);
+
+const char* jet_sb_arena_dup(
+        jet_sb* sb, 
+        void* arena_ctx,
+        void* (*arena_alloc)(void* arena_ctx, size_t bytes));
 
 void jet_sb_appendf(jet_sb* sb, const char* fmt, ...);
 void jet_sb_append_char(jet_sb* sb, char c);
@@ -96,6 +102,22 @@ char* jet_sb_dup(const jet_sb* sb)
     }
     memcpy((void*)dup, (const void*)sb->buf, sb->len + 1);
     return dup;
+}
+
+const char* jet_sb_arena_dup(
+        jet_sb* sb, 
+        void* arena,
+        void* (*arena_alloc)(void* arena, size_t bytes))
+{
+    assert(sb != NULL && "err: cannot arena dup, arg sb is null.");
+    void* mem = arena_alloc(arena, sb->len + 1);
+    if(!mem)
+    {
+        fprintf(stderr, "err: could not arena dup, failed to allocate arena memory.\n");
+        return NULL;
+    }
+    memcpy(mem, sb->buf, sb->len + 1);
+    return (const char*)mem;
 }
 
 const char* jet_sb_view(const jet_sb* sb)

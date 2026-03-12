@@ -1,5 +1,5 @@
-//#define PRINT_AST
-#define PRINT_TOK
+#define PRINT_AST
+//#define PRINT_TOK
 
 #include <jet_lexer.h>
 #include <jet_parser.h>
