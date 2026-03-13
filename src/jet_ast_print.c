@@ -2,6 +2,7 @@
 #include <jet_print.h>
 #include <jet_sb.h>
 #include <jet_arena.h>
+#include <jet_token.h>
 
 #include <assert.h>
 #include <stdlib.h>
@@ -12,15 +13,15 @@
 
 #ifndef _WIN32
 
-#define JET_AST_FILL "  "
+#define JET_ASTP_FILL "  "
 #define JET_ASTP_VLINK "\u2502 "
 #define JET_ASTP_HLINK_MID "\u251C\u2500"
 #define JET_ASTP_HLINK_LAST "\u2514\u2500"
 #define JET_ASTP_DOT "\u2022"
 
-#else //windows specific (basic ascii)
-
-#define JET_AST_FILL "  "
+#else 
+//windows specific (basic asci)
+#define JET_ASTP_FILL "  "
 #define JET_ASTP_VLINK "| "
 #define JET_ASTP_HLINK_MID "|-"
 #define JET_ASTP_HLINK_LAST "|_"
@@ -47,6 +48,7 @@ static const char* jet_astp_resolve_node_str(jet_ast_printer* p, const jet_ast_n
 static void jet_astp_print_node(jet_ast_printer* p, const jet_ast_node* node, size_t depth, bool is_last);
 static void jet_astp_print_by_nid(jet_ast_printer* p, node_id nid, size_t depth, bool is_last);
 static void jet_astp_print_nid_da(jet_ast_printer* p, const char* label, const jet_da* nid_da, size_t depth);
+static const char* jet_astp_op_str(jet_token_type t);
 
 static bool jet_astp_init(jet_ast_printer* p, const jet_ast* ast)
 {
@@ -91,6 +93,42 @@ static void jet_astp_dispose(jet_ast_printer* p)
     memset(p, 0, sizeof(*p));
 }
 
+static const char* jet_astp_op_str(jet_token_type t)
+{
+    switch(t)
+    {
+        default: return "no_op_str";
+        case TOK_EQ: return "==";
+        case TOK_NEQ: return "!=";
+        case TOK_LT: return "<";
+        case TOK_GT: return ">";
+        case TOK_LTE: return "<=";
+        case TOK_GTE: return ">=";
+        case TOK_BAND: return "&";
+        case TOK_BOR: return "|";
+        case TOK_AND: return "&&";
+        case TOK_OR: return "||";
+        case TOK_XOR: return "^";
+        case TOK_NOT: return "!";
+        case TOK_SHL: return "<<";
+        case TOK_SHR: return ">>";
+        case TOK_PLUS: return "+";
+        case TOK_MINUS: return "-";
+        case TOK_STAR: return "*";
+        case TOK_SLASH: return "/";
+        case TOK_MOD: return "%";
+        case TOK_PLUSEQ: return "+=";
+        case TOK_MINEQ: return "-=";
+        case TOK_MULEQ: return "*=";
+        case TOK_DIVEQ: return "/=";
+        case TOK_MODEQ: return "%=";
+        case TOK_BANDEQ: return "&=";
+        case TOK_BOREQ: return "|=";
+        case TOK_INCR: return "++";
+        case TOK_DECR: return "--";                
+    }
+}
+
 static void jet_astp_indent(jet_ast_printer* p, size_t depth)
 {
     for(size_t i = 0; i < depth; i++)
@@ -98,7 +136,7 @@ static void jet_astp_indent(jet_ast_printer* p, size_t depth)
         if(jet_astp_is_col_active(p, i))
             ANSI_PRINTF(ANSI_GREEN2, "%s", JET_ASTP_VLINK);
         else 
-            ANSI_PRINTF(ANSI_GREY1, "%s", JET_AST_FILL);
+            ANSI_PRINTF(ANSI_GREY1, "%s", JET_ASTP_FILL);
     }
 }
 
@@ -136,9 +174,74 @@ static const char* jet_astp_resolve_node_str(jet_ast_printer* p, const jet_ast_n
     {
         jet_sb_appendf(&p->sb, "NO_STR_CONV<%d>", (int)n->node_type);
         str = jet_sb_arena_dup(&p->sb, (void*)&p->arena, jet_arena_galloc);
+    } 
+    jet_sb_appendf(&p->sb, "%s(", str);
+    switch(n->node_type)
+    {
+        default: 
+            jet_sb_clear(&p->sb);
+            return str;
+        case AST_MEM:
+            jet_sb_append_sizet(&p->sb, n->as.mem.alloc_size);
+            break;
+        case AST_IDENT:
+            jet_sb_append_cstr(&p->sb, n->as.ident.str);
+            break;
+        case AST_LIT:
+        {
+            switch(n->as.lit.lit_type)
+            {
+                default: 
+                    break;
+                case TOK_KWD_TRUE:
+                     jet_sb_append_cstr(&p->sb, "true");
+                     break;
+                case TOK_KWD_FALSE:
+                     jet_sb_append_cstr(&p->sb, "false");
+                     break;
+                case TOK_KWD_STR:
+                     jet_sb_append_cstr(&p->sb, n->as.lit.as.s);
+                     break;
+                case TOK_KWD_CHAR:
+                     jet_sb_append_char(&p->sb, n->as.lit.as.c);
+                     break;
+                case TOK_KWD_INT:
+                     jet_sb_appendf(&p->sb,"%d", n->as.lit.as.i);
+                     break;
+                case TOK_KWD_FLOAT:
+                     jet_sb_appendf(&p->sb, "%f", n->as.lit.as.f);
+                     break;
+            }
+            break;
+        }
+        case AST_TYPE_DECL:
+            jet_sb_appendf(&p->sb, 
+                    "%s, %zu", 
+                    n->as.tdecl.tname, 
+                    n->as.tdecl.byte_size);
+            break;
+        case AST_BINOP:    
+        {
+            const char* bop_str = 
+                jet_astp_op_str(n->as.binop.op_type);
+            jet_sb_append_cstr(&p->sb, bop_str);
+            break;
+        }
+        case AST_UNOP:
+        {
+            const char* uop_str = 
+                jet_astp_op_str(n->as.unop.op_type);
+            jet_sb_append_cstr(&p->sb, uop_str);
+            break;
+        }
     }
+    jet_sb_append_char(&p->sb, ')');
+    const char* out = (const char*)jet_sb_arena_dup(
+            &p->sb, 
+            (void*)&p->arena, 
+            jet_arena_galloc);
     jet_sb_clear(&p->sb);
-    return str;
+    return out;
 }
 
 static void jet_astp_print_by_nid(jet_ast_printer* p, node_id nid, size_t depth, bool is_last)

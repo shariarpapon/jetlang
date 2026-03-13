@@ -1,5 +1,6 @@
 #pragma once
 
+#include <jet_token.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <jet_ast.h>

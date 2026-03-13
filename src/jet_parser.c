@@ -86,6 +86,24 @@ bool jet_parser_parse(jet_parser* p)
     return true;
 }
 
+static const char* jet_parser_get_type_name(jet_token_type tok_type)
+{
+    switch(tok_type)
+    {
+        default:
+        {
+            fprintf(stderr, "error: token type (enum-id: %d) is not recognized as a native type.\n", (int)tok_type);
+            return "invalid";
+        }
+        case TOK_KWD_INT: return "int";
+        case TOK_KWD_FLOAT: return "float";
+        case TOK_KWD_STR: return "str";
+        case TOK_KWD_BOOL: return "bool";
+        case TOK_KWD_CHAR: return "char";
+        case TOK_KWD_VOID: return "void";
+    }
+}
+
 // DEF=== 
 static const jet_token* jet_parser_peek_prev_tok(jet_parser* p)
 {
@@ -138,25 +156,6 @@ static const jet_token* jet_parser_consume_tok(jet_parser* p)
         return NULL;
     p->tok_cursor++;
     return (const jet_token*)jet_da_get(p->tok_da , p->tok_cursor - 1);
-}
-
-
-static const char* jet_parser_get_type_name(jet_token_type tok_type)
-{
-    switch(tok_type)
-    {
-        default:
-        {
-            fprintf(stderr, "error: token type (enum-id: %d) is not recognized as a native type.\n", (int)tok_type);
-            return "invalid";
-        }
-        case TOK_KWD_INT: return "int";
-        case TOK_KWD_FLOAT: return "float";
-        case TOK_KWD_STR: return "str";
-        case TOK_KWD_BOOL: return "bool";
-        case TOK_KWD_CHAR: return "char";
-        case TOK_KWD_VOID: return "void";
-    }
 }
 
 // PARSING ==============================================================================
