@@ -37,7 +37,7 @@ static node_id jet_parser_func_parse(jet_parser* p);
 static node_id jet_parser_parse_fparam(jet_parser* p);
 
 // EXPOSED===
-bool jet_parser_init(jet_parser* p, jet_da* tok_da, jet_ast* ast)
+bool jet_parser_init(jet_parser* p, const jet_da* tok_da, jet_ast* ast)
 {
     if(!p || !tok_da || !ast)
     {

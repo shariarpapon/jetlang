@@ -105,7 +105,6 @@ typedef struct jet_token
 bool jet_token_init(jet_token* token, jet_token_type tok_type, const char* lexeme, size_t start_cursor, size_t end_cursor, uint32_t line, uint32_t col);
 bool jet_token_dispose(jet_token* token);
 const char* jet_token_type_str(jet_token_type type);
-void jet_token_print_da(const jet_da* da);
 char* jet_token_strdup(const jet_token* tok);
 
 

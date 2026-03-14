@@ -1,11 +1,6 @@
-#define PRINT_AST
-//#define PRINT_TOK
+#define JET_DBG_PRINT_AST
 
-#include <jet_lexer.h>
-#include <jet_parser.h>
-#include <jet_ast.h>
-#include <jet_ast_print.h>
-
+#include <jet_compilation_unit.h>
 #include <stdio.h>
 #include <assert.h>
 #include <stdbool.h>
@@ -15,15 +10,16 @@
 #include <windows.h>
 #endif
 
-
 static int arg_count = 0;
 static char** args = NULL;
 
 static const char* jet_get_arg_at(size_t index);
+static const char* jet_get_filepath();
+static void jet_init_args(int argc, char** argv);
+static bool jet_compile(const char* filepath);
 
 int main(int argc, char** argv)
 {
-
 //Enable ansi support on windows
 #ifdef _WIN32
 	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -33,63 +29,36 @@ int main(int argc, char** argv)
     SetConsoleMode(hOut, dwMode);
 #endif
 
-    assert(argc >= 2 && "no filepath provided");
-    printf("all modules compiled successfully.\n");
+    printf("all modules built successfully!\n");
+    jet_init_args(argc, argv);
 
+    if(jet_compile(jet_get_filepath()))
+        printf("compiled input successfully.\n");
+    else 
+        printf("failed to compile input.");
+}
+
+static bool jet_compile(const char* filepath)
+{
+    jet_compilation_unit cu;
+    if(!jet_cu_init(&cu, filepath)) 
+        return false;
+    return jet_cu_run(&cu);
+}
+
+static void jet_init_args(int argc, char** argv)
+{
+    assert(argv != NULL && "err: argv is null.");
+    assert(argc >= 2 && "err: required arg/s not supplied.");
     arg_count = argc;
-    args = argv;
-    
+    args = argv; 
+}
+
+static const char* jet_get_filepath()
+{ 
     const char* filepath = jet_get_arg_at(1);
-    size_t src_len = 0;
-
-    // COMP_UNIT LIFE BEG
-    const char* src = jet_io_read_text(filepath, &src_len);
-    
-    assert(src != NULL && "could not read source file");
-    if(src_len == 0)
-    {
-        printf("read file is empty.\n");
-        return 0;
-    }
-
-    // TOK_DA LIFE BEG
-    jet_da token_da;
-    assert(jet_da_init(&token_da, 32, sizeof(jet_token)) && "could not init token da");
-
-    // LEXER LIFE BEG
-    jet_lexer lexer;
-    assert(jet_lexer_init(&lexer, src, &token_da) && "could not init lexer.");    
-    assert(jet_lexer_tokenize(&lexer) && "could not tokenize.");
-    jet_lexer_dispose(&lexer);
-    // LEXER LIFE END
-
-    // AST LIFE BEG
-    jet_ast ast;
-    assert(jet_ast_init(&ast) && "could not init ast."); 
-
-    // PARSER LIFE BEG
-    jet_parser parser;
-    assert(jet_parser_init(&parser, &token_da, &ast) && "could not init parser.");
-    assert(jet_parser_parse(&parser) && "could not finish parsing.");
-    jet_parser_dispose(&parser);
-    // PARSER LIFE END
-
-#ifdef PRINT_TOK
-    jet_token_print_da(&token_da);
-#endif
-
-#ifdef PRINT_AST
-    jet_ast_print(&ast);
-#endif
-
-    jet_da_dispose(&token_da);
-    // TOK_DA LIFE END
-    jet_ast_dispose(&ast);
-    // AST LIFE END
-    free((void*)src);
-    // COMP_UNIT LIFE END
-
-    return 0;
+    assert(filepath != NULL && "err: no valid filepath provided for arg1.\n");
+    return filepath;
 }
 
 static const char* jet_get_arg_at(size_t index)

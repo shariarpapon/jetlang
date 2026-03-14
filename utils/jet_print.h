@@ -7,6 +7,7 @@
 
 #define ANSI_RESET "\x1b[0m"
 #define ANSI_RED1 "\x1b[31m"
+#define ANSI_RED2 "\x1b[0;38;5;161;49m"
 #define ANSI_BLUE1 "\x1b[34m"
 #define ANSI_BLUE2 "\x1b[38;5;39m"
 #define ANSI_ORANGE1 "\x1b[38;5;215m"
