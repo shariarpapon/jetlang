@@ -3,10 +3,12 @@
 #include <jet_sb.h>
 #include <jet_arena.h>
 #include <jet_token.h>
+#include <jet_conv.h>
 
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 
 #define JET_ASTP_COLS_CAP (16)
 #define JET_ASTP_SB_CAP (64)
@@ -194,23 +196,20 @@ static const char* jet_astp_resolve_node_str(jet_ast_printer* p, const jet_ast_n
                 default: 
                     break;
                 case JET_TYPE_BOOL:
-                     jet_sb_append_cstr(&p->sb, "true");
-                     break;
-                case TOK_KWD_FALSE:
-                     jet_sb_append_cstr(&p->sb, "false");
-                     break;
-                case TOK_KWD_STR:
-                     jet_sb_append_cstr(&p->sb, n->as.lit.as.s);
-                     break;
-                case TOK_KWD_CHAR:
-                     jet_sb_append_char(&p->sb, n->as.lit.as.c);
-                     break;
-                case TOK_KWD_INT:
-                     jet_sb_appendf(&p->sb,"%d", n->as.lit.as.i);
-                     break;
-                case TOK_KWD_FLOAT:
-                     jet_sb_appendf(&p->sb, "%f", n->as.lit.as.f);
-                     break;
+                    jet_sb_append_cstr(&p->sb, jet_conv_btos(n->as.lit.as.b));
+                    break;
+                case JET_TYPE_STR:
+                    jet_sb_append_cstr(&p->sb, n->as.lit.as.s);
+                    break;
+                case JET_TYPE_CHAR:
+                    jet_sb_append_char(&p->sb, n->as.lit.as.c);
+                    break;
+                case JET_TYPE_INT:
+                    jet_sb_appendf(&p->sb,"%"PRId64, n->as.lit.as.i);
+                    break;
+                case JET_TYPE_FLOAT:
+                    jet_sb_appendf(&p->sb, "%f", n->as.lit.as.f);
+                    break;
             }
             break;
         }

@@ -1,8 +1,10 @@
 #pragma once
 #include <stddef.h>
+#include <inttypes.h>
 
 int jet_conv_stoi(const char* start, size_t len);
 float jet_conv_stof(const char* start, size_t len);
+const char* jet_conv_btos(bool b);
 
 #ifdef JET_CONV_IMPL
 
@@ -37,6 +39,11 @@ float jet_conv_stof(const char* start, size_t len)
     buf[len] = '\0';
     float f = atof(buf);
     return f;
+}
+
+const char* jet_conv_btos(bool b)
+{
+    return b ? "true" : "false";
 }
 
 #endif

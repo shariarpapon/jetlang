@@ -7,5 +7,4 @@ typedef enum jet_type_kind
     JET_TYPE_FLOAT,
     JET_TYPE_CHAR,
     JET_TYPE_STR,
-
 } jet_type_kind;

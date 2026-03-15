@@ -3,6 +3,7 @@
 #include <jet_ast.h>
 #include <jet_ast_node.h>
 #include <jet_conv.h>
+#include <jet_sb.h>
 
 #include <inttypes.h>
 #include <stdlib.h>
@@ -148,7 +149,7 @@ static const char* jet_parser_create_type_name(const jet_token* tok, bool* is_pr
     const char* name = jet_sb_dup(&sb);
     if(!name)
     {
-        frpintf(stderr, "err: cannot parse, failed to get type name, unable to dup sb.\n");
+        fprintf(stderr, "err: cannot parse, failed to get type name, unable to dup sb.\n");
         goto fail;
     }
     
@@ -459,7 +460,7 @@ static node_id jet_parser_lit_parse(jet_parser* p)
     switch(tok->type)
     {
         default:
-            fprintf(stderr, "error: could not parse lit, unrecognized tkind (tok_type:%d).\n", (int)lit.tkind);
+            fprintf(stderr, "error: could not parse lit, no type representation for token: %d.\n", (int)tok->type);
             return INVALID_NID;
         case TOK_KWD_TRUE:
         {
@@ -521,7 +522,7 @@ static node_id jet_parser_tdecl_parse(jet_parser* p)
     const jet_token* tok = jet_parser_consume_tok(p);
 
     jet_ast_node_tdecl tdecl;
-    tdecl.tname = jet_parser_create_type_name(tok->type, &tdecl.is_primitive);
+    tdecl.tname = jet_parser_create_type_name(tok, &tdecl.is_primitive);
     tdecl.byte_size = 4;
     jet_ast_node node;
     if(!jet_ast_node_init(&node, AST_TYPE_DECL, tok->span.start, tok->span.end))
@@ -795,7 +796,7 @@ static node_id jet_parser_parse_expr(jet_parser* p, size_t min_prec)
 
 static node_id jet_parser_parse_primary(jet_parser* p)
 {
-    assert(p != NULL && "cannot parse primary expr, parser is null.");
+    assert(p != NULL && "err: cannot parse primary expr, parser is null.");
     const jet_token* cur_tok = jet_parser_peek_tok(p);
     const jet_token* start_tok = cur_tok;
     const jet_token* end_tok = cur_tok;
@@ -807,7 +808,7 @@ static node_id jet_parser_parse_primary(jet_parser* p)
     {
         default:
         {
-            fprintf(stderr, "error: expected primary expression.\n");
+            fprintf(stderr, "err: expected primary expression.\n");
             return INVALID_NID;
         }
         case TOK_KWD_NULL:
@@ -826,7 +827,7 @@ static node_id jet_parser_parse_primary(jet_parser* p)
             out_nid = jet_parser_ident_parse(p);
             if(out_nid == INVALID_NID)
             {
-                fprintf(stderr, "error: cannot parse primary, unable to parse ident.\n");
+                fprintf(stderr, "err: cannot parse primary, unable to parse ident.\n");
                 return INVALID_NID;
             }
             break;
@@ -838,7 +839,7 @@ static node_id jet_parser_parse_primary(jet_parser* p)
             cur_tok = jet_parser_peek_tok(p);
             if(cur_tok == NULL || cur_tok->type != TOK_RPAR)
             {
-                fprintf(stderr, "error: expected ')' after primary expression.\n");
+                fprintf(stderr, "err: expected ')' after primary expression.\n");
                 return INVALID_NID;
             }
             jet_parser_consume_tok(p);
@@ -851,7 +852,7 @@ static node_id jet_parser_parse_primary(jet_parser* p)
             node_id rhs_nid = jet_parser_parse_expr(p, PREC_PREFIX);
             if(rhs_nid == INVALID_NID)
             {
-                fprintf(stderr, "error: expected expr after unary operator\n");
+                fprintf(stderr, "err: expected expr after unary operator\n");
                 return INVALID_NID;
             }
             end_tok = jet_parser_peek_prev_tok(p);
@@ -873,7 +874,7 @@ static node_id jet_parser_parse_primary(jet_parser* p)
 
     if(out_nid == INVALID_NID)
     {
-        fprintf(stderr, "error: no valid primary expressions parsed.\n");
+        fprintf(stderr, "err: no valid primary expressions parsed.\n");
         return INVALID_NID;
     }
 

@@ -29,20 +29,20 @@ void jet_ast_node_dispose(jet_ast_node* node)
         case AST_IDENT: 
         {
             if(node->as.ident.str)
-                free(node->as.ident.str);
+                free((void*)node->as.ident.str);
             return;
         }
         case AST_LIT:
         {
             if(node->as.lit.tkind == JET_TYPE_STR && 
                node->as.lit.as.s)
-                    free(node->as.lit.as.s);
+                    free((void*)node->as.lit.as.s);
             return;
         }
         case AST_TYPE_DECL:
         {
             if(node->as.tdecl.tname)
-                free(node->as.tdecl.tname);
+                free((void*)node->as.tdecl.tname);
             return;
         }       
     }
