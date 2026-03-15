@@ -1,13 +1,31 @@
 #pragma once
 #include <jet_token.h>
-#include <jet_ast_node_type.h>
 #include <jet_da.h>
 #include <jet_span.h>
+#include <jet_type.h>
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <inttypes.h>
 
-#define INVALID_NID 0
+typedef enum jet_ast_node_type
+{
+  AST_UNKNOWN = -1,
+  AST_PROG = 0,  
+  AST_MEM,
+  AST_IDENT,
+  AST_LIT,
+  AST_BLOCK,
+  AST_VAR_DECL,
+  AST_TYPE_DECL,
+  AST_FUNC_DECL,
+  AST_FUNC_DEF,
+  AST_CALL,
+  AST_BINOP,
+  AST_UNOP,
+} jet_ast_node_type;
+
+#define INVALID_NID (0)
 typedef size_t node_id;
 
 typedef struct jet_ast_node jet_ast_node;
@@ -30,12 +48,11 @@ typedef struct jet_ast_node_ident
  
 typedef struct jet_ast_node_lit
 {
-   jet_token_type lit_type;
+   jet_type_kind tkind;
    union
    {
-       void* v;
-       int i;
-       float f;
+       int64_t i;
+       double f;
        bool b;
        char c;
        const char* s;
@@ -58,7 +75,7 @@ typedef struct jet_ast_node_tdecl
 {
   const char* tname;
   size_t byte_size;
-  bool is_native;
+  bool is_primitive;
 } jet_ast_node_tdecl;
 
 typedef struct jet_ast_node_fdecl
@@ -117,6 +134,6 @@ struct jet_ast_node
 
 bool jet_ast_node_init(jet_ast_node* node, jet_ast_node_type type, size_t start_cursor, size_t end_cursor);
 bool jet_ast_node_dispose(jet_ast_node* node);
-
+const char* jet_ast_node_type_str(jet_ast_node_type node_type);
 
 

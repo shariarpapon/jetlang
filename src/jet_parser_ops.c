@@ -1,8 +1,9 @@
-#include <jet_ast_op_prec.h>
+#include <jet_parser_ops.h>
 
-size_t jet_ast_get_op_prec(jet_token_type op_type)
+uint8_t jet_parser_get_op_prec(jet_token_type op_type)
 {
     switch(op_type) {
+        default: return PREC_NONE; // not an operator
         case TOK_INCR:
         case TOK_DECR:
         case TOK_DOT: return PREC_POSTFIX;
@@ -40,7 +41,6 @@ size_t jet_ast_get_op_prec(jet_token_type op_type)
         
         case TOK_POW: return PREC_POW;
 
-        default: return 0; // not an operator
     }
 }
 

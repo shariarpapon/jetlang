@@ -1,7 +1,7 @@
 #include <jet_parser.h>
+#include <jet_parser_ops.h>
 #include <jet_ast.h>
 #include <jet_ast_node.h>
-#include <jet_ast_op_prec.h>
 #include <jet_conv.h>
 
 #include <inttypes.h>
@@ -19,7 +19,7 @@ static const jet_token* jet_parser_expect_tok(jet_parser* p, jet_token_type tok_
 static jet_token_type jet_parser_peekn_tok_type(jet_parser* p, size_t n);
 
 // PARSING
-static const char* jet_parser_get_type_name(jet_token_type tok_type);
+static const char* jet_parser_create_type_name(const jet_token* tok, bool* is_primitive);
 static bool jet_parser_is_type_tok(jet_token_type tok_type);
 static bool jet_parser_is_vdecl(jet_parser* p);
 static bool jet_parser_is_func_head(jet_parser* p);
@@ -86,22 +86,78 @@ bool jet_parser_parse(jet_parser* p)
     return true;
 }
 
-static const char* jet_parser_get_type_name(jet_token_type tok_type)
+static const char* jet_parser_create_type_name(const jet_token* tok, bool* is_primitive)
 {
+    jet_token_type tok_type = tok->type;
+    *is_primitive = true;
+    
+    jet_sb sb;
+    if(!jet_sb_init(&sb, 32))
+    {
+        fprintf(stderr, "err: cannot parse, failed to get type name, unable to init sb.\n");
+        return NULL;
+    }
+
     switch(tok_type)
     {
         default:
         {
-            fprintf(stderr, "error: token type (enum-id: %d) is not recognized as a native type.\n", (int)tok_type);
-            return "invalid";
+            fprintf(stderr, "err: token type (enum-id: %d) is not a type token.\n", (int)tok_type);
+            goto fail;
         }
-        case TOK_KWD_INT: return "int";
-        case TOK_KWD_FLOAT: return "float";
-        case TOK_KWD_STR: return "str";
-        case TOK_KWD_BOOL: return "bool";
-        case TOK_KWD_CHAR: return "char";
-        case TOK_KWD_VOID: return "void";
+        case TOK_IDENT: 
+        {
+            *is_primitive = false;
+            const char* tok_str = jet_token_strdup(tok);
+            if(!tok_str)
+            {
+                fprintf(stderr, "err: cannot parse, failed to dup token str.\n");
+                goto fail;
+            }
+            jet_sb_append_cstr(&sb, tok_str);
+            free((void*)tok_str);
+            break;
+        }
+        case TOK_KWD_INT:
+        {
+            jet_sb_append_cstr(&sb, "int");
+            break;
+        }
+        case TOK_KWD_FLOAT: 
+        {
+            jet_sb_append_cstr(&sb, "float");
+            break;
+        }
+        case TOK_KWD_STR:
+        {
+            jet_sb_append_cstr(&sb, "str");
+            break;
+        }
+        case TOK_KWD_BOOL: 
+        {
+            jet_sb_append_cstr(&sb, "bool");
+            break;
+        }
+        case TOK_KWD_CHAR:
+        {
+            jet_sb_append_cstr(&sb, "char");
+            break;
+        }
     }
+
+    const char* name = jet_sb_dup(&sb);
+    if(!name)
+    {
+        frpintf(stderr, "err: cannot parse, failed to get type name, unable to dup sb.\n");
+        goto fail;
+    }
+    
+    jet_sb_dispose(&sb);
+    return name;
+
+fail:
+    jet_sb_dispose(&sb);
+    return NULL;
 }
 
 // DEF=== 
@@ -400,44 +456,44 @@ static node_id jet_parser_lit_parse(jet_parser* p)
         return INVALID_NID;
     }
     jet_ast_node_lit lit;
-    lit.lit_type = tok->type;
-    switch(lit.lit_type)
+    switch(tok->type)
     {
         default:
-            fprintf(stderr, "error: could not parse lit, unrecognized lit_type (tok_type:%d).\n", (int)lit.lit_type);
+            fprintf(stderr, "error: could not parse lit, unrecognized tkind (tok_type:%d).\n", (int)lit.tkind);
             return INVALID_NID;
-        case TOK_KWD_NULL:
-        {
-            lit.as.v = NULL;
-            break;
-        }
         case TOK_KWD_TRUE:
         {
+            lit.tkind = JET_TYPE_BOOL;
             lit.as.b = true;
             break;
         }
         case TOK_KWD_FALSE:
         {
+            lit.tkind = JET_TYPE_BOOL;
             lit.as.b = false;
             break;
         }
         case TOK_LIT_INT:
         {
+           lit.tkind = JET_TYPE_INT;
            lit.as.i = jet_conv_stoi(tok->lexeme, tok->span.end - tok->span.start); 
            break;
         }
         case TOK_LIT_FLOAT:
         {
+            lit.tkind = JET_TYPE_FLOAT;
             lit.as.f = jet_conv_stof(tok->lexeme, tok->span.end - tok->span.start);
             break;
         }
         case TOK_LIT_CHAR:
         {
+            lit.tkind = JET_TYPE_CHAR;
             lit.as.c = *(tok->lexeme);
             break;
         }
         case TOK_LIT_STR:
         {
+            lit.tkind = JET_TYPE_STR;
             lit.as.s = jet_token_strdup(tok); 
             if(!lit.as.s)
             {
@@ -465,10 +521,8 @@ static node_id jet_parser_tdecl_parse(jet_parser* p)
     const jet_token* tok = jet_parser_consume_tok(p);
 
     jet_ast_node_tdecl tdecl;
-    tdecl.tname = jet_parser_get_type_name(tok->type);
+    tdecl.tname = jet_parser_create_type_name(tok->type, &tdecl.is_primitive);
     tdecl.byte_size = 4;
-    tdecl.is_native = strcmp(tdecl.tname, "invalid" ) != 0;
-
     jet_ast_node node;
     if(!jet_ast_node_init(&node, AST_TYPE_DECL, tok->span.start, tok->span.end))
     {
@@ -707,8 +761,8 @@ static node_id jet_parser_parse_expr(jet_parser* p, size_t min_prec)
         const jet_token* op_tok = jet_parser_peek_tok(p);
         if(op_tok == NULL)
             break;
-        size_t op_prec = jet_ast_get_op_prec(op_tok->type);
-        if(op_prec == 0)
+        uint8_t op_prec = jet_parser_get_op_prec(op_tok->type);
+        if(op_prec == PREC_NONE)
             break;
         if(op_prec < min_prec)
             break;
