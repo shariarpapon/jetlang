@@ -189,11 +189,11 @@ static const char* jet_astp_resolve_node_str(jet_ast_printer* p, const jet_ast_n
             break;
         case AST_LIT:
         {
-            switch(n->as.lit.lit_type)
+            switch(n->as.lit.tkind)
             {
                 default: 
                     break;
-                case TOK_KWD_TRUE:
+                case JET_TYPE_BOOL:
                      jet_sb_append_cstr(&p->sb, "true");
                      break;
                 case TOK_KWD_FALSE:

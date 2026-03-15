@@ -16,37 +16,36 @@ bool jet_ast_node_init(jet_ast_node* node, jet_ast_node_type type, size_t start_
     return true;
 }
 
-bool jet_ast_node_dispose(jet_ast_node* node)
+void jet_ast_node_dispose(jet_ast_node* node)
 {
     //dispose according to type
     if(!node) 
-        return false;
+        return;
 
     switch(node->node_type)
     {
         default: 
-            break;
+            return;
         case AST_IDENT: 
         {
             if(node->as.ident.str)
                 free(node->as.ident.str);
-            break;
+            return;
         }
         case AST_LIT:
         {
-            if(node->as.lit.tkind == JET_TYPE_STR)
-                free((void*)node->as.lit.as.s);
-            break;
+            if(node->as.lit.tkind == JET_TYPE_STR && 
+               node->as.lit.as.s)
+                    free(node->as.lit.as.s);
+            return;
         }
-        case AST_TYPE_DECL
+        case AST_TYPE_DECL:
         {
-            free((void*)node->as.tdecl.tname);
-            break;
+            if(node->as.tdecl.tname)
+                free(node->as.tdecl.tname);
+            return;
         }       
     }
-
-    return true;
-
 }
 
 const char* jet_ast_node_type_str(jet_ast_node_type node_type)
