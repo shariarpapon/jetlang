@@ -45,6 +45,22 @@ void jet_ast_node_dispose(jet_ast_node* node)
                 free((void*)node->as.tdecl.tname);
             return;
         }       
+        case AST_BLOCK:
+        {
+            jet_da_dispose(&node->as.block.stmt_nid_da);
+            return;
+        }
+        case AST_FUNC_DECL:
+        {
+            jet_da_dispose(&node->as.fdecl.ret_tdecl_nid_da);
+            jet_da_dispose(&node->as.fdecl.param_nid_da);
+            return;
+        }
+        case AST_CALL:
+        {
+            jet_da_dispose(&node->as.call.arg_nid_da);
+            return;
+        }
     }
 }
 

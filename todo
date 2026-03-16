@@ -1,10 +1,4 @@
-- dispose nodes according to type
-
-- complete jet_err system
-    * core err arg => token (contains line/col #)
-    * maybe container err_ctx { module, tok, filename }
-
-- create jet_logger system
+- create jet_logger system (essentially err system)
     * writes to files
     * injectable writer function
 

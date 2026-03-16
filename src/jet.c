@@ -29,13 +29,13 @@ int main(int argc, char** argv)
     SetConsoleMode(hOut, dwMode);
 #endif
 
-    printf("all modules built successfully!\n");
+    printf("\nall modules built successfully!\n");
     jet_init_args(argc, argv);
 
     if(jet_compile(jet_get_filepath()))
-        printf("compiled input successfully.\n");
+        printf("\ninput compiled successfully.\n");
     else 
-        printf("failed to compile input.");
+        printf("\nfailed to compile input.");
 }
 
 static bool jet_compile(const char* filepath)

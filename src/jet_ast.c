@@ -29,6 +29,14 @@ bool jet_ast_init(jet_ast* ast)
 void jet_ast_dispose(jet_ast* ast)
 {
     if(!ast) return;
+    
+    for(size_t i = 0; i < jet_da_count(&ast->node_registry); i++)
+    {
+        void* node = jet_da_get(&ast->node_registry, i);
+        if(node) 
+            jet_ast_node_dispose((jet_ast_node*)node);
+    }
+
     jet_da_dispose(&ast->node_registry);
     jet_da_dispose(&ast->top_nid_da);
     memset(ast, 0, sizeof(*ast)); 

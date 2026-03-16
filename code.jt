@@ -1,2 +1,7 @@
 int x = 1;
     
+prog 
+{
+    int a = 234;
+    int b = a + 5;
+}
