@@ -7,7 +7,7 @@ typedef enum jet_log_level
     JET_LOG_LEVEL_WARNING = 2,
     JET_LOG_LEVEL_INFO = 3,
     JET_LOG_LEVEL_DEBUG = 4,
-};
+} jet_log_level;
 
 void jet_log_output(jet_log_level level, const char* fmt, ...);
 
