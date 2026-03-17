@@ -1,6 +1,2 @@
-- create jet_logger system (essentially err system)
-    * writes to files
-    * injectable writer function
-
 - invalid token fallback system
     * sync to next end of statement

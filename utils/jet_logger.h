@@ -10,10 +10,12 @@ typedef enum jet_log_level
 } jet_log_level;
 
 void jet_log_output(jet_log_level level, const char* fmt, ...);
+void jet_assert_fail(const char* expr, const char* msg, const char* file, int line);
 
 #define JET_LOG_ENABLE_WARNING  1
 #define JET_LOG_ENABLE_INFO     1
 #define JET_LOG_ENABLE_DEBUG    1
+#define JET_ASSERTION_ENABLED
 
 #define JET_FATAL(fmt, ...) \
     jet_log_output(JET_LOG_LEVEL_FATAL, fmt, ##__VA_ARGS__)
@@ -45,6 +47,38 @@ void jet_log_output(jet_log_level level, const char* fmt, ...);
 #endif
 
 
+#ifdef JET_ASSERTION_ENABLED
+
+#if _MSC_VER
+#include <intrin.h>
+#define JET_DEBUG_BREAK() __debugBreak()
+#else
+#define JET_DEBUG_BREAK() __builtin_trap()
+#endif
+#define JET_ASSERT(expr)                                \
+{                                                       \
+    if(expr){}                                          \
+    else                                                \
+    {                                                   \
+        jet_assert_fail(#expr, "", __FILE__, __LINE__); \
+        JET_DEBUG_BREAK();                              \
+    }                                                   \
+}
+
+#define JET_ASSERT_MSG(expr, msg)                        \
+{                                                        \
+    if(expr){}                                           \
+    else                                                 \
+    {                                                    \
+        jet_assert_fail(#expr, msg, __FILE__, __LINE__); \
+        JET_DEBUG_BREAK();                               \
+    }                                                    \
+}
+#else
+#define JET_ASSERT(expr)
+#define JET_ASSERT_MSG(expr, msg)
+#endif
+
 #ifdef JET_LOGGER_IMPL
 
 #include <string.h>
@@ -71,4 +105,10 @@ void jet_log_output(jet_log_level level, const char* fmt, ...)
     printf("%s", out_buf);
 }
 
+void jet_assert_fail(const char* expr, const char* msg, const char* file, int line)
+{
+    jet_log_output(JET_LOG_LEVEL_FATAL, 
+           "Assertion failed: %s, msg: %s, in file: %s, line: %d.\n", 
+            expr, msg, file, line);
+}
 #endif
