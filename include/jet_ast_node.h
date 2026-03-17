@@ -1,7 +1,7 @@
 #pragma once
 #include <jet_token.h>
 #include <jet_da.h>
-#include <jet_span.h>
+#include <jet_atom.h>
 #include <jet_type.h>
 
 #include <stdbool.h>
@@ -114,7 +114,7 @@ typedef struct jet_ast_node_unop
 struct jet_ast_node
 {
     jet_ast_node_type node_type;
-    jet_span span;
+    jet_atom span;
     union
     {
         jet_ast_node_prog prog;

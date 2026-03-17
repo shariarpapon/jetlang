@@ -1,5 +1,3 @@
-#define JET_DBG_PRINT_AST
-
 #include <jet_compilation_unit.h>
 #include <stdio.h>
 #include <assert.h>
@@ -30,13 +28,16 @@ int main(int argc, char** argv)
     SetConsoleMode(hOut, dwMode);
 #endif
 
-    printf("\nall modules built successfully!\n");
+    printf("\n");
+    JET_INFO("all modules built successfully!");
     jet_init_args(argc, argv);
 
     if(jet_compile(jet_get_filepath()))
-        printf("\ninput compiled successfully.\n");
+        JET_INFO("input compiled successfully.");
     else 
-        printf("\nfailed to compile input.");
+        JET_INFO("failed to compile input.");
+    
+    printf("\n");
 }
 
 static bool jet_compile(const char* filepath)
@@ -66,7 +67,7 @@ static const char* jet_get_arg_at(size_t index)
 {
     if(index >= arg_count)
     {
-        JET_ERROR("cannot get arg, index = %zu is out of bounds.\n", index); 
+        JET_ERROR("cannot get arg, index = %zu is out of bounds.", index); 
         abort();
         return NULL;
     }

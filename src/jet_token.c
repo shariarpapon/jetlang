@@ -15,7 +15,7 @@ bool jet_token_init(jet_token* token, jet_token_type tok_type, const char* lexem
     token->lexeme = lexeme;
     token->line = line;
     token->col = col;
-    if(!jet_span_init(&token->span, start_cursor, end_cursor))
+    if(!jet_atom_init(&token->span, start_cursor, end_cursor))
     {
         JET_ERROR( "err: failed to init token, unable to init span.\n");
         return false;
@@ -27,7 +27,7 @@ bool jet_token_dispose(jet_token* token)
 {
     if(!token) 
         return false;
-    jet_span_dispose(&token->span);
+    jet_atom_dispose(&token->span);
     memset(token, 0, sizeof(*token));
     return true;
 }

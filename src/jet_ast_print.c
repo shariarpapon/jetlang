@@ -214,10 +214,7 @@ static const char* jet_astp_resolve_node_str(jet_ast_printer* p, const jet_ast_n
             break;
         }
         case AST_TYPE_DECL:
-            jet_sb_appendf(&p->sb, 
-                    "%s, %zu", 
-                    n->as.tdecl.tname, 
-                    n->as.tdecl.byte_size);
+            jet_sb_append_cstr(&p->sb, n->as.tdecl.tname);
             break;
         case AST_BINOP:    
         {
@@ -356,6 +353,7 @@ void jet_ast_print(const jet_ast* ast)
     ANSI_PRINTF(ANSI_GREY1, "\n=====================================\n");
 
     jet_astp_print_nid_da(&p, "top_level", &ast->top_nid_da, 0);
+    printf("\n");
     
     jet_astp_dispose(&p);
 }

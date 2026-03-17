@@ -1,6 +1,6 @@
 #pragma once
 #include <jet_da.h>
-#include <jet_span.h>
+#include <jet_atom.h>
 
 #include <stdint.h>
 
@@ -97,7 +97,7 @@ typedef struct jet_token
 {
     const char* lexeme;
     jet_token_type type;
-    jet_span span;
+    jet_atom span;
     uint32_t line;
     uint32_t col;
 } jet_token;
