@@ -116,7 +116,7 @@ bool jet_lexer_init(jet_lexer* lexer, const char* input, jet_da* token_da)
     assert(lexer != NULL && "cannot init, param lexer is null");
     if(!input || !token_da)
     {
-        JET_ERROR( "err: cannot init, invalid param/s.\n");
+        JET_ERROR(" cannot init, invalid param/s.\n");
         return false;
     }
     memset(lexer, 0, sizeof(*lexer)); 
@@ -184,13 +184,13 @@ static void jet_lexer_emit_token(jet_lexer* lexer, size_t start_cursor, size_t l
                 lexer->cur_line, 
                 lexer->cur_col - len))
     {
-        JET_ERROR( "err: failed to emit token, could not init token.\n");
+        JET_ERROR(" failed to emit token, could not init token.\n");
         return;
     }
 
     if(!jet_da_append(lexer->token_da, (const void*)&tok))
     {
-        JET_ERROR( "error: failed to emit token, could not push token.\n");
+        JET_ERROR(": failed to emit token, could not push token.\n");
         return;
     }
 }
@@ -276,7 +276,7 @@ static bool jet_lexer_try_get_cmpd_punct_type(char left, char right, jet_token_t
 {
     if(!out_tok_type)
     {
-        JET_ERROR( "error: invalid output pointer\n");
+        JET_ERROR(": invalid output pointer\n");
         return false;
     }
     

@@ -15,12 +15,12 @@ bool jet_ast_init(jet_ast* ast)
     ast->node_count = 0;
     if( !jet_da_init(&ast->node_registry, 32, sizeof(jet_ast_node)) )
     {
-        JET_ERROR( "err: failed to init node_registry DA.\n");
+        JET_ERROR(" failed to init node_registry DA.\n");
         return false;
     }
     if( !jet_da_init(&ast->top_nid_da, 16, sizeof(node_id)) )
     {
-        JET_ERROR( "err: failed to init top_node_nid_da DA.\n");
+        JET_ERROR(" failed to init top_node_nid_da DA.\n");
         jet_da_dispose(&ast->node_registry);
         return false;
     } 
@@ -49,7 +49,7 @@ node_id jet_ast_register_node(jet_ast* ast, const jet_ast_node* node)
     assert(node != NULL && "cannot register node, param node is null");
     if(!jet_da_append(&ast->node_registry, (const void*)node))
     {
-        JET_ERROR( "err: failed to register node, unable to append.\n");
+        JET_ERROR(" failed to register node, unable to append.\n");
         abort();
         return INVALID_NID;
     }
@@ -63,7 +63,7 @@ bool jet_ast_push_nid(jet_ast* ast, node_id nid)
     const jet_ast_node* node = jet_ast_node_get(ast, nid);
     if(node == NULL)
     {
-        JET_ERROR( "err: nid=%zu does not exist in registry.\n", nid);
+        JET_ERROR(" nid=%zu does not exist in registry.\n", nid);
         return false;
     }
     if(node->node_type == AST_PROG)
@@ -72,7 +72,7 @@ bool jet_ast_push_nid(jet_ast* ast, node_id nid)
             ast->prog_nid = nid;
         else
         {
-            JET_ERROR( "error: cannot push node to ast, multiple program entry points.\n");
+            JET_ERROR(": cannot push node to ast, multiple program entry points.\n");
             return false;
         }
     }
@@ -87,13 +87,13 @@ const jet_ast_node* jet_ast_node_get(const jet_ast* ast, node_id nid)
     assert(ast != NULL && "cannot get node with specified nid, ast is null");
     if(nid == INVALID_NID)
     {
-        JET_ERROR( "err: cannot get node with id=%zu, this id internally represents invalid node.\n", (size_t)INVALID_NID);
+        JET_ERROR(" cannot get node with id=%zu, this id internally represents invalid node.\n", (size_t)INVALID_NID);
         return NULL;
     }
 
     if(nid - 1 >= jet_da_count(&ast->node_registry))
     {
-        JET_ERROR( "err: cannot get node, index out of bounds.\n");
+        JET_ERROR(" cannot get node, index out of bounds.\n");
         return NULL;
     }
 
@@ -101,7 +101,7 @@ const jet_ast_node* jet_ast_node_get(const jet_ast* ast, node_id nid)
     const jet_ast_node* node = (const jet_ast_node*)jet_da_get(&ast->node_registry, nid - 1);
     if(!node)
     {
-        JET_ERROR( "err: node with id=%zu does not exist in registry.\n", nid);
+        JET_ERROR(" node with id=%zu does not exist in registry.\n", nid);
         return NULL;
     }
     return node;

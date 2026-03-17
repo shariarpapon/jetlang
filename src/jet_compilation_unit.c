@@ -59,7 +59,7 @@ bool jet_cu_run(jet_compilation_unit* cu)
 {
     if(!cu)
     {
-        JET_ERROR( "err: failed to compile, arg <cu> is null.\n");
+        JET_ERROR(" failed to compile, arg <cu> is null.\n");
         return false;
     } 
 
@@ -89,7 +89,7 @@ bool jet_cu_run(jet_compilation_unit* cu)
     return true;
 
 fail:
-    JET_ERROR( "err: abrupt compilation failure.\n");
+    JET_ERROR(" abrupt compilation failure.\n");
     if(lexer_init) jet_lexer_dispose(&lexer);
     if(parser_init) jet_parser_dispose(&parser);
     return false;

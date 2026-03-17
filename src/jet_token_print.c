@@ -13,7 +13,7 @@ void jet_token_tprint_da(const jet_da* tokens)
 {
     if(!tokens)
     {
-        JET_ERROR("error: cannot print tokens, token tokens null.");
+        JET_ERROR(": cannot print tokens, token tokens null.");
         return;
     }
     size_t len = jet_da_count(tokens);
