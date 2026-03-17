@@ -23,11 +23,11 @@ jetlang is an experiemental programming language and compiler project. I mainly 
 ### Step 2: Compile
 
 #### With make
-    Simply run:
+##### Simply run:
     make
 
 #### Without make
-    Compile all .c files manually with GCC, including the header directories:
+##### Compile all .c files manually with GCC, including the header directories:
     gcc -Iinclude -Iutils src/*.c utils/*.c -o jet
 
 ### Step 3: Run
