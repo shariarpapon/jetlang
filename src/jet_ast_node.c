@@ -1,4 +1,5 @@
 #include <jet_ast_node.h>
+#include <jet_logger.h>
 
 #include <string.h>
 #include <stdio.h>
@@ -10,7 +11,7 @@ bool jet_ast_node_init(jet_ast_node* node, jet_ast_node_type type, size_t start_
     node->node_type = type;
     if(!jet_span_init(&node->span, start_cursor, end_cursor))
     {
-        fprintf(stderr, "failed to init node, unable to init span.\n");
+        JET_ERROR( "failed to init node, unable to init span.\n");
         return false;
     }
     return true;

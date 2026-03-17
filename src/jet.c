@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <jet_io.h>
+#include <jet_logger.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -65,7 +66,7 @@ static const char* jet_get_arg_at(size_t index)
 {
     if(index >= arg_count)
     {
-        fprintf(stderr, "cannot get arg, index = %zu is out of bounds.\n", index); 
+        JET_ERROR("cannot get arg, index = %zu is out of bounds.\n", index); 
         abort();
         return NULL;
     }

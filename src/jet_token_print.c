@@ -1,6 +1,7 @@
 #include <jet_token_print.h>
 #include <jet_token.h>
 #include <jet_da.h>
+#include <jet_logger.h>
 
 #include <stdio.h>
 #include <inttypes.h>
@@ -12,7 +13,7 @@ void jet_token_tprint_da(const jet_da* tokens)
 {
     if(!tokens)
     {
-        fprintf(stderr, "error: cannot print tokens, token tokens null.\n");
+        JET_ERROR("error: cannot print tokens, token tokens null.\n");
         return;
     }
     size_t len = jet_da_count(tokens);

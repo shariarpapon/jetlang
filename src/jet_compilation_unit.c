@@ -1,9 +1,9 @@
 #include <jet_compilation_unit.h>
 #include <jet_io.h>
-
 #include <jet_config.h>
 #include <jet_token_print.h>
 #include <jet_ast_print.h>
+#include <jet_logger.h>
 
 #include <string.h>
 #include <stdio.h>
@@ -59,7 +59,7 @@ bool jet_cu_run(jet_compilation_unit* cu)
 {
     if(!cu)
     {
-        fprintf(stderr, "err: failed to compile, arg <cu> is null.\n");
+        JET_ERROR( "err: failed to compile, arg <cu> is null.\n");
         return false;
     } 
 
@@ -89,7 +89,7 @@ bool jet_cu_run(jet_compilation_unit* cu)
     return true;
 
 fail:
-    fprintf(stderr, "err: abrupt compilation failure.\n");
+    JET_ERROR( "err: abrupt compilation failure.\n");
     if(lexer_init) jet_lexer_dispose(&lexer);
     if(parser_init) jet_parser_dispose(&parser);
     return false;
