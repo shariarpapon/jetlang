@@ -5,7 +5,7 @@ jetlang is an experiemental programming language and compiler project. I mainly 
 ## Features
 
 - Custom syntax and AST parsing utility.
-- All tools and data structures (arena allocator, hashtables, logger, etc) built from scratch using standard C libraries.
+- All tools and data structures (arena allocator, hashtables, logger, etc) built as stb-style libraries from scratch.
 - Modular design focusing on clarity and runtime memory safety.
 - Pretty printing utilities (for data structures) for debug purposes.
 
