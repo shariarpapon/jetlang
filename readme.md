@@ -4,10 +4,10 @@ jetlang is a experiemental programming language and compiler project. I mainly s
 
 ## Features
 
-- **Custom syntax and AST parsing utility.
-- **All tools developed from scratch with standard C libraries.
-- **Modular design focusing on clarity and runtime memory safety.
-- **Pretty printing utilities (for data structures) for debug purposes.
+- Custom syntax and AST parsing utility.
+- All tools developed from scratch with standard C libraries.
+- Modular design focusing on clarity and runtime memory safety.
+- Pretty printing utilities (for data structures) for debug purposes.
 
 ## Getting Started
 
