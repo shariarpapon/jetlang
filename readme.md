@@ -33,8 +33,8 @@ jetlang is an experiemental programming language and compiler project. I mainly 
 ### Step 3: Run
 
 - Linux:
-./jet [filename]
+    ./jet [filename]
 
 - Windows:
-jet.exe [filename]
+    jet.exe [filename]
 
