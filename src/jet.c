@@ -50,8 +50,8 @@ static bool jet_compile(const char* filepath)
 
 static void jet_init_args(int argc, char** argv)
 {
-    assert(argv != NULL && "err: argv is null.");
-    assert(argc >= 2 && "err: required arg/s not supplied.");
+    JET_ASSERT(argv != NULL);
+    JET_ASSERT(*argv != NULL)
     arg_count = argc;
     args = argv; 
 }
@@ -59,7 +59,7 @@ static void jet_init_args(int argc, char** argv)
 static const char* jet_get_filepath()
 { 
     const char* filepath = jet_get_arg_at(1);
-    assert(filepath != NULL && "err: no valid filepath provided for arg1.\n");
+    JET_ASSERT_MSG(filepath != NULL, "no valid filepath arg.");
     return filepath;
 }
 
@@ -67,9 +67,7 @@ static const char* jet_get_arg_at(size_t index)
 {
     if(index >= arg_count)
     {
-        JET_ERROR("cannot get arg, index = %zu is out of bounds.", index); 
-        abort();
-        return NULL;
+        JET_FATAL("cannot get arg, index = %zu is out of bounds.", index); 
     }
     char** temp = args;
     for(size_t i = 0; i < index; i++)

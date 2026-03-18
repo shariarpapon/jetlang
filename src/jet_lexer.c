@@ -113,10 +113,10 @@ static char jet_lexer_peek_next(jet_lexer* lexer);
 //lexer should be zero initialized, otherwise memory leak may occure if called with already initialized lexer.
 bool jet_lexer_init(jet_lexer* lexer, const char* input, jet_da* token_da)
 {
-    assert(lexer != NULL && "cannot init, param lexer is null");
+    JET_ASSERT(lexer != NULL);
     if(!input || !token_da)
     {
-        JET_ERROR(" cannot init, invalid param/s.\n");
+        JET_ERROR("cannot init, invalid param/s.");
         return false;
     }
     memset(lexer, 0, sizeof(*lexer)); 
@@ -131,7 +131,7 @@ bool jet_lexer_init(jet_lexer* lexer, const char* input, jet_da* token_da)
 
 void jet_lexer_reset(jet_lexer* lexer)
 {
-    assert(lexer != NULL && "cannot reset, param lexer is null.");
+    JET_ASSERT(lexer != NULL);
     lexer->cursor = 0;
     lexer->cur_line = 1;
     lexer->cur_col = 1;
@@ -146,8 +146,7 @@ void jet_lexer_dispose(jet_lexer* lexer)
 
 bool jet_lexer_tokenize(jet_lexer* lexer)
 {
-    assert(lexer != NULL && "cannot tokenizer, lexer is null.");
-    //TEST
+    JET_ASSERT(lexer != NULL);
     while(true)
     {
         if(jet_lexer_peek(lexer) == NULL_TERM)
@@ -173,6 +172,7 @@ bool jet_lexer_tokenize(jet_lexer* lexer)
 
 static void jet_lexer_emit_token(jet_lexer* lexer, size_t start_cursor, size_t len, jet_token_type tok_type)
 {
+    JET_ASSERT(lexer != NULL);
     jet_token tok;
     const char* lexeme = lexer->input + start_cursor;
     if(!jet_token_init(
@@ -232,9 +232,11 @@ static bool jet_lexer_is_digit(char c)
 
 static bool jet_lexer_try_get_kwd_type(const char* s, size_t len, jet_token_type* out_tok_type)
 { 
+    if(!s) 
+        return false;
     if(!out_tok_type)
     {
-        perror("invalid output pointer");
+        JET_ERROR("output token type pointer out_tok_type is null.");
         return false;
     }
 
@@ -257,7 +259,7 @@ static bool jet_lexer_try_get_punct_type(char c, jet_token_type* out_tok_type)
 {
     if(!out_tok_type)
     {
-        perror("invalid output pointer");
+        JET_ERROR("output token type pointer out_tok_type is null.");
         return false;
     }
     
@@ -276,7 +278,7 @@ static bool jet_lexer_try_get_cmpd_punct_type(char left, char right, jet_token_t
 {
     if(!out_tok_type)
     {
-        JET_ERROR(": invalid output pointer\n");
+        JET_ERROR("output token type pointer out_tok_type is null.");
         return false;
     }
     
@@ -294,6 +296,7 @@ static bool jet_lexer_try_get_cmpd_punct_type(char left, char right, jet_token_t
 
 static bool jet_lexer_try_scan_str_lit(jet_lexer* lexer)
 {
+    JET_ASSERT(lexer != NULL);
     if(jet_lexer_peek(lexer) != STRING_QUOTE)
         return false;
 
@@ -320,6 +323,7 @@ static bool jet_lexer_try_scan_str_lit(jet_lexer* lexer)
 
 static bool jet_lexer_try_scan_num_lit(jet_lexer* lexer)
 {
+    JET_ASSERT(lexer != NULL);
     bool float_flag = false;
     size_t start_cursor = lexer->cursor;
     if(!jet_lexer_is_digit(jet_lexer_peek(lexer)))
@@ -357,14 +361,13 @@ static bool jet_lexer_try_scan_num_lit(jet_lexer* lexer)
 
 static bool jet_lexer_try_scan_char_lit(jet_lexer* lexer)
 {
+    JET_ASSERT(lexer != NULL);
     if(jet_lexer_peek(lexer) != CHAR_QUOTE) 
         return false;
-    
     size_t start_cursor = lexer->cursor;
     jet_lexer_consume(lexer);
     if(jet_lexer_peek_next(lexer) != CHAR_QUOTE) 
         return false;
-
     jet_lexer_consume(lexer);
     jet_lexer_consume(lexer);
     jet_lexer_emit_token(lexer, start_cursor, 3, TOK_LIT_CHAR);
@@ -373,14 +376,13 @@ static bool jet_lexer_try_scan_char_lit(jet_lexer* lexer)
 
 static bool jet_lexer_try_scan_ident(jet_lexer* lexer)
 {
+    JET_ASSERT(lexer != NULL);
     if(jet_lexer_is_ident(jet_lexer_peek(lexer)) == false)
     {
         return false;
     }
-
     size_t start_cursor = lexer->cursor;
     jet_lexer_consume(lexer);
-
     while(jet_lexer_is_ident(jet_lexer_peek(lexer))
        || jet_lexer_is_digit(jet_lexer_peek(lexer)))
     {
@@ -394,8 +396,8 @@ static bool jet_lexer_try_scan_ident(jet_lexer* lexer)
 
 static bool jet_lexer_try_scan_punct(jet_lexer* lexer)
 {
+    JET_ASSERT(lexer != NULL);
     char left = jet_lexer_peek(lexer);
-
     jet_token_type emit_tok_type = TOK_INV;
     if(!jet_lexer_try_get_punct_type(left, &emit_tok_type))
         return false;
@@ -410,6 +412,7 @@ static bool jet_lexer_try_scan_punct(jet_lexer* lexer)
 
 static bool jet_lexer_try_scan_line_com(jet_lexer* lexer)
 {
+    JET_ASSERT(lexer != NULL);
     if(jet_lexer_peek(lexer) != '/' || jet_lexer_peek_next(lexer) != '/')
     {
         return false;
@@ -430,6 +433,7 @@ static bool jet_lexer_try_scan_line_com(jet_lexer* lexer)
 
 static bool jet_lexer_try_scan_block_com(jet_lexer* lexer)
 {
+    JET_ASSERT(lexer != NULL);
     if(jet_lexer_peek(lexer) != '/' || jet_lexer_peek_next(lexer) != '*')
     {
         return false;
@@ -446,12 +450,12 @@ static bool jet_lexer_try_scan_block_com(jet_lexer* lexer)
         }
         jet_lexer_consume(lexer);
     }
-
     return false;
 }
 
 static bool jet_lexer_try_scan_whitespace(jet_lexer* lexer)
 {
+    JET_ASSERT(lexer != NULL);
     switch(jet_lexer_peek(lexer))
     {
         case '\n':
@@ -470,6 +474,7 @@ static bool jet_lexer_try_scan_whitespace(jet_lexer* lexer)
 
 static char jet_lexer_peek_next(jet_lexer* lexer)
 {
+    JET_ASSERT(lexer != NULL);
     size_t next = lexer->cursor + 1;
     if(next >= lexer->input_len)
         return NULL_TERM;
@@ -478,17 +483,17 @@ static char jet_lexer_peek_next(jet_lexer* lexer)
 
 static char jet_lexer_peek(jet_lexer* lexer)
 {
+    JET_ASSERT(lexer != NULL);
     return lexer->input[lexer->cursor];
 }
 
 static char jet_lexer_consume(jet_lexer* lexer)
 {
+    JET_ASSERT(lexer != NULL);
     if(lexer->cursor >= lexer->input_len)
         return NULL_TERM;
     char c = jet_lexer_peek(lexer);
-
     lexer->cursor++;
-
     if(c == '\t')
         lexer->cur_col += TAB_WIDTH - ((lexer->cur_col  - 1) % TAB_WIDTH);
     else if(c == '\n')
@@ -496,9 +501,7 @@ static char jet_lexer_consume(jet_lexer* lexer)
         lexer->cur_line++;
         lexer->cur_col = 1;
     }
-    else 
-        lexer->cur_col++;
-
+    else lexer->cur_col++;
     return c;
 }
 

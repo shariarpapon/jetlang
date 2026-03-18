@@ -9,18 +9,18 @@
 // should be fresh ast init, otherwise memory leak will occure.
 bool jet_ast_init(jet_ast* ast)
 {
-    assert(ast != NULL && "cannot init, param ast is null");  
+    JET_ASSERT(ast != NULL);
     memset(ast, 0, sizeof(*ast)); 
     ast->prog_nid = INVALID_NID;
     ast->node_count = 0;
-    if( !jet_da_init(&ast->node_registry, 32, sizeof(jet_ast_node)) )
+    if(!jet_da_init(&ast->node_registry, 32, sizeof(jet_ast_node)) )
     {
-        JET_ERROR(" failed to init node_registry DA.\n");
+        JET_FATAL("failed to init node_registry DA.");
         return false;
     }
     if( !jet_da_init(&ast->top_nid_da, 16, sizeof(node_id)) )
     {
-        JET_ERROR(" failed to init top_node_nid_da DA.\n");
+        JET_FATAL("failed to init top_node_nid_da DA.");
         jet_da_dispose(&ast->node_registry);
         return false;
     } 
@@ -30,7 +30,6 @@ bool jet_ast_init(jet_ast* ast)
 void jet_ast_dispose(jet_ast* ast)
 {
     if(!ast) return;
-    
     for(size_t i = 0; i < jet_da_count(&ast->node_registry); i++)
     {
         void* node = jet_da_get(&ast->node_registry, i);
@@ -45,8 +44,8 @@ void jet_ast_dispose(jet_ast* ast)
 
 node_id jet_ast_register_node(jet_ast* ast, const jet_ast_node* node)
 {
-    assert(ast != NULL && "cannot register node, ast is null");
-    assert(node != NULL && "cannot register node, param node is null");
+    JET_ASSERT(ast != NULL);
+    JET_ASSERT(node != NULL);
     if(!jet_da_append(&ast->node_registry, (const void*)node))
     {
         JET_ERROR(" failed to register node, unable to append.\n");
@@ -59,11 +58,11 @@ node_id jet_ast_register_node(jet_ast* ast, const jet_ast_node* node)
 
 bool jet_ast_push_nid(jet_ast* ast, node_id nid)
 {
-    assert(ast != NULL && "cannot push nid, ast is null.");
+    JET_ASSERT(ast != NULL);
     const jet_ast_node* node = jet_ast_node_get(ast, nid);
     if(node == NULL)
     {
-        JET_ERROR(" nid=%zu does not exist in registry.\n", nid);
+        JET_ERROR("nid=%zu does not exist in registry.", nid);
         return false;
     }
     if(node->node_type == AST_PROG)
@@ -72,7 +71,7 @@ bool jet_ast_push_nid(jet_ast* ast, node_id nid)
             ast->prog_nid = nid;
         else
         {
-            JET_ERROR(": cannot push node to ast, multiple program entry points.\n");
+            JET_ERROR("cannot push node to ast, multiple program entry points.");
             return false;
         }
     }
@@ -84,16 +83,16 @@ bool jet_ast_push_nid(jet_ast* ast, node_id nid)
 
 const jet_ast_node* jet_ast_node_get(const jet_ast* ast, node_id nid)
 {
-    assert(ast != NULL && "cannot get node with specified nid, ast is null");
+    JET_ASSERT(ast != NULL);
     if(nid == INVALID_NID)
     {
-        JET_ERROR(" cannot get node with id=%zu, this id internally represents invalid node.\n", (size_t)INVALID_NID);
+        JET_WARNING("id=%zu represents invalid node id.", (size_t)INVALID_NID);
         return NULL;
     }
 
     if(nid - 1 >= jet_da_count(&ast->node_registry))
     {
-        JET_ERROR(" cannot get node, index out of bounds.\n");
+        JET_ERROR("cannot get node, index out of bounds.");
         return NULL;
     }
 
@@ -101,7 +100,7 @@ const jet_ast_node* jet_ast_node_get(const jet_ast* ast, node_id nid)
     const jet_ast_node* node = (const jet_ast_node*)jet_da_get(&ast->node_registry, nid - 1);
     if(!node)
     {
-        JET_ERROR(" node with id=%zu does not exist in registry.\n", nid);
+        JET_ERROR("could not fetch node with id=%zu from registry, likely node this nid does not exist.", nid);
         return NULL;
     }
     return node;
@@ -109,13 +108,13 @@ const jet_ast_node* jet_ast_node_get(const jet_ast* ast, node_id nid)
 
 const jet_da* jet_ast_get_top_nid_da(const jet_ast* ast)
 {
-    assert(ast != NULL && "cannot get top_nid_da, ast is null");
+    JET_ASSERT(ast != NULL);
     return (const jet_da*)&ast->top_nid_da;
 }
 
 node_id jet_ast_get_prog_nid(const jet_ast* ast)
 {
-    assert(ast != NULL && "cannot get prog nid, ast is null");
+    JET_ASSERT(ast != NULL);
     return ast->prog_nid;
 }
 

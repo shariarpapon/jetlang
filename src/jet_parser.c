@@ -41,9 +41,10 @@ static node_id jet_parser_parse_fparam(jet_parser* p);
 // EXPOSED===
 bool jet_parser_init(jet_parser* p, const jet_da* tok_da, jet_ast* ast)
 {
-    if(!p || !tok_da || !ast)
+    JET_ASSERT(p != NULL);
+    if(!tok_da || !ast)
     {
-        JET_ERROR(" could not init parser, null param.\n");
+        JET_ERROR("could not init parser, null param/s.");
         return false;
     }
     memset(p, 0 , sizeof(*p));
@@ -62,7 +63,7 @@ bool jet_parser_dispose(jet_parser* p)
 
 bool jet_parser_parse(jet_parser* p)
 {
-    assert(p != NULL && "cannot parse, parser is null.");
+    JET_ASSERT(p != NULL);
     if(jet_da_count(p->tok_da) == 0)
         return true;
 
@@ -74,13 +75,13 @@ bool jet_parser_parse(jet_parser* p)
         if(t == TOK_INV)
         {
             const jet_token* tk = jet_parser_peek_tok(p);
-            JET_ERROR(" at [line:%"PRIu32", col:%"PRIu32"] cannot continue parsing, invalid token encountered.\n", tk->line, tk->col);
+            JET_ERROR("at [line:%"PRIu32", col:%"PRIu32"] cannot continue parsing, invalid token encountered.", tk->line, tk->col);
             return false;
         }
         node_id nid = jet_parser_parse_next_stmt(p);
         if(nid == INVALID_NID)
         {
-            JET_ERROR(": cannot continue parsing, unable to parse next stmt.\n");        
+            JET_ERROR("cannot continue parsing, unable to parse next stmt.");        
             return false;
         }
         jet_ast_push_nid(p->ast, nid);
@@ -90,21 +91,26 @@ bool jet_parser_parse(jet_parser* p)
 
 static const char* jet_parser_create_type_name(const jet_token* tok, bool* is_primitive)
 {
-    jet_token_type tok_type = tok->type;
-    *is_primitive = true;
-    
-    jet_sb sb;
-    if(!jet_sb_init(&sb, 32))
+    if(!tok)
     {
-        JET_ERROR(" cannot parse, failed to get type name, unable to init sb.\n");
+        JET_ERROR("cannot create type name, given token is null.");
         return NULL;
     }
-
+    if(!is_primitive)
+    {
+        JET_ERROR("cannot create type name, output pointer is_primitive is null.");
+        return NULL;
+    }
+    jet_token_type tok_type = tok->type;
+    *is_primitive = true; 
+    jet_sb sb;
+    if(!jet_sb_init(&sb, 32))
+        JET_FATAL("cannot create type name, failed to init sb");
     switch(tok_type)
     {
         default:
         {
-            JET_ERROR(" token type (enum-id: %d) is not a type token.\n", (int)tok_type);
+            JET_ERROR("token type (enum-id: %d) is not a jet_type token.", (int)tok_type);
             goto fail;
         }
         case TOK_IDENT: 
@@ -113,7 +119,7 @@ static const char* jet_parser_create_type_name(const jet_token* tok, bool* is_pr
             const char* tok_str = jet_token_strdup(tok);
             if(!tok_str)
             {
-                JET_ERROR(" cannot parse, failed to dup token str.\n");
+                JET_ERROR("cannot parse, failed to dup token str.");
                 goto fail;
             }
             jet_sb_append_cstr(&sb, tok_str);
@@ -150,10 +156,9 @@ static const char* jet_parser_create_type_name(const jet_token* tok, bool* is_pr
     const char* name = jet_sb_dup(&sb);
     if(!name)
     {
-        JET_ERROR(" cannot parse, failed to get type name, unable to dup sb.\n");
+        JET_ERROR("cannot parse, failed to get type name, unable to dup sb.\n");
         goto fail;
-    }
-    
+    } 
     jet_sb_dispose(&sb);
     return name;
 
@@ -172,7 +177,7 @@ static const jet_token* jet_parser_peek_prev_tok(jet_parser* p)
 
 static const jet_token* jet_parser_peekn_tok(jet_parser* p, size_t n)
 { 
-    assert(p != NULL && "cannot peek nth tok, parser is null");
+    JET_ASSERT(p != NULL);
     size_t count = jet_da_count(p->tok_da);
     if(count == 0 || n >= count - p->tok_cursor) 
         return NULL; 
@@ -181,13 +186,13 @@ static const jet_token* jet_parser_peekn_tok(jet_parser* p, size_t n)
 
 static const jet_token* jet_parser_peek_tok(jet_parser* p)
 {
-    assert(p != NULL && "cannot peek tok, parser is null.");
+    JET_ASSERT(p != NULL);
     return jet_parser_peekn_tok(p, 0);
 }
 
 static jet_token_type jet_parser_peekn_tok_type(jet_parser* p, size_t n)
 {
-    assert(p != NULL && "cannot peek nth tok type, parser is null");
+    JET_ASSERT(p != NULL);
     const jet_token* tok = jet_parser_peekn_tok(p, n);
     if(tok == NULL)
         return TOK_EOF;
@@ -196,12 +201,16 @@ static jet_token_type jet_parser_peekn_tok_type(jet_parser* p, size_t n)
 
 static const jet_token* jet_parser_expect_tok(jet_parser* p, jet_token_type tok_type)
 {
-    assert(p != NULL && "cannot expect tok, parser is null");
+    JET_ASSERT(p != NULL);
     const jet_token* tok = jet_parser_peek_tok(p);
     if(!tok) return NULL;
     if(tok->type != tok_type)
     {
-        JET_ERROR(": expected token type (id: %d) but encountered (id: %d).\n", (int)tok_type, (int)tok->type);
+        const char* exp_tok = jet_token_type_str(tok_type);
+        const char* enc_tok = jet_token_type_str(tok->type);
+        JET_ERROR("expected token type %s but encountered %s.", exp_tok, enc_tok);
+        free((void*)exp_tok);
+        free((void*)enc_tok);
         return NULL;
     }
     return jet_parser_consume_tok(p);
@@ -209,7 +218,7 @@ static const jet_token* jet_parser_expect_tok(jet_parser* p, jet_token_type tok_
 
 static const jet_token* jet_parser_consume_tok(jet_parser* p)
 {
-    assert(p != NULL && "cannot consume tok, parser is null");
+    JET_ASSERT(p != NULL);
     if(p->tok_cursor >= jet_da_count(p->tok_da))
         return NULL;
     p->tok_cursor++;
@@ -236,7 +245,7 @@ static bool jet_parser_is_type_tok(jet_token_type tok_type)
 
 static bool jet_parser_is_vdecl(jet_parser* p)
 {
-    assert(p != NULL && "cannot parse next stmt, parser is null.");
+    JET_ASSERT(p != NULL);
     jet_token_type t0 = jet_parser_peekn_tok_type(p, 0);
     return jet_parser_is_type_tok(t0) && 
            jet_parser_peekn_tok_type(p, 1) == TOK_IDENT &&
@@ -246,7 +255,7 @@ static bool jet_parser_is_vdecl(jet_parser* p)
 
 static bool jet_parser_is_func_head(jet_parser* p)
 {
-    assert(p != NULL && "cannot parse next stmt, parser is null.");
+    JET_ASSERT(p != NULL);
     jet_token_type t = jet_parser_peekn_tok_type(p, 0);
     return jet_parser_is_type_tok(t) &&
            jet_parser_peekn_tok_type(p, 1) == TOK_IDENT &&
@@ -255,7 +264,7 @@ static bool jet_parser_is_func_head(jet_parser* p)
 
 static node_id jet_parser_parse_next_stmt(jet_parser* p)
 {
-    assert(p != NULL && "cannot parse next stmt, parser is null.");
+    JET_ASSERT(p != NULL);
     node_id parsed_nid = INVALID_NID;
     jet_token_type t = jet_parser_peekn_tok_type(p, 0);
     
@@ -263,7 +272,7 @@ static node_id jet_parser_parse_next_stmt(jet_parser* p)
         return INVALID_NID;
     else if(t == TOK_INV)
     {
-        JET_ERROR(": cannot parse next stmt, invalid token.\n");
+        JET_ERROR("cannot parse next stmt, invalid token.");
         return INVALID_NID; 
     }    
     else if(t == TOK_KWD_PROG)
@@ -271,7 +280,7 @@ static node_id jet_parser_parse_next_stmt(jet_parser* p)
         parsed_nid = jet_parser_prog_parse(p);
         if(parsed_nid == INVALID_NID)
         {
-            JET_ERROR(": unable to parse next stmt (prog)\n");
+            JET_ERROR("unable to parse next stmt (prog)");
             return INVALID_NID;
         }
     }
@@ -280,7 +289,7 @@ static node_id jet_parser_parse_next_stmt(jet_parser* p)
         parsed_nid = jet_parser_vdecl_parse(p);
         if(parsed_nid == INVALID_NID)
         {
-            JET_ERROR(": cannot parse next stmt (vdecl)\n");
+            JET_ERROR("cannot parse next stmt (vdecl)");
             return INVALID_NID;
         }
     }
@@ -289,7 +298,7 @@ static node_id jet_parser_parse_next_stmt(jet_parser* p)
         parsed_nid = jet_parser_func_parse(p);
         if(parsed_nid == INVALID_NID)
         {
-            JET_ERROR(": cannot parse next stmt (func)\n");
+            JET_ERROR("cannot parse next stmt (func)");
             return INVALID_NID;
         }
     }
@@ -298,29 +307,29 @@ static node_id jet_parser_parse_next_stmt(jet_parser* p)
         parsed_nid = jet_parser_parse_expr_stmt(p);
         if(parsed_nid == INVALID_NID)
         {
-            JET_ERROR("cannot parse next stmt, expected expression statement.\n");
+            JET_ERROR("cannot parse next stmt, expected expression statement.");
             return INVALID_NID;
         }
     }
 
     if(parsed_nid == INVALID_NID)
-        JET_ERROR(": unable to parse next stmt, no valid stmt sequences parsed.\n");
+        JET_ERROR("unable to parse next stmt, no valid stmt sequences parsed.");
 
     return parsed_nid;
 }
 
 static node_id jet_parser_parse_expr_stmt(jet_parser* p)
 {
-    assert(p != NULL && "cannot parse expr stmt, parser is null.");
+    JET_ASSERT(p != NULL);
     node_id expr_nid = jet_parser_parse_expr(p, 0);
     if(expr_nid == INVALID_NID)
     {
-        JET_ERROR(": cannot parse expr stmt, expected expr node.\n");
+        JET_ERROR("cannot parse expr stmt, expected expr node.");
         return INVALID_NID;
     }
     if(jet_parser_expect_tok(p, TOK_SEMI) == NULL)
     {
-        JET_ERROR(" cannot parse expr_stmt, expected TOK_SEMI.\n");
+        JET_ERROR("cannot parse expr_stmt, expected TOK_SEMI.");
         return INVALID_NID;
     }
     return expr_nid;
@@ -328,10 +337,11 @@ static node_id jet_parser_parse_expr_stmt(jet_parser* p)
 
 static node_id jet_parser_prog_parse(jet_parser* p)
 {
+    JET_ASSERT(p != NULL);
     const jet_token* start_tok = jet_parser_expect_tok(p, TOK_KWD_PROG);
     if(start_tok == NULL)
     {
-        JET_ERROR(" cannot parse prog, expected TOK_KWD_PROG\n");
+        JET_ERROR("cannot parse prog, expected TOK_KWD_PROG");
         return INVALID_NID;
     }
 
@@ -341,7 +351,7 @@ static node_id jet_parser_prog_parse(jet_parser* p)
 
     if(prog.block_nid == INVALID_NID)
     {
-        JET_ERROR(": unable to parse prog block.\n");
+        JET_ERROR("unable to parse prog block.");
         return INVALID_NID;
     }
  
@@ -353,8 +363,7 @@ static node_id jet_parser_prog_parse(jet_parser* p)
                 start_tok->line,
                 start_tok->col))
     {
-        JET_ERROR("fatal: cannot init prog node.\n");
-        abort();
+        JET_FATAL("cannot init prog node.");
     }
     node.as.prog = prog;
     return jet_ast_register_node(p->ast, (const jet_ast_node*)&node);
@@ -362,18 +371,17 @@ static node_id jet_parser_prog_parse(jet_parser* p)
 
 static node_id jet_parser_block_parse(jet_parser* p)
 {
-    assert(p != NULL && "cannot parse block, parser is null.");
+    JET_ASSERT(p != NULL);
     const jet_token* start_tok = jet_parser_expect_tok(p, TOK_LBRC);
     if(start_tok == NULL)
     {
-        JET_ERROR(" cannot parse block, expected TOK_LBRC.\n");
+        JET_ERROR("cannot parse block, expected TOK_LBRC.");
         return INVALID_NID;
     }
     jet_ast_node_block block;
     if(!jet_da_init(&block.stmt_nid_da, 4, sizeof(node_id)))
     {
-        JET_ERROR("fatal: cannot parse block, could not init block.stmt_nid_da.\n");
-        abort();
+        JET_FATAL("cannot parse block, could not init block.stmt_nid_da.");
     }
 
     node_id stmt_nid = INVALID_NID;
@@ -383,7 +391,7 @@ static node_id jet_parser_block_parse(jet_parser* p)
         t = jet_parser_peekn_tok_type(p, 0);
         if(t == TOK_EOF || t == TOK_INV)
         {
-            JET_ERROR(" cannot parse block, unexpected token.\n");
+            JET_ERROR("cannot parse block, unexpected token.");
             goto fail;
         }
         else if(t == TOK_RBRC)
@@ -392,7 +400,7 @@ static node_id jet_parser_block_parse(jet_parser* p)
         stmt_nid = jet_parser_parse_next_stmt(p);
         if(stmt_nid == INVALID_NID)
         {
-            JET_ERROR("cannot parse block, unable to parse next stmt.\n");
+            JET_ERROR("cannot parse block, unable to parse next stmt.");
             goto fail;
         }
         jet_da_append(&block.stmt_nid_da, (const void*)&stmt_nid);
@@ -400,7 +408,7 @@ static node_id jet_parser_block_parse(jet_parser* p)
     const jet_token* end_tok = jet_parser_expect_tok(p, TOK_RBRC);
     if(end_tok == NULL)
     {
-        JET_ERROR("cannot parse block, expected TOK_RBRC.\n");
+        JET_ERROR("cannot parse block, expected TOK_RBRC.");
         goto fail;
     }
 
@@ -411,7 +419,7 @@ static node_id jet_parser_block_parse(jet_parser* p)
                 start_tok->line, 
                 start_tok->col))
     {
-        JET_FATAL("failed to init block node.\n");
+        JET_FATAL("failed to init block node.");
     }
     node.as.block = block;  
     return jet_ast_register_node(p->ast, (const jet_ast_node*)&node);
@@ -423,16 +431,16 @@ fail:
 
 static node_id jet_parser_ident_parse(jet_parser* p)
 {
-    assert(p != NULL && "cannot parse ident, parser is null."); 
+    JET_ASSERT(p != NULL);
     const jet_token* tok = jet_parser_peek_tok(p);
     if(!tok)
     {
-        JET_ERROR(": cannot parse ident, no valid tokens to peek.\n");
+        JET_ERROR("cannot parse ident, no valid tokens to peek.");
         return INVALID_NID;
     }
     if(tok->type != TOK_IDENT)
     {
-        JET_ERROR(": cannot parse ident, token type mismatch.\n");
+        JET_ERROR("cannot parse ident, token type mismatch.");
         return INVALID_NID;
     }
 
@@ -440,7 +448,7 @@ static node_id jet_parser_ident_parse(jet_parser* p)
     ident.str = (const char*)jet_token_strdup(tok);
     if(!ident.str)
     {
-        JET_ERROR(": cannot parse ident, unable to create token string dup.\n");
+        JET_ERROR("cannot parse ident, unable to create token string dup.");
         return INVALID_NID;
     }
     
@@ -449,7 +457,7 @@ static node_id jet_parser_ident_parse(jet_parser* p)
     jet_ast_node node;
     if(!jet_ast_node_init(&node, AST_IDENT, tok->span.start, tok->span.end, tok->line, tok->col))
     {
-        JET_FATAL("cannot parse ident, failed to init node.\n");
+        JET_FATAL("cannot parse ident, failed to init node.");
     }
     node.as.ident = ident;
     return jet_ast_register_node(p->ast, (const jet_ast_node*)&node);
@@ -457,18 +465,18 @@ static node_id jet_parser_ident_parse(jet_parser* p)
 
 static node_id jet_parser_lit_parse(jet_parser* p)
 {
-    assert(p != NULL && "cannot parse lit, parser is null.");
+    JET_ASSERT(p != NULL);
     const jet_token* tok = jet_parser_peek_tok(p);
     if(!tok)
     {
-        JET_ERROR(" cannot parse lit, unable to peek tok.\n");
+        JET_ERROR("cannot parse lit, unable to peek tok.");
         return INVALID_NID;
     }
     jet_ast_node_lit lit;
     switch(tok->type)
     {
         default:
-            JET_ERROR(": could not parse lit, no type representation for token: %d.\n", (int)tok->type);
+            JET_ERROR("could not parse lit, no type representation for token: %d.\n", (int)tok->type);
             return INVALID_NID;
         case TOK_KWD_TRUE:
         {
@@ -506,7 +514,7 @@ static node_id jet_parser_lit_parse(jet_parser* p)
             lit.as.s = jet_token_strdup(tok); 
             if(!lit.as.s)
             {
-                JET_ERROR(" cannot parse lit, failed to create tok strdup.\n");
+                JET_ERROR("cannot parse lit, failed to create tok strdup.");
                 return INVALID_NID;
             }
             break;
@@ -518,7 +526,6 @@ static node_id jet_parser_lit_parse(jet_parser* p)
     if(!jet_ast_node_init(&node, AST_LIT, tok->span.start, tok->span.end, tok->line, tok->col))
     {
         JET_FATAL("failed to parse lit, unable to init node.");
-        abort();
     }
     node.as.lit = lit;
     return jet_ast_register_node(p->ast, (const jet_ast_node*)&node);
@@ -526,17 +533,15 @@ static node_id jet_parser_lit_parse(jet_parser* p)
 
 static node_id jet_parser_tdecl_parse(jet_parser* p)
 {
-    assert(p != NULL && "cannot parse tdecl, parser is null.");
+    JET_ASSERT(p != NULL);
     const jet_token* tok = jet_parser_consume_tok(p);
-
     jet_ast_node_tdecl tdecl;
     tdecl.tname = jet_parser_create_type_name(tok, &tdecl.is_primitive);
     tdecl.byte_size = 4;
     jet_ast_node node;
     if(!jet_ast_node_init(&node, AST_TYPE_DECL, tok->span.start, tok->span.end, tok->line, tok->col))
     {
-        JET_ERROR("fatal: failed to parse tdecl, unable to init node.\n");
-        abort();
+        JET_FATAL("failed to parse tdecl, unable to init node.");
     }
     node.as.tdecl = tdecl;
     return jet_ast_register_node(p->ast, (const jet_ast_node*)&node);
@@ -544,21 +549,20 @@ static node_id jet_parser_tdecl_parse(jet_parser* p)
 
 static node_id jet_parser_vdecl_parse(jet_parser* p) 
 {
-    assert(p != NULL && "cannot parse vdecl, parser is null.");
+    JET_ASSERT(p != NULL);
     const jet_token* start_tok = jet_parser_peek_tok(p);
-
     jet_ast_node_vdecl vdecl;
     vdecl.tdecl_nid = jet_parser_tdecl_parse(p);
     if(vdecl.tdecl_nid == INVALID_NID)
     {
-        JET_ERROR(" cannot parse vdecl, expected tdecl.\n");
+        JET_ERROR("cannot parse vdecl, expected tdecl.");
         return INVALID_NID;
     }
     
     vdecl.ident_nid = jet_parser_ident_parse(p);
     if(vdecl.ident_nid == INVALID_NID)
     {
-        JET_ERROR(" cannot parse vdecl, expected ident.\n");
+        JET_ERROR("cannot parse vdecl, expected ident.");
         return INVALID_NID;
     }
 
@@ -570,7 +574,7 @@ static node_id jet_parser_vdecl_parse(jet_parser* p)
         vdecl.init_value_nid = jet_parser_parse_expr(p, 0);
         if(vdecl.init_value_nid == INVALID_NID)
         {
-            JET_ERROR(": cannot parse vdecl, expected expr value after asg operator.\n");
+            JET_ERROR("cannot parse vdecl, expected expr value after asg operator.");
             return INVALID_NID;
         } 
     }
@@ -578,15 +582,14 @@ static node_id jet_parser_vdecl_parse(jet_parser* p)
     const jet_token* end_tok = jet_parser_expect_tok(p, TOK_SEMI);
     if(end_tok == NULL)
     {
-        JET_ERROR(" cannot parse, expected TOK_SEMI.\n");
+        JET_ERROR("cannot parse, expected TOK_SEMI.");
         return INVALID_NID;
     }
     
     jet_ast_node node;
     if(!jet_ast_node_init(&node, AST_VAR_DECL, start_tok->span.start, end_tok->span.end, start_tok->line, start_tok->col))
     {
-        JET_ERROR("fatal: failed to parse vdecl, unable to init node.\n");
-        abort();
+        JET_FATAL("failed to parse vdecl, unable to init node.");
     } 
     node.as.vdecl = vdecl;
     return jet_ast_register_node(p->ast, (const jet_ast_node*)&node);
@@ -594,7 +597,7 @@ static node_id jet_parser_vdecl_parse(jet_parser* p)
 
 static node_id jet_parser_func_parse(jet_parser* p) 
 {
-    assert(p != NULL && "cannot parse func, parser is null.");
+    JET_ASSERT(p != NULL);
     const jet_token* start_tok = jet_parser_peek_tok(p);
 
     jet_ast_node_fdecl fdecl;
@@ -603,29 +606,27 @@ static node_id jet_parser_func_parse(jet_parser* p)
     
     if( !jet_da_init(&fdecl.ret_tdecl_nid_da, 1, sizeof(node_id)) )
     {
-        JET_ERROR("fatal: cannot parse func, unable to init fdecl.ret_tdecl_nid_da.\n");
-        abort();
+        JET_FATAL("cannot parse func, unable to init fdecl.ret_tdecl_nid_da.");
     }
 
     if(!jet_da_append(&fdecl.ret_tdecl_nid_da, (const void*)&ret_tdecl_nid))
     {
-        JET_ERROR(" cannot prase func, failed to append to ret_tdecl_nid_da.\n");
+        JET_ERROR("cannot prase func, failed to append to ret_tdecl_nid_da.");
         jet_da_dispose(&fdecl.ret_tdecl_nid_da);
         return INVALID_NID;
     }
 
     if(jet_parser_expect_tok(p, TOK_LPAR) == NULL)
     {
-        JET_ERROR(" cannot parse, expected TOK_LPAR.\n");
+        JET_ERROR("cannot parse, expected TOK_LPAR.");
         jet_da_dispose(&fdecl.ret_tdecl_nid_da);
         return INVALID_NID;
     }
 
     if( !jet_da_init(&fdecl.param_nid_da, 2, sizeof(node_id)) )
     {
-        JET_ERROR("fatal: cannot parse func, unable to init fdecl.param_nid_da.\n");
         jet_da_dispose(&fdecl.ret_tdecl_nid_da);
-        abort();
+        JET_FATAL("cannot parse func, unable to init fdecl.param_nid_da.");
     }
 
     node_id vdecl_nid = INVALID_NID;
@@ -635,13 +636,13 @@ static node_id jet_parser_func_parse(jet_parser* p)
         vdecl_nid = jet_parser_parse_fparam(p);
         if(vdecl_nid == INVALID_NID)
         {
-            JET_ERROR(": cannot parse func, unable to parse parameter.\n");
+            JET_ERROR("cannot parse func, unable to parse parameter.");
             goto fail;
         }
 
         if(!jet_da_append(&fdecl.param_nid_da, (const void*)&vdecl_nid))
         {
-            JET_ERROR(" cannot parse func, failed to append to param_nid_da.\n");
+            JET_ERROR("cannot parse func, failed to append to param_nid_da.");
             goto fail;
         }
         
@@ -654,13 +655,13 @@ static node_id jet_parser_func_parse(jet_parser* p)
                 jet_parser_consume_tok(p);
                 break;
             case TOK_EOF:
-                JET_ERROR(": cannot parse func, EOF reached.\n");
+                JET_ERROR("cannot parse func, EOF reached.");
                 goto fail;
             case TOK_INV:
-                JET_ERROR(": cannot parse func, invalid token encountered.\n");
+                JET_ERROR("cannot parse func, invalid token encountered.");
                 goto fail;
             default:
-                JET_ERROR(": cannot parse func, unexpected token (type-enum-id: %d) encountered.\n", (int)t);
+                JET_ERROR("cannot parse func, unexpected token (type-enum-id: %d) encountered.", (int)t);
                 goto fail;
         }
     }
@@ -668,18 +669,16 @@ static node_id jet_parser_func_parse(jet_parser* p)
     const jet_token* end_tok = jet_parser_expect_tok(p, TOK_RPAR);
     if(end_tok == NULL)
     {
-        JET_ERROR(" cannot parse func, expected TOK_RPAR.\n");
+        JET_ERROR("cannot parse func, expected TOK_RPAR.");
         goto fail;
     }
 
     jet_ast_node fdecl_base;
     if(!jet_ast_node_init(&fdecl_base, AST_FUNC_DECL, start_tok->span.start, end_tok->span.end, start_tok->line, start_tok->col))
     {
-        JET_ERROR("fatal: failed to parse func, unable to init node.\n");
-        abort();
+        JET_FATAL("failed to parse func, unable to init node.");
     }
     fdecl_base.as.fdecl = fdecl;
-
     node_id out_func_nid = INVALID_NID;
     if(jet_parser_peekn_tok_type(p, 0) == TOK_LBRC)
     {
@@ -687,7 +686,7 @@ static node_id jet_parser_func_parse(jet_parser* p)
         fdef.block_nid = jet_parser_block_parse(p);
         if(fdef.block_nid == INVALID_NID)
         {
-            JET_ERROR(" cannot parse func, unable to parse func definiton block.\n");
+            JET_ERROR("cannot parse func, unable to parse func definiton block.");
             goto fail;
         }
         fdef.fdecl_nid = jet_ast_register_node(p->ast, (const jet_ast_node*)&fdecl_base);
@@ -695,8 +694,7 @@ static node_id jet_parser_func_parse(jet_parser* p)
         jet_ast_node fdef_base;
         if(!jet_ast_node_init(&fdef_base, AST_FUNC_DEF, start_tok->span.start, end_tok->span.end, start_tok->line, start_tok->col))
         {
-            JET_ERROR("fatal: failed to parse func, unable to init node.\n");
-            abort();
+            JET_FATAL("fatal: failed to parse func, unable to init node.");
         }
         fdef_base.as.fdef = fdef;
         out_func_nid = jet_ast_register_node(p->ast, (const jet_ast_node*)&fdef_base); 
@@ -715,20 +713,20 @@ fail:
 
 static node_id jet_parser_parse_fparam(jet_parser* p)
 {
-    assert(p != NULL && "cannot parse fparam, parser is null.");
+    JET_ASSERT(p != NULL);
     const jet_token* start_tok = jet_parser_peek_tok(p);
     jet_ast_node_vdecl vdecl;
     vdecl.tdecl_nid = jet_parser_tdecl_parse(p);
     if(vdecl.tdecl_nid == INVALID_NID)
     {
-        JET_ERROR(": cannot parse vdecl, expected tdecl.\n");
+        JET_ERROR("cannot parse vdecl, expected tdecl.");
         return INVALID_NID;
     }
 
     vdecl.ident_nid = jet_parser_ident_parse(p);
     if(vdecl.ident_nid == INVALID_NID)
     {
-        JET_ERROR(": cannot parse vdecl, expected ident after tdecl.\n");
+        JET_ERROR("cannot parse vdecl, expected ident after tdecl.");
         return INVALID_NID;
     }
 
@@ -740,7 +738,7 @@ static node_id jet_parser_parse_fparam(jet_parser* p)
         vdecl.init_value_nid = jet_parser_parse_expr(p, 0);
         if(!vdecl.init_value_nid)
         {
-            JET_ERROR(": cannot parse vdecl, expected expr value after asg operator.\n");
+            JET_ERROR("cannot parse vdecl, expected expr value after asg operator.");
             return INVALID_NID;
         } 
     }
@@ -748,8 +746,7 @@ static node_id jet_parser_parse_fparam(jet_parser* p)
     jet_ast_node node;
     if(!jet_ast_node_init(&node, AST_VAR_DECL, start_tok->span.start, end_tok->span.end, start_tok->line, start_tok->col))
     {
-        JET_ERROR("fatal: failed to parse fparam, unable to init node.\n");
-        abort();
+        JET_FATAL("failed to parse fparam, unable to init node.");
     }
     node.as.vdecl = vdecl;
     return jet_ast_register_node(p->ast, (const jet_ast_node*)&node);
@@ -757,12 +754,12 @@ static node_id jet_parser_parse_fparam(jet_parser* p)
 
 static node_id jet_parser_parse_expr(jet_parser* p, size_t min_prec)
 {
-    assert(p != NULL && "cannot parse expr, parser is null.");
+    JET_ASSERT(p != NULL);
     const jet_token* start_tok = jet_parser_peek_tok(p);
     node_id lhs_nid = jet_parser_parse_primary(p);
     if(lhs_nid == INVALID_NID)
     {
-        JET_ERROR("wrn: cannot parse expression, expected primary lhs.\n");
+        JET_ERROR("cannot parse expression, expected primary lhs.");
         return INVALID_NID;
     }
     while(jet_parser_peek_tok(p) != NULL)
@@ -779,7 +776,7 @@ static node_id jet_parser_parse_expr(jet_parser* p, size_t min_prec)
         node_id rhs_nid = jet_parser_parse_expr(p, op_prec + 1);        
         if(rhs_nid == INVALID_NID)
         {
-            JET_ERROR(": cannot parse expression, expected rhs expr after operator.\n");
+            JET_ERROR("cannot parse expression, expected rhs expr after operator.");
             return INVALID_NID;
         }
         
@@ -793,8 +790,7 @@ static node_id jet_parser_parse_expr(jet_parser* p, size_t min_prec)
         jet_ast_node node;
         if(!jet_ast_node_init(&node, AST_BINOP, start_tok->span.start, end_tok->span.end, start_tok->line, start_tok->col))
         {
-            JET_ERROR("fatal: failed to parse binop, unable to init node.\n");
-            abort();
+            JET_FATAL("failed to parse binop, unable to init node.");
         }
         node.as.binop = binop;
         lhs_nid = jet_ast_register_node(p->ast, (const jet_ast_node*)&node);
@@ -804,7 +800,7 @@ static node_id jet_parser_parse_expr(jet_parser* p, size_t min_prec)
 
 static node_id jet_parser_parse_primary(jet_parser* p)
 {
-    assert(p != NULL && "err: cannot parse primary expr, parser is null.");
+    JET_ASSERT(p != NULL);
     const jet_token* cur_tok = jet_parser_peek_tok(p);
     const jet_token* start_tok = cur_tok;
     const jet_token* end_tok = cur_tok;
@@ -816,7 +812,7 @@ static node_id jet_parser_parse_primary(jet_parser* p)
     {
         default:
         {
-            JET_ERROR(" expected primary expression.\n");
+            JET_ERROR("expected primary expression.");
             return INVALID_NID;
         }
         case TOK_KWD_NULL:
@@ -835,7 +831,7 @@ static node_id jet_parser_parse_primary(jet_parser* p)
             out_nid = jet_parser_ident_parse(p);
             if(out_nid == INVALID_NID)
             {
-                JET_ERROR(" cannot parse primary, unable to parse ident.\n");
+                JET_ERROR("cannot parse primary, unable to parse ident.");
                 return INVALID_NID;
             }
             break;
@@ -847,7 +843,7 @@ static node_id jet_parser_parse_primary(jet_parser* p)
             cur_tok = jet_parser_peek_tok(p);
             if(cur_tok == NULL || cur_tok->type != TOK_RPAR)
             {
-                JET_ERROR(" expected ')' after primary expression.\n");
+                JET_ERROR("expected ')' after primary expression.");
                 return INVALID_NID;
             }
             jet_parser_consume_tok(p);
@@ -860,7 +856,7 @@ static node_id jet_parser_parse_primary(jet_parser* p)
             node_id rhs_nid = jet_parser_parse_expr(p, PREC_PREFIX);
             if(rhs_nid == INVALID_NID)
             {
-                JET_ERROR(" expected expr after unary operator\n");
+                JET_ERROR("expected expr after unary operator");
                 return INVALID_NID;
             }
             end_tok = jet_parser_peek_prev_tok(p);
@@ -871,8 +867,7 @@ static node_id jet_parser_parse_primary(jet_parser* p)
             jet_ast_node node;
             if(!jet_ast_node_init(&node, AST_UNOP, start_tok->span.start, end_tok->span.end, start_tok->line, start_tok->col))
             {
-                JET_ERROR("fatal: failed to parse primary unop, unable to init node.\n");
-                abort();
+                JET_FATAL("failed to parse primary unop, unable to init node.");
             }
             node.as.unop = unop;
             out_nid = jet_ast_register_node(p->ast, (const jet_ast_node*)&node);
@@ -882,7 +877,7 @@ static node_id jet_parser_parse_primary(jet_parser* p)
 
     if(out_nid == INVALID_NID)
     {
-        JET_ERROR(" no valid primary expressions parsed.\n");
+        JET_ERROR("no valid primary expressions parsed.");
         return INVALID_NID;
     }
 
@@ -892,8 +887,7 @@ static node_id jet_parser_parse_primary(jet_parser* p)
         jet_da arg_da;
         if( !jet_da_init(&arg_da, 2, sizeof(node_id)) )
         {
-            JET_ERROR("fatal: cannot parse primary expr, unable to init arg_da.\n");
-            abort();
+            JET_FATAL("cannot parse primary expr, unable to init arg_da.");
         }
         jet_parser_consume_tok(p);        
         while(jet_parser_peekn_tok_type(p, 0) != TOK_RPAR)
@@ -901,13 +895,13 @@ static node_id jet_parser_parse_primary(jet_parser* p)
             node_id arg_nid = jet_parser_parse_expr(p, 0);
             if(arg_nid == INVALID_NID)
             {
-                JET_ERROR(": cannot parse primary expr, unable to parse call arg.\n");
+                JET_ERROR("cannot parse primary expr, unable to parse call arg.");
                 jet_da_dispose(&arg_da);
                 return INVALID_NID;
             }
             if(!jet_da_append(&arg_da, (const void*)&arg_nid))
             {
-                JET_ERROR(" cannot parse primary expr, unable append to arg_da.\n");
+                JET_ERROR("cannot parse primary expr, unable append to arg_da.");
                 jet_da_dispose(&arg_da);
                 return INVALID_NID;
             }
@@ -920,7 +914,7 @@ static node_id jet_parser_parse_primary(jet_parser* p)
         end_tok = jet_parser_expect_tok(p, TOK_RPAR);
         if(end_tok == NULL)
         {
-            JET_ERROR(" cannot parse, expected TOK_RPAR.\n");
+            JET_ERROR("cannot parse, expected TOK_RPAR.");
             jet_da_dispose(&arg_da);
             return INVALID_NID;
         }
@@ -935,8 +929,7 @@ static node_id jet_parser_parse_primary(jet_parser* p)
         jet_ast_node call_base;
         if(!jet_ast_node_init(&call_base, AST_CALL, start_tok->span.start, end_tok->span.end, start_tok->line, start_tok->col))
         {
-            JET_ERROR("fatal: failed to parse primary expr fcall, unable to init node.\n");
-            abort();
+            JET_FATAL("failed to parse primary expr fcall, unable to init node.");
         }
         call_base.as.call = call;
         out_nid = jet_ast_register_node(p->ast, (const jet_ast_node*)&call_base);
