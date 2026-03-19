@@ -3,7 +3,6 @@
 
 #include <stdio.h>
 #include <stdbool.h>
-#include <assert.h>
 #include <string.h>
 
 // should be fresh ast init, otherwise memory leak will occure.

@@ -5,9 +5,7 @@
 #include <jet_logger.h>
 
 #include <string.h>
-#include <assert.h>
 #include <stdio.h>
-
 
 #define STRING_QUOTE '"'
 #define CHAR_QUOTE '\''

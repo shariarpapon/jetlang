@@ -1,6 +1,5 @@
 #include <jet_compilation_unit.h>
 #include <stdio.h>
-#include <assert.h>
 #include <stdbool.h>
 #include <jet_io.h>
 #include <jet_logger.h>

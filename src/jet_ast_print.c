@@ -4,8 +4,8 @@
 #include <jet_arena.h>
 #include <jet_token.h>
 #include <jet_conv.h>
+#include <jet_logger.h>
 
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
@@ -80,7 +80,7 @@ fail:
 
 static void jet_astp_reset(jet_ast_printer* p)
 {
-    assert(p != NULL && "cannot reset jet_ast_printer, arg p is null.");
+    JET_ASSERT(p != NULL);
     jet_da_clear(&p->active_cols);
     jet_sb_clear(&p->sb);
     jet_arena_clear(&p->arena);
@@ -144,21 +144,21 @@ static void jet_astp_indent(jet_ast_printer* p, size_t depth)
 
 static size_t jet_astp_add_col(jet_ast_printer* p, size_t col)
 {
-    assert(p != NULL && "err: cannot add column to jet_ast_printer, arg p is null.");
-    assert(jet_da_append(&p->active_cols, (const void*)&col) && "err: cannot add column to jet_ast_printer, failed to append to da.\n");
+    JET_ASSERT(p != NULL);
+    JET_ASSERTM(jet_da_append(&p->active_cols, (const void*)&col), "cannot add column to jet_ast_printer, failed to append to da.");
     size_t index = jet_da_count(&p->active_cols) - 1;
     return index;
 }
 
 static void jet_astp_remove_col(jet_ast_printer* p, size_t col_id)
 {
-    assert(p != NULL && "err: cannot add column to jet_ast_printer, arg p is null.");
+    JET_ASSERT(p != NULL);
     jet_da_remove(&p->active_cols, col_id);
 }
 
 static bool jet_astp_is_col_active(jet_ast_printer* p, size_t col)
 {
-    assert(p != NULL && "cannot check if col is active, arg p is null.");
+    JET_ASSERT(p != NULL);
     for(size_t i = 0; i < jet_da_count(&p->active_cols); i++)
     {
         size_t* c = (size_t*)jet_da_get(&p->active_cols, i);
@@ -170,6 +170,7 @@ static bool jet_astp_is_col_active(jet_ast_printer* p, size_t col)
 
 static const char* jet_astp_resolve_node_str(jet_ast_printer* p, const jet_ast_node* n)
 {
+    JET_ASSERT(p != NULL);
     jet_sb_clear(&p->sb);
     const char* str = jet_ast_node_type_str(n->node_type);
     if(!str)
@@ -242,7 +243,7 @@ static const char* jet_astp_resolve_node_str(jet_ast_printer* p, const jet_ast_n
 
 static void jet_astp_print_by_nid(jet_ast_printer* p, node_id nid, size_t depth, bool is_last)
 {
-    assert(p != NULL && "cannot print node by nid, arg p is null.");
+    JET_ASSERT(p != NULL);
     if(nid == INVALID_NID) return;
     const jet_ast_node* n = jet_ast_node_get(p->ast, nid); 
     if(!n) return;
@@ -251,7 +252,8 @@ static void jet_astp_print_by_nid(jet_ast_printer* p, node_id nid, size_t depth,
 
 static void jet_astp_print_node(jet_ast_printer* p, const jet_ast_node* n, size_t depth, bool is_last)
 {
-    if(!p || !n) return;
+    JET_ASSERT(p != NULL);
+    JET_ASSERT(n != NULL);
 
     const char* node_str = jet_astp_resolve_node_str(p, n); 
     size_t col_id = jet_astp_add_col(p, depth);
@@ -311,7 +313,10 @@ static void jet_astp_print_node(jet_ast_printer* p, const jet_ast_node* n, size_
 
 static void jet_astp_print_nid_da(jet_ast_printer* p, const char* label, const jet_da* nid_da, size_t depth)
 {
-    if(!p || !nid_da || jet_da_is_empty(nid_da)) return;
+    JET_ASSERT(p != NULL);
+    JET_ASSERT(nid_da != NULL);
+
+    if(jet_da_is_empty(nid_da)) return;
     if(!label) label = "collection";
     size_t count = jet_da_count(nid_da);
     
@@ -336,6 +341,7 @@ static void jet_astp_print_nid_da(jet_ast_printer* p, const char* label, const j
 // user entry
 void jet_ast_print(const jet_ast* ast)
 {
+    JET_ASSERT(ast != NULL);
     jet_ast_printer p;
     bool init_success = jet_astp_init(&p, ast);
     if(!init_success)
