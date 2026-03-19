@@ -18,7 +18,7 @@ static void jet_init_args(int argc, char** argv);
 static bool jet_compile(const char* filepath);
 
 int main(int argc, char** argv)
-{
+{   
 //Enable ansi support on windows
 #ifdef _WIN32
 	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -51,7 +51,7 @@ static bool jet_compile(const char* filepath)
 static void jet_init_args(int argc, char** argv)
 {
     JET_ASSERT(argv != NULL);
-    JET_ASSERT(*argv != NULL)
+    JET_ASSERT(*argv != NULL);
     arg_count = argc;
     args = argv; 
 }
