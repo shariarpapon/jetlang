@@ -59,7 +59,7 @@ static void jet_init_args(int argc, char** argv)
 static const char* jet_get_filepath()
 { 
     const char* filepath = jet_get_arg_at(1);
-    JET_ASSERT_MSG(filepath != NULL, "no valid filepath arg.");
+    JET_ASSERTM(filepath != NULL, "no valid filepath arg.");
     return filepath;
 }
 

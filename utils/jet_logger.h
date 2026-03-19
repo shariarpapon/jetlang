@@ -49,34 +49,35 @@ void jet_assert_fail(const char* expr, const char* msg, const char* file, int li
 
 #ifdef JET_ASSERTION_ENABLED
 
-#if _MSC_VER
-#include <intrin.h>
-#define JET_DEBUG_BREAK() __debugBreak()
-#else
-#define JET_DEBUG_BREAK() __builtin_trap()
-#endif
-#define JET_ASSERT(expr)                                \
-{                                                       \
-    if(expr){}                                          \
-    else                                                \
-    {                                                   \
-        jet_assert_fail(#expr, "", __FILE__, __LINE__); \
-        JET_DEBUG_BREAK();                              \
-    }                                                   \
-}
+    #if _MSC_VER
+        #include <intrin.h>
+        #define JET_DEBUG_BREAK() __debugBreak()
+    #else
+        #define JET_DEBUG_BREAK() __builtin_trap()
+    #endif
 
-#define JET_ASSERT_MSG(expr, msg)                        \
-{                                                        \
-    if(expr){}                                           \
-    else                                                 \
-    {                                                    \
-        jet_assert_fail(#expr, msg, __FILE__, __LINE__); \
-        JET_DEBUG_BREAK();                               \
-    }                                                    \
-}
+    #define JET_ASSERT(expr)                                \
+    {                                                       \
+        if(expr){}                                          \
+        else                                                \
+        {                                                   \
+            jet_assert_fail(#expr, NULL, __FILE__, __LINE__); \
+            JET_DEBUG_BREAK();                              \
+        }                                                   \
+    }
+
+    #define JET_ASSERTM(expr, msg)                        \
+    {                                                        \
+        if(expr){}                                           \
+        else                                                 \
+        {                                                    \
+            jet_assert_fail(#expr, msg, __FILE__, __LINE__); \
+            JET_DEBUG_BREAK();                               \
+        }                                                    \
+    }
 #else
-#define JET_ASSERT(expr)
-#define JET_ASSERT_MSG(expr, msg)
+    #define JET_ASSERT(expr)
+    #define JET_ASSERT_MSG(expr, msg)
 #endif
 
 #ifdef JET_LOGGER_IMPL
@@ -107,8 +108,12 @@ void jet_log_output(jet_log_level level, const char* fmt, ...)
 
 void jet_assert_fail(const char* expr, const char* msg, const char* file, int line)
 {
-    jet_log_output(JET_LOG_LEVEL_FATAL, 
-           "Assertion failed: %s, msg: %s, in file: %s, line: %d.\n", 
-            expr, msg, file, line);
+    if(msg) jet_log_output(JET_LOG_LEVEL_FATAL, 
+               "ASSERTION FAILED\n\texpression: %s \n\tfile: %s, line: %d \n\tmessage: %s\n", 
+                expr, file, line, msg);
+    else jet_log_output(JET_LOG_LEVEL_FATAL, 
+               "ASSERTION FAILED\n\texpression: %s \n\tfile: %s, line: %d\n", 
+                expr, file, line);
 }
+
 #endif
