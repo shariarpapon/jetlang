@@ -31,7 +31,7 @@ void jet_token_tprint_da(const jet_da* tokens)
         jet_token* token = jet_da_get(tokens, i);
         const char* type_str = jet_token_type_str(token->type);
         size_t len = token->span.end - token->span.start;
-        JET_INFO(TOK_TB_ENTRY_FMT, i, type_str, token->line, token->col, (int)len, token->lexeme);        
+        JET_INFO(TOK_TB_ENTRY_FMT, i, type_str, token->span.line, token->span.col, (int)len, token->lexeme);        
     }
     printf("\n");
 }

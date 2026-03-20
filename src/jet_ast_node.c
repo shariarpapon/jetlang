@@ -14,9 +14,9 @@ bool jet_ast_node_init(jet_ast_node* node,
     if(!node) return false;
     memset(node, 0, sizeof(*node));
     node->node_type = type;
-    if(!jet_atom_init(&node->span, start_cursor, end_cursor, line, col))
+    if(!jet_span_init(&node->span, start_cursor, end_cursor, line, col))
     {
-        JET_ERROR("failed to init node, unable to init span.\n");
+        JET_ERROR("failed to init node, unable to initspan.\n");
         return false;
     }
     return true;

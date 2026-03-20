@@ -67,7 +67,7 @@ bool jet_cu_run(jet_compilation_unit* cu)
     jet_parser parser;
 
     bool lexer_init = false;
-    lexer_init = jet_lexer_init(&lexer, cu->source, &cu->tok_da);
+    lexer_init = jet_lexer_init(&lexer, cu->filename, cu->source, &cu->tok_da);
     if(!lexer_init || !jet_lexer_tokenize(&lexer)) 
         goto fail;
 
@@ -76,7 +76,7 @@ bool jet_cu_run(jet_compilation_unit* cu)
 #endif
 
     bool parser_init = false;
-    parser_init = jet_parser_init(&parser, (const jet_da*)&cu->tok_da, &cu->ast);
+    parser_init = jet_parser_init(&parser, cu->filename, (const jet_da*)&cu->tok_da, &cu->ast);
     if(!parser_init || !jet_parser_parse(&parser))
         goto fail;
 
@@ -89,7 +89,7 @@ bool jet_cu_run(jet_compilation_unit* cu)
     return true;
 
 fail:
-    JET_ERROR(" abrupt compilation failure.\n");
+    JET_ERROR("abrupt compilation failure.\n");
     if(lexer_init) jet_lexer_dispose(&lexer);
     if(parser_init) jet_parser_dispose(&parser);
     return false;

@@ -1,8 +1,8 @@
-#include <jet_atom.h>
+#include <jet_span.h>
 
 #include <string.h>
 
-bool jet_atom_init(jet_atom* span, size_t start, size_t end, uint32_t line, uint32_t col)
+bool jet_span_init(jet_span* span, size_t start, size_t end, uint32_t line, uint32_t col)
 {
     if(!span)
         return false;
@@ -14,14 +14,14 @@ bool jet_atom_init(jet_atom* span, size_t start, size_t end, uint32_t line, uint
     return true;
 }
 
-bool jet_atom_init_copy(jet_atom* target, jet_atom* src)
+bool jet_span_init_copy(jet_span* target, jet_span* src)
 {
     if(!target || !src)
         return false;
-    return jet_atom_init(target, src->start, src->end, src->line, src->col);
+    return jet_span_init(target, src->start, src->end, src->line, src->col);
 }
 
-bool jet_atom_dispose(jet_atom* span)
+bool jet_span_dispose(jet_span* span)
 {
     if(!span) 
         return false;

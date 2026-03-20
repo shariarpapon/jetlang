@@ -109,7 +109,7 @@ static char jet_lexer_peek(jet_lexer* lexer);
 static char jet_lexer_peek_next(jet_lexer* lexer);
 
 //lexer should be zero initialized, otherwise memory leak may occure if called with already initialized lexer.
-bool jet_lexer_init(jet_lexer* lexer, const char* input, jet_da* token_da)
+bool jet_lexer_init(jet_lexer* lexer, const char* filename, const char* input, jet_da* token_da)
 {
     JET_ASSERT(lexer != NULL);
     if(!input || !token_da)
@@ -118,6 +118,7 @@ bool jet_lexer_init(jet_lexer* lexer, const char* input, jet_da* token_da)
         return false;
     }
     memset(lexer, 0, sizeof(*lexer)); 
+    lexer->filename = filename;
     lexer->input = input;
     lexer->input_len = strlen(input);
     lexer->cursor = 0;
