@@ -13,25 +13,25 @@ void jet_token_tprint_da(const jet_da* tokens)
 {
     if(!tokens)
     {
-        JET_ERROR(": cannot print tokens, token tokens null.");
+        JET_LOG_ERROR(": cannot print tokens, token tokens null.");
         return;
     }
     size_t len = jet_da_count(tokens);
     if(len == 0)
     {
-        JET_INFO("nothing to print, token darray is empty");
+        JET_LOG_INFO("nothing to print, token darray is empty");
         return;
     }
     
-    JET_INFO("token darray [%zu]:", len);
-    JET_INFO(TOK_TB_HEADER_FMT, "index", "type", "line", "col", "value");        
+    JET_LOG_INFO("token darray [%zu]:", len);
+    JET_LOG_INFO(TOK_TB_HEADER_FMT, "index", "type", "line", "col", "value");        
    
     for(size_t i = 0; i < len; i++)
     {  
         jet_token* token = jet_da_get(tokens, i);
         const char* type_str = jet_token_type_str(token->type);
         size_t len = token->span.end - token->span.start;
-        JET_INFO(TOK_TB_ENTRY_FMT, i, type_str, token->span.line, token->span.col, (int)len, token->lexeme);        
+        JET_LOG_INFO(TOK_TB_ENTRY_FMT, i, type_str, token->span.line, token->span.col, (int)len, token->lexeme);        
     }
     printf("\n");
 }

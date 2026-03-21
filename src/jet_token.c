@@ -17,7 +17,7 @@ bool jet_token_init(jet_token* token, jet_token_type tok_type, const char* lexem
     token->lexeme = lexeme;
     if(!jet_span_init(&token->span, start_cursor, end_cursor, line, col))
     {
-        JET_ERROR(" failed to init token, unable to initspan.\n");
+        JET_LOG_ERROR(" failed to init token, unable to initspan.\n");
         return false;
     }
     return true;
@@ -37,7 +37,7 @@ char* jet_token_strdup(const jet_token* tok)
     char* s = malloc(tok->span.end - tok->span.start + 1);
     if(!s)
     {
-        JET_ERROR(": unable to allocate memory for str slice.\n");
+        JET_LOG_ERROR(": unable to allocate memory for str slice.\n");
         return NULL;
     }
     memcpy(s, tok->lexeme, tok->span.end - tok->span.start);

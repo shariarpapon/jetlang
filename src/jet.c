@@ -28,13 +28,13 @@ int main(int argc, char** argv)
 #endif
 
     printf("\n");
-    JET_INFO("all modules built successfully!");
+    JET_LOG_INFO("all modules built successfully!");
     jet_init_args(argc, argv);
 
     if(jet_compile(jet_get_filepath()))
-        JET_INFO("input compiled successfully.");
+        JET_LOG_INFO("input compiled successfully.");
     else 
-        JET_INFO("failed to compile input.");
+        JET_LOG_INFO("failed to compile input.");
     
     printf("\n");
 }
@@ -66,7 +66,7 @@ static const char* jet_get_arg_at(size_t index)
 {
     if(index >= arg_count)
     {
-        JET_FATAL("cannot get arg, index = %zu is out of bounds.", index); 
+        JET_LOG_FATAL("cannot get arg, index = %zu is out of bounds.", index); 
     }
     char** temp = args;
     for(size_t i = 0; i < index; i++)

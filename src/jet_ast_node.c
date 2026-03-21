@@ -16,7 +16,7 @@ bool jet_ast_node_init(jet_ast_node* node,
     node->node_type = type;
     if(!jet_span_init(&node->span, start_cursor, end_cursor, line, col))
     {
-        JET_ERROR("failed to init node, unable to initspan.\n");
+        JET_LOG_ERROR("failed to init node, unable to initspan.\n");
         return false;
     }
     return true;

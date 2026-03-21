@@ -114,7 +114,7 @@ bool jet_lexer_init(jet_lexer* lexer, const char* filename, const char* input, j
     JET_ASSERT(lexer != NULL);
     if(!input || !token_da)
     {
-        JET_ERROR("cannot init, invalid param/s.");
+        JET_LOG_ERROR("cannot init, invalid param/s.");
         return false;
     }
     memset(lexer, 0, sizeof(*lexer)); 
@@ -183,13 +183,13 @@ static void jet_lexer_emit_token(jet_lexer* lexer, size_t start_cursor, size_t l
                 lexer->cur_line, 
                 lexer->cur_col - len))
     {
-        JET_ERROR(" failed to emit token, could not init token.\n");
+        JET_LOG_ERROR(" failed to emit token, could not init token.\n");
         return;
     }
 
     if(!jet_da_append(lexer->token_da, (const void*)&tok))
     {
-        JET_ERROR(": failed to emit token, could not push token.\n");
+        JET_LOG_ERROR(": failed to emit token, could not push token.\n");
         return;
     }
 }
@@ -235,7 +235,7 @@ static bool jet_lexer_try_get_kwd_type(const char* s, size_t len, jet_token_type
         return false;
     if(!out_tok_type)
     {
-        JET_ERROR("output token type pointer out_tok_type is null.");
+        JET_LOG_ERROR("output token type pointer out_tok_type is null.");
         return false;
     }
 
@@ -258,7 +258,7 @@ static bool jet_lexer_try_get_punct_type(char c, jet_token_type* out_tok_type)
 {
     if(!out_tok_type)
     {
-        JET_ERROR("output token type pointer out_tok_type is null.");
+        JET_LOG_ERROR("output token type pointer out_tok_type is null.");
         return false;
     }
     
@@ -277,7 +277,7 @@ static bool jet_lexer_try_get_cmpd_punct_type(char left, char right, jet_token_t
 {
     if(!out_tok_type)
     {
-        JET_ERROR("output token type pointer out_tok_type is null.");
+        JET_LOG_ERROR("output token type pointer out_tok_type is null.");
         return false;
     }
     
