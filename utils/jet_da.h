@@ -69,7 +69,7 @@ bool jet_da_init(jet_da* da, size_t capacity, size_t elm_size)
     da->block = malloc(capacity * elm_size);
     if(!da->block)
     {
-        fprintf(stderr, "err: failed to allocate array memory.\n");
+        fprintf(stderr, "err: failed to allocate da block memory.\n");
         return false;
     }
     da->count = 0;

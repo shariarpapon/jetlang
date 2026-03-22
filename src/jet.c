@@ -4,10 +4,6 @@
 #include <jet_io.h>
 #include <jet_logger.h>
 
-#ifdef _WIN32
-#include <windows.h>
-#endif
-
 static int arg_count = 0;
 static char** args = NULL;
 
@@ -18,15 +14,6 @@ static bool jet_compile(const char* filepath);
 
 int main(int argc, char** argv)
 {   
-//Enable ansi support on windows
-#ifdef _WIN32
-	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-    DWORD dwMode = 0;
-    GetConsoleMode(hOut, &dwMode);
-    dwMode |= 0x0004;
-    SetConsoleMode(hOut, dwMode);
-#endif
-
     printf("\n");
     JET_LOG_INFO("all modules built successfully!");
     jet_init_args(argc, argv);
@@ -37,7 +24,7 @@ int main(int argc, char** argv)
     if(jet_compile(filepath))
         JET_LOG_INFO("input compiled successfully.");
     else 
-        JET_LOG_INFO("failed to compile input.");
+        JET_LOG_ERROR("failed to compile input.");
     
     printf("\n");
 }

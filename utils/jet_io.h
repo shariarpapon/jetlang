@@ -18,7 +18,7 @@ char* jet_io_read_text(const char* path, size_t* out_len)
     FILE* file = fopen(path, "rb");
     if(!file)
     {
-        fprintf(stderr, "error: could not open file at path %s\n", path);
+        fprintf(stderr, "err: jet_io - could not open file at path %s\n", path);
         return NULL;
     }
     
@@ -28,7 +28,7 @@ char* jet_io_read_text(const char* path, size_t* out_len)
 
     if(file_size < 0)
     {
-        fprintf(stderr, "error: failed to determine size of file: %s\n", path);
+        fprintf(stderr, "err: jet_io - failed to determine size of file: %s\n", path);
         fclose(file);
         return NULL;
     }
@@ -36,7 +36,7 @@ char* jet_io_read_text(const char* path, size_t* out_len)
     char* buf = (char*)malloc(file_size + 1);
     if(!buf)
     {
-        fprintf(stderr, "error: failed to allocate buffer memory\n"); 
+        fprintf(stderr, "err: jet_io - failed to allocate buffer memory\n"); 
         fclose(file);
         return NULL;
     }
@@ -44,7 +44,7 @@ char* jet_io_read_text(const char* path, size_t* out_len)
     size_t read_size = fread(buf, 1, file_size, file);
     if(read_size != file_size)
     {
-        fprintf(stderr, "error: failed to read to file properly");
+        fprintf(stderr, "err: jet_io - failed to read to file properly");
         free(buf);
         fclose(file);
         return NULL;
@@ -63,7 +63,7 @@ void jet_io_print_str_range(const char* start, size_t len)
 {
     if(!start)
     {
-        fprintf(stderr, "error: cannot print, given start char* is null.\n");
+        fprintf(stderr, "err: jet_io - cannot print, given start char* is null.\n");
         return;
     }
 

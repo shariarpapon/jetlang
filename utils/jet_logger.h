@@ -120,10 +120,10 @@ static void jet_assert_fail(const char* expr, const char* msg, const char* file,
 {
     if(msg) 
         jet_log_output(JET_LOG_LEVEL_FATAL, file, line, 
-                "ASSERTION FAILED(%s) : %s", expr, msg);
+                "assertion_failed (%s): %s", expr, msg);
     else
         jet_log_output(JET_LOG_LEVEL_FATAL, file, line, 
-                "ASSERTION FAILED(%s)", expr);
+                "assertion_failed (%s)", expr);
     fflush(stdout);
     JET_DEBUG_BREAK();
 }
