@@ -9,11 +9,13 @@
 #define JET_ERR_HEADER_FMT "[%s:%"PRIu32":%"PRIu32"]"
 #define JET_ERR_HEADER_ARGS(filename, span) filename, span->line, span->col
 
-extern bool g_jet_err_handler_started = false;
-
 void jet_err_handler_start(const char* filename);
 void jet_err_handler_end();
 void jet_err_handler_reset();
+
+bool jet_err_handler_is_started(); 
+const char* jet_err_handler_get_filename();
+size_t jet_err_handler_get_count();
 
 void jet_err_handler_push(
         const char* filename, 
