@@ -1,2 +1,3 @@
+- improve err handler, push fns shouldn't take filename and use implicite one instead 
 - invalid token fallback system
     * sync to next end of statement
