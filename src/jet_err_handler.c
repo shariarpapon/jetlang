@@ -29,20 +29,9 @@ void jet_err_handler_reset()
     err_count = 0;
 }
 
-bool jet_err_handler_is_started()
-{
-    return handler_started;
-}
-
-const char* jet_err_handler_get_filename()
-{
-    return cur_filename;
-}
-
-size_t jet_err_handler_get_count()
-{
-    return err_count;
-}
+bool jet_err_handler_is_started() { return handler_started; }
+const char* jet_err_handler_get_filename() { return cur_filename; }
+size_t jet_err_handler_get_count() { return err_count; }
 
 void jet_err_handler_pushf(const jet_span* span, const char* fmt, ...) 
 {
