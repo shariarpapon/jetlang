@@ -51,9 +51,6 @@ void jet_assert(bool cond, const char* expr, const char* msg,
 #define JET_LOG_DEBUG(fmt, ...)
 #endif
 
-
-#define ASSERTION_HEADER_FMT "ASSERTION_FAILED(%s)"
-
 #ifdef JET_ASSERTION_ENABLED
 
     #if _MSC_VER
@@ -114,10 +111,11 @@ static void jet_assert_fail(const char* expr, const char* msg, const char* file,
 {
     if(msg) 
         jet_log_output(JET_LOG_LEVEL_FATAL, file, line, 
-                ASSERTION_HEADER_FMT " : %s", expr, msg);
+                "ASSERTION FAILED(%s) : %s", expr, msg);
     else
         jet_log_output(JET_LOG_LEVEL_FATAL, file, line, 
-                ASSERTION_HEADER_FMT, expr);
+                "ASSERTION FAILED(%s)", expr);
+    fflush(stdout);
     JET_DEBUG_BREAK();
 }
 
