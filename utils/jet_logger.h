@@ -18,9 +18,9 @@ void jet_assert(bool cond, const char* expr, const char* msg,
 
 #define JET_LOG_MSG_BUF_SIZE (1024 * 32) 
 
-#define JET_LOG_ENABLE_WARNING  1
-#define JET_LOG_ENABLE_INFO     1
-#define JET_LOG_ENABLE_DEBUG    1
+#define JET_LOG_ENABLE_WARNING 1 
+#define JET_LOG_ENABLE_INFO    1 
+#define JET_LOG_ENABLE_DEBUG   1 
 #define JET_ASSERTION_ENABLED
 
 
@@ -34,21 +34,21 @@ void jet_assert(bool cond, const char* expr, const char* msg,
 #define JET_LOG_WRN(fmt, ...) \
     jet_log_output(JET_LOG_LEVEL_WARNING, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
 #else
-#define JET_LOG_WRN(fmt, ...)
+#define JET_LOG_WRN(fmt, ...) ((void)0)
 #endif
 
 #if JET_LOG_ENABLE_INFO == 1
 #define JET_LOG_INFO(fmt, ...) \
     jet_log_output(JET_LOG_LEVEL_INFO, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
 #else
-#define JET_LOG_INFO(fmt, ...)
+#define JET_LOG_INFO(fmt, ...) ((void)0)
 #endif
 
 #if JET_LOG_ENABLE_DEBUG == 1
 #define JET_LOG_DEBUG(fmt, ...) \
     jet_log_output(JET_LOG_LEVEL_DEBUG, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
 #else 
-#define JET_LOG_DEBUG(fmt, ...)
+#define JET_LOG_DEBUG(fmt, ...) ((void)0)
 #endif
 
 #ifdef JET_ASSERTION_ENABLED
@@ -66,8 +66,8 @@ void jet_assert(bool cond, const char* expr, const char* msg,
     #define JET_ASSERTM(expr, msg) \
         jet_assert(expr, #expr, msg, __FILE__, __LINE__)
 #else
-    #define JET_ASSERT(expr)
-    #define JET_ASSERTM(expr, msg)
+    #define JET_ASSERT(expr) ((void)0)
+    #define JET_ASSERTM(expr, msg) ((void)0)
 #endif
 
 #ifdef JET_LOGGER_IMPL
