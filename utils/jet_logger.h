@@ -16,13 +16,13 @@ void jet_log_output(jet_log_level level, const char* filename,
 void jet_assert(bool cond, const char* expr, const char* msg, 
                 const char* file, int line);
 
+
 #define JET_LOG_MSG_BUF_SIZE (1024 * 32) 
 
 #define JET_LOG_ENABLE_WARNING 1 
 #define JET_LOG_ENABLE_INFO    1 
 #define JET_LOG_ENABLE_DEBUG   1 
 #define JET_ASSERTION_ENABLED
-
 
 #define JET_LOG_FATAL(fmt, ...) \
     jet_log_output(JET_LOG_LEVEL_FATAL, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
@@ -80,12 +80,21 @@ static void jet_assert_fail(const char* expr, const char* msg, const char* file,
 
 void jet_log_output(jet_log_level level, const char* filename, int line, const char* fmt, ...)
 {
+    
     if(level < JET_LOG_LEVEL_FATAL) 
         level = JET_LOG_LEVEL_FATAL;
     else if(level > JET_LOG_LEVEL_DEBUG) 
         level = JET_LOG_LEVEL_DEBUG; 
 
-    const char* level_str[] = { "FATAL", "ERROR", "WARNING", "INFO", "DEBUG" };
+    const char* level_str[] = 
+    { 
+        "\x1b[95m" "FATAL"   "\x1b[0m", 
+        "\x1b[91m" "ERROR"   "\x1b[0m", 
+        "\x1b[93m" "WARNING" "\x1b[0m",
+        "\x1b[92m" "INFO"    "\x1b[0m", 
+        "\x1b[94m" "DEBUG"   "\x1b[0m",
+    };
+    
     va_list args;
     va_start(args, fmt);
     

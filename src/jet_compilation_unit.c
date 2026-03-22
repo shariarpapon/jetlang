@@ -8,6 +8,11 @@
 #include <string.h>
 #include <stdio.h>
 
+
+#ifdef _WIN32
+#include<windows.h>
+#endif
+
 #define JET_CU_ARENA_CAP (1024 * 4)
 #define JET_CU_TOK_CAP (64)
 
@@ -33,6 +38,17 @@ bool jet_cu_init(jet_compilation_unit* cu, const char* filename)
     {
         goto fail;
     }
+
+    //intialize ansi for windows 
+#ifdef _WIN32
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD dwMode = 0;
+    GetConsoleMode(hOut, &dwMode);
+    dwMode |= 0x0004;
+    SetConsoleMode(hOut, dwMode);
+    ansi_initialized = true;
+#endif
+
     return true;
 
 fail:

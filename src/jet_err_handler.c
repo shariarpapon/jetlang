@@ -11,7 +11,7 @@ static size_t err_count = 0;
 
 void jet_err_handler_start(const char* filename)
 {
-    JET_ASSERT(filename != NULL);
+    JET_ASSERTM(filename != NULL, "cannot start err handler, must provide a filename.");
     cur_filename = filename;
     err_count = 0;
     handler_started = true;
@@ -44,10 +44,7 @@ size_t jet_err_handler_get_count()
     return err_count;
 }
 
-void jet_err_handler_pushf(
-        const char* filename, 
-        const jet_span* span, 
-        const char* fmt, ...)
+void jet_err_handler_pushf(const jet_span* span, const char* fmt, ...) 
 {
     if(!handler_started)
     {
@@ -55,9 +52,11 @@ void jet_err_handler_pushf(
         return;
     }
 
-    JET_ASSERT(fmt != NULL);
-    JET_ASSERT(filename != NULL);
-    JET_ASSERT(span != NULL);
+    if(!cur_filename || !fmt || !span)
+    {
+        JET_LOG_ERROR("cannot push error, one or more invalid args.");
+        return;
+    }
 
     va_list args;
     va_start(args, fmt);
@@ -71,26 +70,25 @@ void jet_err_handler_pushf(
     { 
         size_t end = sizeof(buf) - 4;
         buf[end] = '\0';
-        JET_LOG_ERROR(JET_ERR_HEADER_FMT " %s...", JET_ERR_HEADER_ARGS(filename, span), buf);
+        JET_LOG_ERROR(JET_ERR_HEADER_FMT " %s...", JET_ERR_HEADER_ARGS(span), buf);
     }
     else 
-        JET_LOG_ERROR(JET_ERR_HEADER_FMT " %s", JET_ERR_HEADER_ARGS(filename, span), buf);
+        JET_LOG_ERROR(JET_ERR_HEADER_FMT " %s", JET_ERR_HEADER_ARGS(span), buf);
 
     err_count++;
 }
 
-void jet_err_handler_push(
-        const char* filename, 
-        const jet_span* span, 
-        const char* msg)
+void jet_err_handler_push(const jet_span* span, const char* msg)
 {
     if(!handler_started)
     {
         JET_LOG_ERROR("must start error handler before pushing errors.");
         return;
     }
-
-    JET_ASSERT(filename != NULL);
-    JET_ASSERT(span != NULL);
-    jet_err_handler_pushf(filename, span, "%s", msg);
+    if(!span)
+    {
+        JET_LOG_ERROR("cannot push error, null arg<span>");
+        return;
+    }
+    jet_err_handler_pushf(span, "%s", msg);
 }
