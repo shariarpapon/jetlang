@@ -10,8 +10,11 @@ typedef enum jet_log_level
     JET_LOG_LEVEL_DEBUG = 4,
 } jet_log_level;
 
-void jet_log_output(jet_log_level level, const char* fmt, ...);
-void jet_assert(bool cond, const char* expr, const char* msg, const char* file, int line);
+void jet_log_output(jet_log_level level, const char* filename, 
+                    int line, const char* fmt, ...);
+
+void jet_assert(bool cond, const char* expr, const char* msg, 
+                const char* file, int line);
 
 #define JET_LOG_MSG_BUF_SIZE (1024 * 32) 
 
@@ -20,33 +23,36 @@ void jet_assert(bool cond, const char* expr, const char* msg, const char* file, 
 #define JET_LOG_ENABLE_DEBUG    1
 #define JET_ASSERTION_ENABLED
 
+
 #define JET_LOG_FATAL(fmt, ...) \
-    jet_log_output(JET_LOG_LEVEL_FATAL, fmt, ##__VA_ARGS__)
+    jet_log_output(JET_LOG_LEVEL_FATAL, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
 
 #define JET_LOG_ERROR(fmt, ...) \
-    jet_log_output(JET_LOG_LEVEL_ERROR, fmt, ##__VA_ARGS__)
+    jet_log_output(JET_LOG_LEVEL_ERROR, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
 
 #if JET_LOG_ENABLE_WARNING == 1
 #define JET_LOG_WRN(fmt, ...) \
-    jet_log_output(JET_LOG_LEVEL_WARNING, fmt, ##__VA_ARGS__)
+    jet_log_output(JET_LOG_LEVEL_WARNING, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
 #else
 #define JET_LOG_WRN(fmt, ...)
 #endif
 
 #if JET_LOG_ENABLE_INFO == 1
 #define JET_LOG_INFO(fmt, ...) \
-    jet_log_output(JET_LOG_LEVEL_INFO, fmt, ##__VA_ARGS__)
+    jet_log_output(JET_LOG_LEVEL_INFO, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
 #else
 #define JET_LOG_INFO(fmt, ...)
 #endif
 
 #if JET_LOG_ENABLE_DEBUG == 1
 #define JET_LOG_DEBUG(fmt, ...) \
-    jet_log_output(JET_LOG_LEVEL_DEBUG, fmt, ##__VA_ARGS__)
+    jet_log_output(JET_LOG_LEVEL_DEBUG, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
 #else 
 #define JET_LOG_DEBUG(fmt, ...)
 #endif
 
+
+#define ASSERTION_HEADER_FMT "ASSERTION_FAILED(%s)"
 
 #ifdef JET_ASSERTION_ENABLED
 
@@ -75,7 +81,7 @@ void jet_assert(bool cond, const char* expr, const char* msg, const char* file, 
 
 static void jet_assert_fail(const char* expr, const char* msg, const char* file, int line);
 
-void jet_log_output(jet_log_level level, const char* fmt, ...)
+void jet_log_output(jet_log_level level, const char* filename, int line, const char* fmt, ...)
 {
     if(level < JET_LOG_LEVEL_FATAL) 
         level = JET_LOG_LEVEL_FATAL;
@@ -93,7 +99,7 @@ void jet_log_output(jet_log_level level, const char* fmt, ...)
 
     char out_buf[JET_LOG_MSG_BUF_SIZE + 64];
     memset(out_buf, 0, sizeof(out_buf));
-    snprintf(out_buf, sizeof(out_buf), "[%s] %s\n", level_str[level], msg_buf);
+    snprintf(out_buf, sizeof(out_buf), "[%s] [%s:%d] %s\n", level_str[level], filename, line, msg_buf);
     printf("%s", out_buf);
 }
 
@@ -106,12 +112,12 @@ void jet_assert(bool cond, const char* expr, const char* msg, const char* file, 
 
 static void jet_assert_fail(const char* expr, const char* msg, const char* file, int line)
 {
-    if(msg) jet_log_output(JET_LOG_LEVEL_FATAL, 
-               "ASSERTION FAILED (%s)\n\tfile: %s, line: %d \n\tmsg: %s\n", 
-                expr, file, line, msg);
-    else jet_log_output(JET_LOG_LEVEL_FATAL, 
-               "ASSERTION FAILED (%s)\n\tfile: %s, line: %d\n", 
-                expr, file, line);
+    if(msg) 
+        jet_log_output(JET_LOG_LEVEL_FATAL, file, line, 
+                ASSERTION_HEADER_FMT " : %s", expr, msg);
+    else
+        jet_log_output(JET_LOG_LEVEL_FATAL, file, line, 
+                ASSERTION_HEADER_FMT, expr);
     JET_DEBUG_BREAK();
 }
 

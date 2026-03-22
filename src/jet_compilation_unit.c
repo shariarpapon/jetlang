@@ -1,9 +1,9 @@
 #include <jet_compilation_unit.h>
 #include <jet_io.h>
+#include <jet_logger.h>
 #include <jet_config.h>
 #include <jet_token_print.h>
 #include <jet_ast_print.h>
-#include <jet_logger.h>
 
 #include <string.h>
 #include <stdio.h>
@@ -13,34 +13,34 @@
 
 bool jet_cu_init(jet_compilation_unit* cu, const char* filename)
 {
-   if(!cu || !filename) 
-       return false; 
+    JET_ASSERT(cu != NULL);
+    if(!filename) return false;
 
-   memset(cu, 0, sizeof(*cu));
-   cu->filename = filename;
-   cu->source_len = 0; 
-   
-   bool arena_init = false;
-   bool tok_da_init = false;
-   bool ast_init = false;
+    memset(cu, 0, sizeof(*cu));
+    cu->filename = filename;
+    cu->source_len = 0; 
 
-   arena_init = jet_arena_init(&cu->arena, JET_CU_ARENA_CAP);
-   tok_da_init = jet_da_init(&cu->tok_da, JET_CU_TOK_CAP, sizeof(jet_token));
-   ast_init = jet_ast_init(&cu->ast);
-   cu->source = jet_io_read_text(filename, &cu->source_len);
-   if(!cu->source || !arena_init || 
-      !tok_da_init || !ast_init)
-   {
-       goto fail;
-   }
-   return true;
+    bool arena_init = false;
+    bool tok_da_init = false;
+    bool ast_init = false;
+
+    arena_init = jet_arena_init(&cu->arena, JET_CU_ARENA_CAP);
+    tok_da_init = jet_da_init(&cu->tok_da, JET_CU_TOK_CAP, sizeof(jet_token));
+    ast_init = jet_ast_init(&cu->ast);
+    cu->source = jet_io_read_text(filename, &cu->source_len);
+    if(!cu->source || !arena_init || 
+       !tok_da_init || !ast_init)
+    {
+        goto fail;
+    }
+    return true;
 
 fail:
-   if(cu->source) free((void*)cu->source);
-   if(arena_init) jet_arena_dispose(&cu->arena);
-   if(tok_da_init) jet_da_dispose(&cu->tok_da);
-   if(ast_init) jet_ast_dispose(&cu->ast);
-   return false;
+    if(cu->source) free((void*)cu->source);
+    if(arena_init) jet_arena_dispose(&cu->arena);
+    if(tok_da_init) jet_da_dispose(&cu->tok_da);
+    if(ast_init) jet_ast_dispose(&cu->ast);
+    return false;
 }
 
 void jet_cu_dispose(jet_compilation_unit* cu)
@@ -57,12 +57,7 @@ void jet_cu_dispose(jet_compilation_unit* cu)
 
 bool jet_cu_run(jet_compilation_unit* cu)
 {
-    if(!cu)
-    {
-        JET_LOG_ERROR(" failed to compile, arg <cu> is null.\n");
-        return false;
-    } 
-
+    JET_ASSERT(cu != NULL);
     jet_lexer lexer;
     jet_parser parser;
 
@@ -71,14 +66,14 @@ bool jet_cu_run(jet_compilation_unit* cu)
     if(!lexer_init || !jet_lexer_tokenize(&lexer)) 
         goto fail;
 
-#ifdef JET_DBG_TPRINT_TOKENS
-    jet_token_tprint_da(&cu->tok_da);
-#endif
-
     bool parser_init = false;
     parser_init = jet_parser_init(&parser, cu->filename, (const jet_da*)&cu->tok_da, &cu->ast);
     if(!parser_init || !jet_parser_parse(&parser))
         goto fail;
+
+#ifdef JET_DBG_TPRINT_TOKENS
+    jet_token_tprint_da(&cu->tok_da);
+#endif
 
 #ifdef JET_DBG_PRINT_AST
     jet_ast_print(&cu->ast);
