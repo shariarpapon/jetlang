@@ -2,7 +2,7 @@
 #include <jet_lexer.h>
 #include <jet_token.h>
 #include <jet_io.h>
-#include <jet_err_handler.h>
+#include <jet_diag.h>
 
 #include <string.h>
 #include <stdio.h>
@@ -185,7 +185,7 @@ static void jet_lexer_emit_token(jet_lexer* lexer, size_t start_cursor, size_t l
     JET_ASSERT(jet_da_append(lexer->token_da, (const void*)&tok));
 
     if(tok_type == TOK_INV)
-        JET_ERH_INV_TOK(&tok);
+        JET_DIAG_INV_TOK(&tok);
 }
 
 static bool jet_lexer_is_ident(char c)

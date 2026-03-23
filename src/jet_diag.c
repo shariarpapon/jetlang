@@ -1,4 +1,4 @@
-#include <jet_err_handler.h>
+#include <jet_diag.h>
 #include <jet_logger.h>
 
 #include <stdarg.h>
@@ -9,7 +9,7 @@ static bool handler_started = false;
 static const char* cur_filename = NULL;
 static size_t err_count = 0;
 
-void jet_erh_start(const char* filename)
+void jet_diag_start(const char* filename)
 {
     JET_ASSERTM(filename != NULL, "cannot start err handler, must provide a filename.");
     cur_filename = filename;
@@ -17,23 +17,23 @@ void jet_erh_start(const char* filename)
     handler_started = true;
 }
 
-void jet_erh_end()
+void jet_diag_end()
 {
     cur_filename = NULL;
     err_count = 0;
     handler_started = false;
 }
 
-void jet_erh_reset()
+void jet_diag_reset()
 {
     err_count = 0;
 }
 
-bool jet_erh_is_started() { return handler_started; }
-const char* jet_erh_get_filename() { return cur_filename; }
-size_t jet_erh_get_count() { return err_count; }
+bool jet_diag_is_started() { return handler_started; }
+const char* jet_diag_get_filename() { return cur_filename; }
+size_t jet_diag_get_count() { return err_count; }
 
-void jet_erh_pushf(jet_log_level level, const jet_span* span, const char* fmt, ...) 
+void jet_diag_pushf(jet_log_level level, const jet_span* span, const char* fmt, ...) 
 {
     if(!handler_started)
     {
@@ -57,7 +57,7 @@ void jet_erh_pushf(jet_log_level level, const jet_span* span, const char* fmt, .
     err_count++;
 }
 
-void jet_erh_pushf_tok(jet_log_level level, const jet_token* tok, const char*  fmt, ...)
+void jet_diag_pushf_tok(jet_log_level level, const jet_token* tok, const char*  fmt, ...)
 {
     JET_ASSERT(tok != NULL);
     JET_ASSERT(level >= JET_LOG_LEVEL_FATAL && level <= JET_LOG_LEVEL_DEBUG);
@@ -71,7 +71,22 @@ void jet_erh_pushf_tok(jet_log_level level, const jet_token* tok, const char*  f
     const char* tok_type_str = jet_token_type_str(tok->type); 
     char* tok_strdup;
     jet_token_strdup(tok, &tok_strdup);
-    jet_erh_pushf(level, &tok->span, "token(%s, %s) %s", tok_type_str, tok_strdup, msg_buf);
+    jet_diag_pushf(level, &tok->span, "token(%s, %s) %s", tok_type_str, tok_strdup, msg_buf);
     free(tok_strdup);
+}
+
+void jet_diag_pushf_node(jet_log_level level, const jet_ast_node* node, const char*  fmt, ...)
+{
+    JET_ASSERT(node != NULL);
+    JET_ASSERT(level >= JET_LOG_LEVEL_FATAL && level <= JET_LOG_LEVEL_DEBUG);
+
+    va_list args;
+    va_start(args, fmt);
+    char msg_buf[JET_LOG_MSG_BUF_SIZE];
+    jet_vsnprintf(msg_buf, sizeof(msg_buf), fmt, args);
+    va_end(args);
+    
+    const char* node_type_str = jet_ast_node_type_str(node->node_type); 
+    jet_diag_pushf(level, &node->span, "node(%s) %s", node_type_str, msg_buf);
 }
 
