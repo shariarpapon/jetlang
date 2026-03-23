@@ -9,6 +9,7 @@
 #define JET_ERH_INV_TOK(tok) \
     jet_erh_pushf(JET_LOG_LEVEL_WARNING, &((tok)->span), "%s", "invalid token encountered")
 
+
 void jet_erh_start(const char* filename);
 void jet_erh_end();
 void jet_erh_reset();

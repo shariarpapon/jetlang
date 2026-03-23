@@ -85,7 +85,7 @@ const jet_ast_node* jet_ast_node_get(const jet_ast* ast, node_id nid)
     JET_ASSERT(ast != NULL);
     if(nid == INVALID_NID)
     {
-        JET_LOG_WRN("id=%zu represents invalid node id.", (size_t)INVALID_NID);
+        JET_LOG_WARNING("id=%zu represents invalid node id.", (size_t)INVALID_NID);
         return NULL;
     }
 

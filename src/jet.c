@@ -15,11 +15,12 @@ static bool jet_compile(const char* filepath);
 int main(int argc, char** argv)
 {   
     printf("\n");
-    JET_LOG_INFO("all modules built successfully!");
     jet_init_args(argc, argv);
     
     const char* filepath = jet_get_filepath();
     JET_ASSERT(filepath != NULL);
+
+    JET_LOG_INFO("all internal modules built, initiating jet compiler...");
 
     if(jet_compile(filepath))
         JET_LOG_INFO("input compiled successfully.");

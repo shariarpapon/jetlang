@@ -36,10 +36,10 @@ void jet_assert(bool cond, const char* expr, const char* msg,
     jet_log_outputf_fl(JET_LOG_LEVEL_ERROR, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
 
 #if JET_LOG_ENABLE_WARNING == 1
-#define JET_LOG_WRN(fmt, ...) \
+#define JET_LOG_WARNING(fmt, ...) \
     jet_log_outputf_fl(JET_LOG_LEVEL_WARNING, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
 #else
-#define JET_LOG_WRN(fmt, ...) ((void)0)
+#define JET_LOG_WARNING(fmt, ...) ((void)0)
 #endif
 
 #if JET_LOG_ENABLE_INFO == 1
@@ -109,7 +109,7 @@ void jet_log_outputf(jet_log_level level, const char* fmt, ...)
     { 
         JET_FATAL_ANSI   "FATAL"   JET_ANSI_RESET, 
         JET_ERROR_ANSI   "ERROR"   JET_ANSI_RESET, 
-        JET_WARNING_ANSI "WARNING" JET_ANSI_RESET,
+        JET_WARNING_ANSI "WARN" JET_ANSI_RESET,
         JET_INFO_ANSI    "INFO"    JET_ANSI_RESET, 
         JET_DEBUG_ANSI   "DEBUG"   JET_ANSI_RESET,
     };

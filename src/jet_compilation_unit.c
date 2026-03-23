@@ -1,9 +1,9 @@
 #include <jet_compilation_unit.h>
 #include <jet_io.h>
-#include <jet_logger.h>
 #include <jet_config.h>
 #include <jet_token_print.h>
 #include <jet_ast_print.h>
+#include <jet_err_handler.h>
 
 #include <string.h>
 #include <stdio.h>
@@ -72,6 +72,9 @@ void jet_cu_dispose(jet_compilation_unit* cu)
 bool jet_cu_run(jet_compilation_unit* cu)
 {
     JET_ASSERT(cu != NULL);
+    
+    jet_erh_start(cu->filename);
+
     jet_lexer lexer;
     jet_parser parser;
 
@@ -95,12 +98,14 @@ bool jet_cu_run(jet_compilation_unit* cu)
 
     jet_lexer_dispose(&lexer);
     jet_parser_dispose(&parser);
+    jet_erh_end();
     return true;
 
 fail:
-    JET_LOG_ERROR("abrupt compilation failure.\n");
+    JET_LOG_ERROR("abrupt compilation failure.");
     if(lexer_init) jet_lexer_dispose(&lexer);
     if(parser_init) jet_parser_dispose(&parser);
+    jet_erh_end();
     return false;
 }
 
