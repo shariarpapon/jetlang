@@ -81,7 +81,7 @@ void jet_assert(bool cond, const char* expr, const char* msg,
 #if JET_LOG_ENABLE_ANSI == 1
 #define JET_FATAL_ANSI "\x1b[95m"
 #define JET_ERROR_ANSI "\x1b[91m"
-#define JET_WARNING_ANSI "\x1b[93m"
+#define JET_WARNING_ANSI "\x1b[38;5;222m"
 #define JET_INFO_ANSI "\x1b[92m"
 #define JET_DEBUG_ANSI "\x1b[94m"
 #define JET_ANSI_RESET "\x1b[0m"

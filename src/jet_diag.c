@@ -71,7 +71,7 @@ void jet_diag_pushf_tok(jet_log_level level, const jet_token* tok, const char*  
     const char* tok_type_str = jet_token_type_str(tok->type); 
     char* tok_strdup;
     jet_token_strdup(tok, &tok_strdup);
-    jet_diag_pushf(level, &tok->span, "token(%s, %s) %s", tok_type_str, tok_strdup, msg_buf);
+    jet_diag_pushf(level, &tok->span, "triggered by token(%s, %s) %s", tok_type_str, tok_strdup, msg_buf);
     free(tok_strdup);
 }
 
@@ -87,6 +87,6 @@ void jet_diag_pushf_node(jet_log_level level, const jet_ast_node* node, const ch
     va_end(args);
     
     const char* node_type_str = jet_ast_node_type_str(node->node_type); 
-    jet_diag_pushf(level, &node->span, "node(%s) %s", node_type_str, msg_buf);
+    jet_diag_pushf(level, &node->span, "triggered by node(%s) %s", node_type_str, msg_buf);
 }
 

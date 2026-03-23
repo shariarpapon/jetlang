@@ -7,7 +7,7 @@
 #include <inttypes.h>
 
 #define JET_DIAG_INV_TOK(tok) \
-    jet_diag_pushf_tok(JET_LOG_LEVEL_WARNING, tok, "%s", "invalid token encountered")
+    jet_diag_pushf_tok(JET_LOG_LEVEL_ERROR, tok, "%s", "invalid token encountered")
 
 #define JET_DIAG_UNEXP_TOK(tok, exp_type) \
     jet_diag_pushf_tok(JET_LOG_LEVEL_ERROR, tok, "expected token type: %s", jet_token_type_str(exp_type))
