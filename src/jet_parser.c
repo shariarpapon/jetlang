@@ -117,12 +117,8 @@ static const char* jet_parser_create_type_name(const jet_token* tok, bool* is_pr
         case TOK_IDENT: 
         {
             *is_primitive = false;
-            const char* tok_str = jet_token_strdup(tok);
-            if(!tok_str)
-            {
-                JET_LOG_ERROR("cannot parse, failed to dup token str.");
-                goto fail;
-            }
+            char* tok_str;
+            jet_token_strdup(tok, &tok_str);
             jet_sb_append_cstr(&sb, tok_str);
             free((void*)tok_str);
             break;
@@ -210,8 +206,6 @@ static const jet_token* jet_parser_expect_tok(jet_parser* p, jet_token_type tok_
         const char* exp_tok = jet_token_type_str(tok_type);
         const char* enc_tok = jet_token_type_str(tok->type);
         JET_LOG_ERROR("expected token type %s but encountered %s.", exp_tok, enc_tok);
-        free((void*)exp_tok);
-        free((void*)enc_tok);
         return NULL;
     }
     return jet_parser_consume_tok(p);
@@ -446,13 +440,12 @@ static node_id jet_parser_ident_parse(jet_parser* p)
     }
 
     jet_ast_node_ident ident;
-    ident.str = (const char*)jet_token_strdup(tok);
+    jet_token_strdup(tok, &ident.str);
     if(!ident.str)
     {
         JET_LOG_ERROR("cannot parse ident, unable to create token string dup.");
         return INVALID_NID;
-    }
-    
+    } 
     jet_parser_consume_tok(p);
     
     jet_ast_node node;
@@ -512,12 +505,7 @@ static node_id jet_parser_lit_parse(jet_parser* p)
         case TOK_LIT_STR:
         {
             lit.tkind = JET_TYPE_STR;
-            lit.as.s = jet_token_strdup(tok); 
-            if(!lit.as.s)
-            {
-                JET_LOG_ERROR("cannot parse lit, failed to create tok strdup.");
-                return INVALID_NID;
-            }
+            jet_token_strdup(tok, &lit.as.s); 
             break;
         }
     }

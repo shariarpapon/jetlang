@@ -32,17 +32,16 @@ bool jet_token_dispose(jet_token* token)
     return true;
 }
 
-char* jet_token_strdup(const jet_token* tok)
+void jet_token_strdup(const jet_token* tok, char** out_str)
 {
-    char* s = malloc(tok->span.end - tok->span.start + 1);
-    if(!s)
-    {
-        JET_LOG_ERROR(": unable to allocate memory for str slice.\n");
-        return NULL;
-    }
-    memcpy(s, tok->lexeme, tok->span.end - tok->span.start);
-    s[tok->span.end - tok->span.start] = '\0';
-    return s;
+    JET_ASSERT(tok != NULL);
+    JET_ASSERT(out_str != NULL);
+    JET_ASSERT(tok->span.end >= tok->span.start);
+    size_t len = tok->span.end - tok->span.start;
+    *out_str = malloc(len + 1);
+    JET_ASSERT(*out_str != NULL);
+    memcpy(*out_str, tok->lexeme, len);
+    (*out_str)[len] = '\0';
 }
 
 const char* jet_token_type_str(jet_token_type type)

@@ -43,7 +43,7 @@ typedef struct jet_ast_node_mem
 
 typedef struct jet_ast_node_ident
 {
-    const char* str;
+    char* str;
 } jet_ast_node_ident;
  
 typedef struct jet_ast_node_lit
@@ -55,7 +55,7 @@ typedef struct jet_ast_node_lit
        double f;
        bool b;
        char c;
-       const char* s;
+       char* s;
    } as;
 } jet_ast_node_lit;
 
