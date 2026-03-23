@@ -6,11 +6,8 @@
 
 #include <inttypes.h>
 
-#define JET_ERR(span, fmt, ...) \
-    jet_erh_pushf(span, fmt, ##__VA_ARGS__)
-
-#define JET_ERR_INV_TOK(tok) \
-    jet_erh_inv_tok(tok)
+#define JET_ERH_INV_TOK(tok) \
+    jet_erh_pushf(JET_LOG_LEVEL_WARNING, &((tok)->span), "%s", "invalid token encountered")
 
 void jet_erh_start(const char* filename);
 void jet_erh_end();
@@ -20,10 +17,7 @@ bool jet_erh_is_started();
 const char* jet_erh_get_filename();
 size_t jet_erh_get_count();
 
-void jet_erh_push(const jet_span* span, const char* msg);
-void jet_erh_pushf(const jet_span* span, const char* fmt, ...);
-
-void jet_erh_inv_tok(const jet_token* tok);
+void jet_erh_pushf(jet_log_level level, const jet_span* span, const char* fmt, ...);
 
 
 

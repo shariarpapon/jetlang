@@ -5,8 +5,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#define JET_ERR_LOG_INTERNAL(span, msg, ...) \
-        jet_log_outputf_flc(JET_LOG_LEVEL_ERROR, cur_filename, (span)->line, (span)->col, msg, ##__VA_ARGS__)
+#define JET_ERH_LOG_INTERNAL(level, span, fmt, ...) \
 
 static bool handler_started = false;
 static const char* cur_filename = NULL;
@@ -32,11 +31,12 @@ void jet_erh_reset()
     err_count = 0;
 }
 
+
 bool jet_erh_is_started() { return handler_started; }
 const char* jet_erh_get_filename() { return cur_filename; }
 size_t jet_erh_get_count() { return err_count; }
 
-void jet_erh_pushf(const jet_span* span, const char* fmt, ...) 
+void jet_erh_pushf(jet_log_level level, const jet_span* span, const char* fmt, ...) 
 {
     if(!handler_started)
     {
@@ -52,43 +52,19 @@ void jet_erh_pushf(const jet_span* span, const char* fmt, ...)
 
     va_list args;
     va_start(args, fmt);
+    
     char buf[JET_LOG_MSG_BUF_SIZE];
     int written = vsnprintf(buf, sizeof(buf), fmt, args);
+
     va_end(args);
 
     JET_ASSERTM(written >= 0, "vsnprintf failed");
-
     if((size_t)written >= sizeof(buf))
     { 
-        size_t end = sizeof(buf) - 4;
-        buf[end] = '\0';
-        JET_ERR_LOG_INTERNAL(span, "%s...", buf);
+        for(size_t i = sizeof(buf) - 4; i < sizeof(buf) - 1; i++)
+            buf[i] = '.';
     }
-    else JET_ERR_LOG_INTERNAL(span, "%s", buf);
+
+    jet_log_outputf_flc(level, cur_filename, span->line, span->col, "%s", buf);
     err_count++;
 }
-
-void jet_erh_push(const jet_span* span, const char* msg)
-{
-    if(!handler_started)
-    {
-        JET_LOG_ERROR("must start error handler before pushing errors.");
-        return;
-    }
-    if(!span)
-    {
-        JET_LOG_ERROR("cannot push error, null arg<span>");
-        return;
-    }
-    jet_erh_pushf(span, "%s", msg);
-}
-
-void jet_erh_inv_tok(const jet_token* tok)
-{
-    const char* tok_str = jet_token_strdup(tok);
-    JET_ASSERT(tok_str != NULL);
-    JET_ERR_LOG_INTERNAL(&tok->span, "invalid token encountered: %s", tok_str);
-    free((void*)tok_str);
-}
-
-
