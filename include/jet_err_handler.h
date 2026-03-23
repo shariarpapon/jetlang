@@ -6,9 +6,6 @@
 
 #include <inttypes.h>
 
-#define JET_ERR_HEADER_FMT "[%s:%"PRIu32":%"PRIu32"]"
-#define JET_ERR_HEADER_ARGS(span) jet_err_handler_get_filename(), span->line, span->col
-
 void jet_err_handler_start(const char* filename);
 void jet_err_handler_end();
 void jet_err_handler_reset();

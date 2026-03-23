@@ -9,6 +9,9 @@ static bool handler_started = false;
 static const char* cur_filename = NULL;
 static size_t err_count = 0;
 
+#define JET_ERR_LOG(span, msg, ...) \
+        jet_log_outputf_flc(JET_LOG_LEVEL_ERROR, cur_filename, span->line, span->col, msg, ##__VA_ARGS__)
+
 void jet_err_handler_start(const char* filename)
 {
     JET_ASSERTM(filename != NULL, "cannot start err handler, must provide a filename.");
@@ -59,11 +62,9 @@ void jet_err_handler_pushf(const jet_span* span, const char* fmt, ...)
     { 
         size_t end = sizeof(buf) - 4;
         buf[end] = '\0';
-        JET_LOG_ERROR(JET_ERR_HEADER_FMT " %s...", JET_ERR_HEADER_ARGS(span), buf);
+        JET_ERR_LOG(span, "%s...", buf);
     }
-    else 
-        JET_LOG_ERROR(JET_ERR_HEADER_FMT " %s", JET_ERR_HEADER_ARGS(span), buf);
-
+    else JET_ERR_LOG(span, "%s", buf);
     err_count++;
 }
 
@@ -81,3 +82,4 @@ void jet_err_handler_push(const jet_span* span, const char* msg)
     }
     jet_err_handler_pushf(span, "%s", msg);
 }
+
