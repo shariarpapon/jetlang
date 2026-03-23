@@ -6,13 +6,24 @@
 
 #include <inttypes.h>
 
-void jet_err_handler_start(const char* filename);
-void jet_err_handler_end();
-void jet_err_handler_reset();
+#define JET_ERR(span, fmt, ...) \
+    jet_erh_pushf(span, fmt, ##__VA_ARGS__)
 
-bool jet_err_handler_is_started(); 
-const char* jet_err_handler_get_filename();
-size_t jet_err_handler_get_count();
+#define JET_ERR_INV_TOK(tok) \
+    jet_erh_inv_tok(tok)
 
-void jet_err_handler_push(const jet_span* span, const char* msg);
-void jet_err_handler_pushf(const jet_span* span, const char* fmt, ...);
+void jet_erh_start(const char* filename);
+void jet_erh_end();
+void jet_erh_reset();
+
+bool jet_erh_is_started(); 
+const char* jet_erh_get_filename();
+size_t jet_erh_get_count();
+
+void jet_erh_push(const jet_span* span, const char* msg);
+void jet_erh_pushf(const jet_span* span, const char* fmt, ...);
+
+void jet_erh_inv_tok(const jet_token* tok);
+
+
+

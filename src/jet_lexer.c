@@ -2,7 +2,7 @@
 #include <jet_lexer.h>
 #include <jet_token.h>
 #include <jet_io.h>
-#include <jet_logger.h>
+#include <jet_err_handler.h>
 
 #include <string.h>
 #include <stdio.h>
@@ -162,7 +162,7 @@ bool jet_lexer_tokenize(jet_lexer* lexer)
         else if (jet_lexer_try_scan_char_lit(lexer))    continue;
         else if (jet_lexer_try_scan_str_lit(lexer))     continue;
         else if (jet_lexer_try_scan_punct(lexer))       continue;   
-        
+  
         jet_lexer_emit_token(lexer, lexer->cursor, 1, TOK_INV);
         jet_lexer_consume(lexer);
     } 
@@ -174,24 +174,18 @@ static void jet_lexer_emit_token(jet_lexer* lexer, size_t start_cursor, size_t l
     JET_ASSERT(lexer != NULL);
     jet_token tok;
     const char* lexeme = lexer->input + start_cursor;
-    if(!jet_token_init(
+    JET_ASSERT(jet_token_init(
                 &tok, 
                 tok_type, 
                 lexeme, 
                 start_cursor, 
                 start_cursor + len,
                 lexer->cur_line, 
-                lexer->cur_col - len))
-    {
-        JET_LOG_ERROR(" failed to emit token, could not init token.\n");
-        return;
-    }
+                lexer->cur_col - len));
+    JET_ASSERT(jet_da_append(lexer->token_da, (const void*)&tok));
 
-    if(!jet_da_append(lexer->token_da, (const void*)&tok))
-    {
-        JET_LOG_ERROR(": failed to emit token, could not push token.\n");
-        return;
-    }
+    if(tok_type == TOK_INV)
+        JET_ERR_INV_TOK(&tok);
 }
 
 static bool jet_lexer_is_ident(char c)
@@ -231,13 +225,9 @@ static bool jet_lexer_is_digit(char c)
 
 static bool jet_lexer_try_get_kwd_type(const char* s, size_t len, jet_token_type* out_tok_type)
 { 
-    if(!s) 
-        return false;
-    if(!out_tok_type)
-    {
-        JET_LOG_ERROR("output token type pointer out_tok_type is null.");
-        return false;
-    }
+    //if(!s) return false;
+    JET_ASSERT(s != NULL);
+    JET_ASSERT(out_tok_type != NULL);
 
     char token_str[len + 1];
     memcpy(token_str, (void*)s, len);
@@ -256,12 +246,8 @@ static bool jet_lexer_try_get_kwd_type(const char* s, size_t len, jet_token_type
 
 static bool jet_lexer_try_get_punct_type(char c, jet_token_type* out_tok_type) 
 {
-    if(!out_tok_type)
-    {
-        JET_LOG_ERROR("output token type pointer out_tok_type is null.");
-        return false;
-    }
-    
+    JET_ASSERT(out_tok_type != NULL);
+
     for(size_t i = 0; i < ARRAY_LEN(punct_table); i++)
     {
         if(punct_table[i].value.chr == c)
@@ -275,12 +261,7 @@ static bool jet_lexer_try_get_punct_type(char c, jet_token_type* out_tok_type)
 
 static bool jet_lexer_try_get_cmpd_punct_type(char left, char right, jet_token_type* out_tok_type) 
 {
-    if(!out_tok_type)
-    {
-        JET_LOG_ERROR("output token type pointer out_tok_type is null.");
-        return false;
-    }
-    
+    JET_ASSERT(out_tok_type != NULL);
     for(size_t i = 0; i < ARRAY_LEN(cmpd_punct_table); i++)
     {
         if(cmpd_punct_table[i].tok_value_right == right && 
@@ -296,6 +277,7 @@ static bool jet_lexer_try_get_cmpd_punct_type(char left, char right, jet_token_t
 static bool jet_lexer_try_scan_str_lit(jet_lexer* lexer)
 {
     JET_ASSERT(lexer != NULL);
+
     if(jet_lexer_peek(lexer) != STRING_QUOTE)
         return false;
 
@@ -327,7 +309,7 @@ static bool jet_lexer_try_scan_num_lit(jet_lexer* lexer)
     size_t start_cursor = lexer->cursor;
     if(!jet_lexer_is_digit(jet_lexer_peek(lexer)))
     {
-        if(jet_lexer_peek(lexer) != DECIMAL_CHAR || !jet_lexer_is_digit(jet_lexer_peek_next(lexer)) )
+        if( jet_lexer_peek(lexer) != DECIMAL_CHAR || !jet_lexer_is_digit(jet_lexer_peek_next(lexer)) )
             return false;
         else
         {
@@ -413,9 +395,7 @@ static bool jet_lexer_try_scan_line_com(jet_lexer* lexer)
 {
     JET_ASSERT(lexer != NULL);
     if(jet_lexer_peek(lexer) != '/' || jet_lexer_peek_next(lexer) != '/')
-    {
         return false;
-    }
     jet_lexer_consume(lexer);
     jet_lexer_consume(lexer);
     while(jet_lexer_peek(lexer) != NULL_TERM)
@@ -434,9 +414,7 @@ static bool jet_lexer_try_scan_block_com(jet_lexer* lexer)
 {
     JET_ASSERT(lexer != NULL);
     if(jet_lexer_peek(lexer) != '/' || jet_lexer_peek_next(lexer) != '*')
-    {
         return false;
-    }
     jet_lexer_consume(lexer);
     jet_lexer_consume(lexer);
     while(jet_lexer_peek(lexer) != NULL_TERM)
