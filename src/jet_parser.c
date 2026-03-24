@@ -98,7 +98,7 @@ static const char* jet_parser_create_type_name(const jet_token* tok, bool* is_pr
     *is_primitive = true; 
 
     jet_sb sb;
-    JET_ASSERT(jet_sb_init(&sb, 32) != false);
+    JET_ASSERT(jet_sb_init(&sb, 32));
 
     switch(tok_type)
     {

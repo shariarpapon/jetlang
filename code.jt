@@ -1,7 +1,7 @@
 int x = 1;
-# some thing #
 prog
 {
     int a = 234;
     int b = a + 5;
+    bool x = true;
 }
