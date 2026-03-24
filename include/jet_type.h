@@ -8,3 +8,5 @@ typedef enum jet_type_kind
     JET_TYPE_CHAR,
     JET_TYPE_STR,
 } jet_type_kind;
+
+const char* jet_type_kind_str(jet_type_kind kind);
