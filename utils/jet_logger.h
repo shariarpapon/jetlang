@@ -15,7 +15,17 @@ typedef enum jet_log_level
 void jet_snprintf(char* buf, size_t buf_size, const char* fmt, ...);
 void jet_vsnprintf(char* buf, size_t buf_size, const char* fmt, va_list args);
 
+void jet_log_voutputf(jet_log_level level, const char* fmt, va_list args)
 void jet_log_outputf(jet_log_level level, const char* fmt, ...);
+
+void jet_log_outputf_range(jet_log_level level, 
+        const char* filename, 
+        int start_line, 
+        int start_col, 
+        int end_line, 
+        int end_col, 
+        const char* fmt, ...);
+
 void jet_log_outputf_fl(jet_log_level level, const char* filename, 
                     int line, const char* fmt, ...);
 void jet_log_outputf_flc(jet_log_level level, const char* filename, 
@@ -23,7 +33,6 @@ void jet_log_outputf_flc(jet_log_level level, const char* filename,
 
 void jet_assert(bool cond, const char* expr, const char* msg, 
                 const char* file, int line);
-
 
 #define JET_LOG_MSG_BUF_SIZE (1024 * 32) 
 
@@ -121,8 +130,7 @@ void jet_vsnprintf(char* buf, size_t buf_size, const char* fmt, va_list args)
             buf[i] = '.';
 }
 
-
-void jet_log_outputf(jet_log_level level, const char* fmt, ...)
+void jet_log_voutputf(jet_log_level level, const char* fmt, va_list args)
 {
     if(level < JET_LOG_LEVEL_FATAL) 
         level = JET_LOG_LEVEL_FATAL;
@@ -137,19 +145,45 @@ void jet_log_outputf(jet_log_level level, const char* fmt, ...)
         JET_INFO_ANSI    "INFO"    JET_ANSI_RESET, 
         JET_DEBUG_ANSI   "DEBUG"   JET_ANSI_RESET,
     };
-    
-    va_list args;
-    va_start(args, fmt);
-    
-    char msg_buf[JET_LOG_MSG_BUF_SIZE];
-    memset(msg_buf, 0, sizeof(msg_buf));
-    jet_vsnprintf(msg_buf, sizeof(msg_buf), fmt, args); 
-    va_end(args);
+
+    char buf[JET_LOG_MSG_BUF_SIZE];
+    jet_vsnprtinf(but, sizeof(buf), fmt, args);
 
     char out_buf[JET_LOG_MSG_BUF_SIZE + 64];
-    memset(out_buf, 0, sizeof(out_buf));
-    jet_snprintf(out_buf, sizeof(out_buf), "[%s] %s\n", level_str[level], msg_buf);
+    jet_snprintf(out_buf, sizeof(out_buf), "[%s] %s\n", level_str[level], buf);
     printf("%s", out_buf);
+}
+
+
+void jet_log_outputf(jet_log_level level, const char* fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+    jet_log_voutputf(level, fmt, args);
+    va_end(args);
+}
+
+void jet_log_outputf_flcr(jet_log_level level, 
+        const char* filename, 
+        int start_line, 
+        int start_col, 
+        int end_line, 
+        int end_col, 
+        const char* fmt, ...)
+{
+    va_list args;
+    va_start(args);
+    char msg_buf[JET_LOG_MSG_BUF_SIZE];
+    jet_vsnprintf(msg_buf, sizeof(msg_bug), args);
+    va_end(args);
+ 
+    jet_log_outputf(level, "[%s: (%d:%d) to (%d:%d)] %s",
+            filename, 
+            start_line, 
+            start_col, 
+            end_line, 
+            end_col, 
+            msg_buf);
 }
 
 void jet_log_outputf_flc(jet_log_level level, const char* filename, int line, int col, const char* fmt, ...)
@@ -157,14 +191,9 @@ void jet_log_outputf_flc(jet_log_level level, const char* filename, int line, in
     va_list args;
     va_start(args, fmt); 
     char msg_buf[JET_LOG_MSG_BUF_SIZE];
-    memset(msg_buf, 0, sizeof(msg_buf));
     jet_vsnprintf(msg_buf, sizeof(msg_buf), fmt, args); 
     va_end(args);
-
-    char out_buf[JET_LOG_MSG_BUF_SIZE + 64];
-    memset(out_buf, 0, sizeof(out_buf));
-    jet_snprintf(out_buf, sizeof(out_buf), "[%s:%d:%d] %s", filename, line, col, msg_buf);
-    jet_log_outputf(level, "%s", out_buf);
+    jet_log_outputf(level, "[%s:%d:%d] %s", filename, line, col, msg_buf);
 }
 
 void jet_log_outputf_fl(jet_log_level level, const char* filename, int line, const char* fmt, ...)
@@ -172,14 +201,9 @@ void jet_log_outputf_fl(jet_log_level level, const char* filename, int line, con
     va_list args;
     va_start(args, fmt); 
     char msg_buf[JET_LOG_MSG_BUF_SIZE];
-    memset(msg_buf, 0, sizeof(msg_buf));
     jet_vsnprintf(msg_buf, sizeof(msg_buf), fmt, args); 
     va_end(args);
-
-    char out_buf[JET_LOG_MSG_BUF_SIZE + 64];
-    memset(out_buf, 0, sizeof(out_buf));
-    jet_snprintf(out_buf, sizeof(out_buf), "[%s:%d] %s", filename, line, msg_buf);
-    jet_log_outputf(level, "%s", out_buf);
+    jet_log_outputf("[%s:%d] %s", filename, line, msg_buf);
 }
 
 void jet_assert(bool cond, const char* expr, const char* msg, const char* file, int line)
