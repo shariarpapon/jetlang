@@ -25,10 +25,14 @@ static const char* jet_parser_create_type_name(const jet_token* tok, bool* is_pr
 static bool jet_parser_is_type_tok(jet_token_type tok_type);
 static bool jet_parser_is_vdecl(jet_parser* p);
 static bool jet_parser_is_func_head(jet_parser* p);
+
+//passive node parsing
 static node_id jet_parser_parse_next_stmt(jet_parser* p);
 static node_id jet_parser_parse_expr_stmt(jet_parser* p);
 static node_id jet_parser_parse_expr(jet_parser* p, size_t min_prec);
 static node_id jet_parser_parse_primary(jet_parser* ast);
+
+//direct node parsing
 static node_id jet_parser_prog_parse(jet_parser* p);
 static node_id jet_parser_block_parse(jet_parser* p);
 static node_id jet_parser_ident_parse(jet_parser* p);
