@@ -1,7 +1,6 @@
-- theres is some information boundary overlap issues when logging.
-    -- compiler errors should not propagate source code line/col data, rather only the metadata in the input stream.
-    -- maybe theres a good reason to not have all logs output locational metadata. 
-    -- makes sense only for assert to do that
+- working on implementing jet_diag_pushf_range(start_span, end_span, etc)...
+-- jet_diag.c and jet_diag.h
+-- have to add many fns in c to h
 
 - invalid token fallback system
     * sync to next end of statement

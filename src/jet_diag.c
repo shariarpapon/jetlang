@@ -104,6 +104,11 @@ void jet_diag_pushf(jet_diag_level level,
     va_end(args);
 }
 
+void jet_diag_pushf_token_range(jet_diag_level level, const jet_span* start, const jet_span* end, jet_ast_node_type root, jet_ast_node_type child)
+{
+
+}
+
 void jet_diag_pushf_span(jet_diag_level level, 
         const jet_span* span, 
         const char* fmt, ...)
@@ -161,9 +166,14 @@ void jet_diag_missing(
             jet_token_type_str(tok->type));
 }
 
-void jet_diag_cant_parse_interm_node(const jet_token* start_tok, const jet_token* end_tok)
+void jet_diag_cant_parse_child(const jet_token* start_tok, const jet_token* end_tok, jet_ast_node_type root, jet_ast_node_type child)
 {
-
+    jet_diag_pushf_token_range(JET_DIAG_ERRRO, 
+            start_tok, 
+            end_tok, 
+            "unable to finish parsing %s, failed to parse child %s", 
+            jet_ast_node_type_str(root),
+            jet_ast_node_type_str(child));
 }
 
 void jet_daig_cant_finish_parsing(const jet_token* tok, jet_ast_node_type node_type, const char* reason)
