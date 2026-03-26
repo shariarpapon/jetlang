@@ -253,7 +253,7 @@ static void jet_astp_print_by_nid(jet_ast_printer* p, node_id nid, size_t depth,
 static void jet_astp_print_node(jet_ast_printer* p, const jet_ast_node* n, size_t depth, bool is_last)
 {
     JET_ASSERT(p != NULL);
-    JET_ASSERT(n != NULL);
+    if(n == NULL) return;
 
     const char* node_str = jet_astp_resolve_node_str(p, n); 
     size_t col_id = jet_astp_add_col(p, depth);

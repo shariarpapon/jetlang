@@ -1,1 +1,8 @@
 int x;
+
+prog 
+{
+    bool active = false;
+    int y = x + 10 / 2;
+}
+

@@ -88,6 +88,7 @@ bool jet_parser_parse(jet_parser* p)
         node_id nid = jet_parser_parse_next_stmt(p);
         if(nid == INVALID_NID)
             goto parse_fail;
+
         jet_ast_push_nid(p->ast, nid);
     }
     return true;
@@ -395,7 +396,7 @@ static node_id jet_parser_ident_parse(jet_parser* p)
     JET_ASSERT(p != NULL);
     const jet_token* tok = jet_parser_peek_tok(p); 
     const jet_token* diag_start = tok;
-    if(jet_parser_expect_tok(p, TOK_IDENT) == NULL)
+    if(tok->type != TOK_IDENT)
     {
         jet_diag_cant_parse(diag_start, AST_IDENT);
         return INVALID_NID;
@@ -481,6 +482,11 @@ static node_id jet_parser_tdecl_parse(jet_parser* p)
     const jet_token* tok = jet_parser_consume_tok(p);
     jet_ast_node_tdecl tdecl;
     tdecl.tname = jet_parser_create_type_name(tok, &tdecl.is_primitive);
+    if(tdecl.tname == NULL)
+    {
+        jet_diag_cant_parse(tok, AST_TYPE_DECL);
+    }
+
     tdecl.byte_size = 4;
     jet_ast_node node;
     JET_ASSERT(jet_ast_node_init(&node, AST_TYPE_DECL, 
@@ -563,7 +569,7 @@ static node_id jet_parser_func_parse(jet_parser* p)
         return INVALID_NID;
     }
     
-    JET_ASSERT(!jet_da_init(&fdecl.ret_tdecl_nid_da, 1, sizeof(node_id)));
+    JET_ASSERT(jet_da_init(&fdecl.ret_tdecl_nid_da, 1, sizeof(node_id)));
     JET_ASSERT(jet_da_append(&fdecl.ret_tdecl_nid_da, (const void*)&ret_tdecl_nid));
 
     diag_start = jet_parser_expect_tok(p, TOK_LPAR);
