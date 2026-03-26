@@ -83,8 +83,12 @@ bool jet_ast_push_nid(jet_ast* ast, node_id nid)
 const jet_ast_node* jet_ast_node_get(const jet_ast* ast, node_id nid)
 {
     JET_ASSERT(ast != NULL);
+
     if(nid == INVALID_NID)
+    {
+        JET_LOG_WARNING("attempting to get node with invalid-id (0)");
         return NULL;
+    }
 
     if(nid - 1 >= jet_da_count(&ast->node_registry))
     {

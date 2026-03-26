@@ -637,6 +637,7 @@ static node_id jet_parser_func_parse(jet_parser* p)
         }
         fdef.fdecl_nid = jet_ast_register_node(p->ast, (const jet_ast_node*)&fdecl_base);
         end_tok = jet_parser_peek_prev_tok(p);
+        if(!end_tok) end_tok = start_tok;
 
         jet_ast_node fdef_base;
         JET_ASSERT(jet_ast_node_init(&fdef_base, AST_FUNC_DEF, start_tok->span.start, end_tok->span.end, start_tok->span.line, start_tok->span.col));
@@ -856,6 +857,12 @@ static node_id jet_parser_parse_primary(jet_parser* p)
             jet_da_dispose(&arg_da);
         
         jet_ast_node_call call;
+        if(out_nid == INVALID_NID)
+        {
+            jet_diag_cant_parse_n(jet_parser_peek_tok(p), "primary expression");
+            return INVALID_NID;
+        }
+
         call.callee_nid = out_nid;
         call.arg_nid_da = arg_da;
 
