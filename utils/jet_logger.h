@@ -18,14 +18,6 @@ void jet_vsnprintf(char* buf, size_t buf_size, const char* fmt, va_list args);
 void jet_log_voutputf(jet_log_level level, const char* fmt, va_list args);
 void jet_log_outputf(jet_log_level level, const char* fmt, ...);
 
-void jet_log_outputf_range(jet_log_level level, 
-        const char* filename, 
-        int start_line, 
-        int start_col, 
-        int end_line, 
-        int end_col, 
-        const char* fmt, ...);
-
 void jet_log_outputf_fl(jet_log_level level, const char* filename, 
                     int line, const char* fmt, ...);
 void jet_log_outputf_flc(jet_log_level level, const char* filename, 
@@ -161,29 +153,6 @@ void jet_log_outputf(jet_log_level level, const char* fmt, ...)
     va_start(args, fmt);
     jet_log_voutputf(level, fmt, args);
     va_end(args);
-}
-
-void jet_log_outputf_flcr(jet_log_level level, 
-        const char* filename, 
-        int start_line, 
-        int start_col, 
-        int end_line, 
-        int end_col, 
-        const char* fmt, ...)
-{
-    va_list args;
-    va_start(args, fmt);
-    char msg_buf[JET_LOG_MSG_BUF_SIZE];
-    jet_vsnprintf(msg_buf, sizeof(msg_buf), fmt, args);
-    va_end(args);
- 
-    jet_log_outputf(level, "[%s: (%d:%d) to (%d:%d)] %s",
-            filename, 
-            start_line, 
-            start_col, 
-            end_line, 
-            end_col, 
-            msg_buf);
 }
 
 void jet_log_outputf_flc(jet_log_level level, const char* filename, int line, int col, const char* fmt, ...)

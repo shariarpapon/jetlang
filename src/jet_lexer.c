@@ -185,7 +185,7 @@ static void jet_lexer_emit_token(jet_lexer* lexer, size_t start_cursor, size_t l
     JET_ASSERT(jet_da_append(lexer->token_da, (const void*)&tok));
 
     if(tok_type == TOK_INV)
-        JET_DIAG_INV_TOK(&tok);
+        jet_diag_unexpected_token(&tok);
 }
 
 static bool jet_lexer_is_ident(char c)
