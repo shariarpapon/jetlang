@@ -25,6 +25,7 @@ static void jet_diag_add_report(const char* filename, uint32_t line, uint32_t co
 {
     JET_ASSERTM(report_count < JET_DIAG_MAX_REPORT_COUNT, "report limit reached, haulting...");
     jet_diag_report report;
+    memset(report, 0, sizeof(report));
     report.filename = filename;
     report.line = line;
     report.col = col;
@@ -82,6 +83,18 @@ void jet_diag_emit(jet_diag_level level,
     jet_diag_add_report(filename, line, col, msg);
 }
 
+void jet_diag_emit_range(jet_diag_level level, 
+        const char* filename, 
+        uint32_t s_line, 
+        uint32_t s_col,
+        uint32_t e_line,
+        uint32_t e_col, 
+        const char* msg)
+{
+    jet_log_outputf_range(level, filename, s_line, s_col, e_line, e_col, msg);
+    jet_diag_add_report(filename, s_line, s_col, msg);
+}
+
 void jet_diag_vpushf(jet_diag_level level, 
         uint32_t line, 
         uint32_t col,
@@ -104,9 +117,22 @@ void jet_diag_pushf(jet_diag_level level,
     va_end(args);
 }
 
-void jet_diag_pushf_token_range(jet_diag_level level, const jet_span* start, const jet_span* end, jet_ast_node_type root, jet_ast_node_type child)
+void jet_diag_pushf_token_range(jet_diag_level level, 
+        const jet_token* start, 
+        const jet_token* end, 
+        const char* fmt, ...)
 {
-
+    va_list args;
+    va_start(args, fmt);
+    char buf[JET_LOG_MSG_BUF_SIZE];
+    jet_vsnprintf(buf, sizeof(buf), args);
+    va_end(args);
+    jet_diag_emit_range(cur_filename, 
+            start->span.line, 
+            start->span.col, 
+            end->span.line, 
+            end->span.col, 
+            buf);
 }
 
 void jet_diag_pushf_span(jet_diag_level level, 
@@ -152,7 +178,9 @@ void jet_diag_expected_token(
 
 void jet_diag_unexpected_token(const jet_token* tok)
 {
-    jet_diag_pushf_tok(JET_DIAG_ERROR, tok, "unexpected token %s", jet_token_type_str(tok->type));
+    jet_diag_pushf_tok(JET_DIAG_ERROR, tok, 
+            "unexpected token %s", 
+            jet_token_type_str(tok->type));
 }
 
 void jet_diag_missing(
@@ -168,7 +196,7 @@ void jet_diag_missing(
 
 void jet_diag_cant_parse_child(const jet_token* start_tok, const jet_token* end_tok, jet_ast_node_type root, jet_ast_node_type child)
 {
-    jet_diag_pushf_token_range(JET_DIAG_ERRRO, 
+    jet_diag_pushf_token_range(JET_DIAG_ERROR, 
             start_tok, 
             end_tok, 
             "unable to finish parsing %s, failed to parse child %s", 
@@ -193,11 +221,24 @@ void jet_diag_cant_parse(const jet_token* tok, jet_ast_node_type node_type)
             jet_ast_node_type_str(node_type));
 }
 
+void jet_diag_cant_parse_range(const jet_token* start, const jet_token* end, const char* what)
+{
+    jet_diag_pushf_token_range(JET_DIAG_ERROR, 
+            start->span.line, start->span.col, 
+            end->span.line, end->span.col, 
+            "failed to parse %s", what);
+}
+
+void jet_diag_cant_parse_n(const jet_token* tok, const char* what)
+{
+    jet_diag_pushf_token(JET_DIAG_ERROR, tok, "failed to parse %s", what);
+}
+
 void jet_diag_parser_fatal(const jet_token* tok, const char* reason)
 {
     jet_diag_pushf_token(JET_DIAG_FATAL, 
             tok, 
-            "fatal error occured after token %s, %s", 
+            "fatal parser error occured after token %s, %s", 
             jet_token_type_str(tok->type), 
             reason);
 }
