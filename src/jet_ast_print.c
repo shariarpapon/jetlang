@@ -99,7 +99,8 @@ static const char* jet_astp_op_str(jet_token_type t)
 {
     switch(t)
     {
-        default: return "no_op_str";
+        default: return "op_str_not_defined";
+        case TOK_ASG: return "=";
         case TOK_EQ: return "==";
         case TOK_NEQ: return "!=";
         case TOK_LT: return "<";
