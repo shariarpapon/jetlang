@@ -12,6 +12,14 @@
 #include <assert.h>
 #include <string.h>
 
+
+static jet_token_type sync_points[] = 
+{
+    TOK_RBRC,
+    TOK_SEMI,
+
+};
+
 // TRAVERSING UTILS
 static const jet_token* jet_parser_peek_prev_tok(jet_parser* p);
 static const jet_token* jet_parser_peek_tok(jet_parser* p);
@@ -19,6 +27,7 @@ static const jet_token* jet_parser_peekn_tok(jet_parser* p, size_t n);
 static const jet_token* jet_parser_consume_tok(jet_parser* p);
 static const jet_token* jet_parser_expect_tok(jet_parser* p, jet_token_type tok_type);
 static jet_token_type jet_parser_peekn_tok_type(jet_parser* p, size_t n);
+static void jet_parser_sync(jet_parser* p);
 
 // PARSING
 static const char* jet_parser_create_type_name(const jet_token* tok, bool* is_primitive);
@@ -96,6 +105,11 @@ bool jet_parser_parse(jet_parser* p)
 parse_fail:
     jet_diag_cant_parse_n(diag_start, "valid statement");
     return false;
+}
+
+static void jet_parser_sync(jet_parser* p)
+{
+    JET_ASSERT(p != NULL);
 }
 
 static const char* jet_parser_create_type_name(const jet_token* tok, bool* is_primitive)
@@ -261,9 +275,7 @@ static node_id jet_parser_parse_next_stmt(jet_parser* p)
     jet_token_type t = jet_parser_peekn_tok_type(p, 0);
     
     if(t == TOK_EOF)
-    {
         parsed_nid = INVALID_NID;
-    }
     else if(t == TOK_INV)
     {
         jet_diag_unexpected_token(jet_parser_peek_tok(p));
