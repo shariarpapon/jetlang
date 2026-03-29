@@ -110,6 +110,19 @@ parse_fail:
 static void jet_parser_sync(jet_parser* p)
 {
     JET_ASSERT(p != NULL);
+    while(jet_parser_peekn_tok_type(p, 0) != TOK_EOF)
+    {
+        bool synced = false;
+        for(size_t i = 0; i < sizeof(sync_points) / sizeof(sync_points[0]); i++)
+            if(sync_points[i] == jet_parser_peekn_tok_type(p, 0))
+            {
+                synced = true;
+                break;
+            }
+
+        if(synced) break;
+        else jet_pasrer_consume_tok(p);
+    }
 }
 
 static const char* jet_parser_create_type_name(const jet_token* tok, bool* is_primitive)

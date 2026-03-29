@@ -1,7 +1,6 @@
 int x;
 prog 
 {
-    something, #
     bool active = false;
     x = 33;
     int y = x + 10 / 2;
