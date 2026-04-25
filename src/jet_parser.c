@@ -17,7 +17,6 @@ static jet_token_type sync_points[] =
 {
     TOK_RBRC,
     TOK_SEMI,
-
 };
 
 // TRAVERSING UTILS
@@ -121,7 +120,7 @@ static void jet_parser_sync(jet_parser* p)
             }
 
         if(synced) break;
-        else jet_pasrer_consume_tok(p);
+        else jet_parser_consume_tok(p);
     }
 }
 
