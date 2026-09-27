@@ -3,7 +3,7 @@
 #include <jet_config.h>
 #include <jet_token_print.h>
 #include <jet_ast_print.h>
-#include <jet_diag.h>
+#include <jet_logger.h>
 
 #include <string.h>
 #include <stdio.h>
@@ -71,9 +71,7 @@ void jet_cu_dispose(jet_compilation_unit* cu)
 
 bool jet_cu_run(jet_compilation_unit* cu)
 {
-    JET_ASSERT(cu != NULL);
-    
-    jet_diag_start(cu->filename);
+    JET_ASSERT(cu != NULL);    
 
     jet_lexer lexer;
     jet_parser parser;
@@ -81,12 +79,18 @@ bool jet_cu_run(jet_compilation_unit* cu)
     bool lexer_init = false;
     lexer_init = jet_lexer_init(&lexer, cu->filename, cu->source, &cu->tok_da);
     if(!lexer_init || !jet_lexer_tokenize(&lexer)) 
+    {
+        JET_LOG_ERROR("lexer failed");
         goto fail;
+    }
 
     bool parser_init = false;
     parser_init = jet_parser_init(&parser, cu->filename, (const jet_da*)&cu->tok_da, &cu->ast);
     if(!parser_init || !jet_parser_parse(&parser))
+    {
+        JET_LOG_ERROR("parser failed");
         goto fail;
+    }
 
 #ifdef JET_DBG_TPRINT_TOKENS
     jet_token_tprint_da(&cu->tok_da);
@@ -98,14 +102,12 @@ bool jet_cu_run(jet_compilation_unit* cu)
 
     jet_lexer_dispose(&lexer);
     jet_parser_dispose(&parser);
-    jet_diag_end();
     return true;
 
 fail:
     JET_LOG_ERROR("abrupt compilation failure.");
     if(lexer_init) jet_lexer_dispose(&lexer);
     if(parser_init) jet_parser_dispose(&parser);
-    jet_diag_end();
     return false;
 }
 

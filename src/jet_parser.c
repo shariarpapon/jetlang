@@ -4,7 +4,7 @@
 #include <jet_ast_node.h>
 #include <jet_conv.h>
 #include <jet_sb.h>
-#include <jet_diag.h>
+#include <jet_logger.h>
 
 #include <inttypes.h>
 #include <stdlib.h>
@@ -80,28 +80,25 @@ bool jet_parser_parse(jet_parser* p)
         return true;
 
     jet_token_type t = TOK_EOF; 
-    const jet_token* diag_start = jet_parser_peek_tok(p); 
     while(true)
     {
         t = jet_parser_peekn_tok_type(p, 0); 
         if(t == TOK_EOF) break;
         if(t == TOK_INV)
         {
-            diag_start = jet_parser_peek_tok(p);
-            jet_diag_unexpected_token(diag_start);
             goto parse_fail;
         }
-        diag_start = jet_parser_peek_tok(p);
         node_id nid = jet_parser_parse_next_stmt(p);
         if(nid == INVALID_NID)
+        {
             goto parse_fail;
+        }
 
         jet_ast_push_nid(p->ast, nid);
     }
     return true;
 
 parse_fail:
-    jet_diag_cant_parse_n(diag_start, "valid statement");
     return false;
 }
 
@@ -138,7 +135,6 @@ static const char* jet_parser_create_type_name(const jet_token* tok, bool* is_pr
     {
         default:
         {
-            jet_diag_unexpected_token(tok);
             goto fail;
         }
         case TOK_IDENT: 
@@ -226,7 +222,6 @@ static const jet_token* jet_parser_expect_tok(jet_parser* p, jet_token_type tok_
     if(!tok) return NULL;
     if(tok->type != tok_type)
     {
-        jet_diag_expected_token(tok, tok_type);
         return NULL;
     }
     return jet_parser_consume_tok(p);
@@ -282,27 +277,30 @@ static node_id jet_parser_parse_next_stmt(jet_parser* p)
 {
     JET_ASSERT(p != NULL);
     node_id parsed_nid = INVALID_NID;
-    const jet_token* start_tok = jet_parser_peek_tok(p);
     jet_token_type t = jet_parser_peekn_tok_type(p, 0);
+    
+    JET_LOG_INFO("parsing this token: %s", jet_token_type_str(t));
     
     if(t == TOK_EOF)
         parsed_nid = INVALID_NID;
     else if(t == TOK_INV)
     {
-        jet_diag_unexpected_token(jet_parser_peek_tok(p));
         parsed_nid = INVALID_NID; 
     }    
     else if(t == TOK_KWD_PROG)
         parsed_nid = jet_parser_prog_parse(p);
     else if(jet_parser_is_vdecl(p))
-        parsed_nid = jet_parser_vdecl_parse(p);
+    {
+        parsed_nid = jet_parser_vdecl_parse(p); 
+    }
     else if(jet_parser_is_func_head(p))
+    {
         parsed_nid = jet_parser_func_parse(p);
+    }
     else 
+    {
         parsed_nid = jet_parser_parse_expr_stmt(p);
-
-    if(parsed_nid == INVALID_NID)
-        jet_diag_cant_parse_n(start_tok,  "next statement");
+    }
 
     return parsed_nid;
 }
@@ -310,16 +308,13 @@ static node_id jet_parser_parse_next_stmt(jet_parser* p)
 static node_id jet_parser_parse_expr_stmt(jet_parser* p)
 {
     JET_ASSERT(p != NULL);
-    const jet_token* start_tok = jet_parser_peek_tok(p);
     node_id expr_nid = jet_parser_parse_expr(p, 0);
     if(expr_nid == INVALID_NID)
     {
-        jet_diag_cant_parse_n(start_tok, "expression statement");
         return INVALID_NID;
     }
     if(jet_parser_expect_tok(p, TOK_SEMI) == NULL)
     {
-        jet_diag_cant_parse_n(jet_parser_peek_tok(p), "expression statement");
         return INVALID_NID;
     }
     return expr_nid;
@@ -331,7 +326,6 @@ static node_id jet_parser_prog_parse(jet_parser* p)
     const jet_token* start_tok = jet_parser_expect_tok(p, TOK_KWD_PROG);
     if(start_tok == NULL)
     {
-        jet_diag_cant_parse_n(jet_parser_peek_tok(p), "program block");
         return INVALID_NID;
     }
 
@@ -341,7 +335,6 @@ static node_id jet_parser_prog_parse(jet_parser* p)
 
     if(prog.block_nid == INVALID_NID)
     {
-        jet_diag_cant_parse_n(start_tok, "program block");
         return INVALID_NID;
     }
  
@@ -360,11 +353,9 @@ static node_id jet_parser_block_parse(jet_parser* p)
 {
     JET_ASSERT(p != NULL);
     const jet_token* start_tok = jet_parser_expect_tok(p, TOK_LBRC);
-    const jet_token* diag_start = jet_parser_peek_tok(p);
 
     if(start_tok == NULL)
     {
-        jet_diag_cant_parse(diag_start, AST_BLOCK);
         return INVALID_NID;
     }
 
@@ -379,14 +370,11 @@ static node_id jet_parser_block_parse(jet_parser* p)
         t = jet_parser_peekn_tok_type(p, 0);
         if(t == TOK_EOF || t == TOK_INV)
         {
-            diag_start = jet_parser_peek_tok(p);
-            jet_diag_unexpected_token(diag_start);
             goto fail;
         }
         else if(t == TOK_RBRC)
             break;
 
-        diag_start = jet_parser_peek_tok(p); 
         stmt_nid = jet_parser_parse_next_stmt(p);
         if(stmt_nid == INVALID_NID)
             goto fail;
@@ -395,7 +383,6 @@ static node_id jet_parser_block_parse(jet_parser* p)
     const jet_token* end_tok = jet_parser_expect_tok(p, TOK_RBRC);
     if(end_tok == NULL)
     {
-        diag_start = jet_parser_peek_tok(p);
         goto fail;
     }
 
@@ -410,7 +397,6 @@ static node_id jet_parser_block_parse(jet_parser* p)
 
 fail:
     jet_da_dispose(&block.stmt_nid_da);
-    jet_diag_cant_parse(diag_start, AST_BLOCK);
     return INVALID_NID;
 }
 
@@ -418,10 +404,8 @@ static node_id jet_parser_ident_parse(jet_parser* p)
 {
     JET_ASSERT(p != NULL);
     const jet_token* tok = jet_parser_peek_tok(p); 
-    const jet_token* diag_start = tok;
     if(tok->type != TOK_IDENT)
     {
-        jet_diag_cant_parse(diag_start, AST_IDENT);
         return INVALID_NID;
     }
 
@@ -449,8 +433,6 @@ static node_id jet_parser_lit_parse(jet_parser* p)
     switch(tok->type)
     {
         default:
-            jet_diag_unexpected_token(tok);
-            jet_diag_cant_parse(tok, AST_LIT);
             return INVALID_NID;
         case TOK_KWD_TRUE:
         {
@@ -505,10 +487,6 @@ static node_id jet_parser_tdecl_parse(jet_parser* p)
     const jet_token* tok = jet_parser_consume_tok(p);
     jet_ast_node_tdecl tdecl;
     tdecl.tname = jet_parser_create_type_name(tok, &tdecl.is_primitive);
-    if(tdecl.tname == NULL)
-    {
-        jet_diag_cant_parse(tok, AST_TYPE_DECL);
-    }
 
     tdecl.byte_size = 4;
     jet_ast_node node;
@@ -524,23 +502,19 @@ static node_id jet_parser_vdecl_parse(jet_parser* p)
     JET_ASSERT(p != NULL);
 
     const jet_token* start_tok = jet_parser_peek_tok(p);
-    const jet_token* diag_start = start_tok;
 
     jet_ast_node_vdecl vdecl;
     vdecl.tdecl_nid = jet_parser_tdecl_parse(p);
 
     if(vdecl.tdecl_nid == INVALID_NID)
     {
-        jet_diag_cant_parse(diag_start, AST_VAR_DECL);
         return INVALID_NID;
     }
     
-    diag_start = jet_parser_peek_tok(p);
     vdecl.ident_nid = jet_parser_ident_parse(p);
 
     if(vdecl.ident_nid == INVALID_NID)
     {
-        jet_diag_cant_parse(diag_start, AST_VAR_DECL);
         return INVALID_NID;
     }
 
@@ -551,12 +525,10 @@ static node_id jet_parser_vdecl_parse(jet_parser* p)
     {
         jet_parser_consume_tok(p);    
 
-        diag_start = jet_parser_peek_tok(p);
         vdecl.init_value_nid = jet_parser_parse_expr(p, 0);
 
         if(vdecl.init_value_nid == INVALID_NID)
         {
-            jet_diag_cant_parse(diag_start, AST_VAR_DECL);
             return INVALID_NID;
         } 
     }
@@ -564,7 +536,6 @@ static node_id jet_parser_vdecl_parse(jet_parser* p)
     const jet_token* end_tok = jet_parser_expect_tok(p, TOK_SEMI);
     if(end_tok == NULL)
     {
-        jet_diag_cant_parse(jet_parser_peek_tok(p), AST_VAR_DECL);
         return INVALID_NID;
     }
     
@@ -580,28 +551,17 @@ static node_id jet_parser_func_parse(jet_parser* p)
 {
     JET_ASSERT(p != NULL);
     const jet_token* start_tok = jet_parser_peek_tok(p);
-
     jet_ast_node_fdecl fdecl;
     node_id ret_tdecl_nid = jet_parser_tdecl_parse(p); 
 
-    const jet_token* diag_start = jet_parser_peek_tok(p);
     fdecl.ident_nid = jet_parser_ident_parse(p);
     if(fdecl.ident_nid == INVALID_NID)
     {
-        jet_diag_cant_parse(diag_start, AST_FUNC_DECL);
         return INVALID_NID;
     }
     
     JET_ASSERT(jet_da_init(&fdecl.ret_tdecl_nid_da, 1, sizeof(node_id)));
     JET_ASSERT(jet_da_append(&fdecl.ret_tdecl_nid_da, (const void*)&ret_tdecl_nid));
-
-    diag_start = jet_parser_expect_tok(p, TOK_LPAR);
-    if(diag_start == NULL)
-    {
-        jet_diag_cant_parse(diag_start, AST_FUNC_DECL);
-        jet_da_dispose(&fdecl.ret_tdecl_nid_da);
-        return INVALID_NID;
-    }
 
     JET_ASSERT(jet_da_init(&fdecl.param_nid_da, 2, sizeof(node_id)));
 
@@ -609,12 +569,10 @@ static node_id jet_parser_func_parse(jet_parser* p)
     jet_token_type t = TOK_EOF;
     while(jet_parser_peekn_tok_type(p, 0) != TOK_RPAR && jet_parser_peekn_tok_type(p, 0) != TOK_EOF)
     {
-        diag_start = jet_parser_peek_tok(p);
         vdecl_nid = jet_parser_parse_fparam(p);
         if(vdecl_nid == INVALID_NID)
         {
-            jet_diag_cant_parse_n(diag_start, "function");
-            goto fail;
+           goto fail;
         }
 
         JET_ASSERT(jet_da_append(&fdecl.param_nid_da, (const void*)&vdecl_nid));
@@ -628,8 +586,6 @@ static node_id jet_parser_func_parse(jet_parser* p)
                 jet_parser_consume_tok(p);
                 break;
             default:
-                jet_diag_unexpected_token(jet_parser_peek_tok(p));
-                jet_diag_cant_parse_n(diag_start, "function");
                 goto fail;
         }
     }
@@ -637,7 +593,6 @@ static node_id jet_parser_func_parse(jet_parser* p)
     const jet_token* end_tok = jet_parser_expect_tok(p, TOK_RPAR);
     if(end_tok == NULL)
     {
-        jet_diag_cant_parse(end_tok, AST_FUNC_DECL);
         goto fail;
     }
 
@@ -651,11 +606,9 @@ static node_id jet_parser_func_parse(jet_parser* p)
     if(jet_parser_peekn_tok_type(p, 0) == TOK_LBRC)
     {
         jet_ast_node_fdef fdef;
-        diag_start = jet_parser_peek_tok(p);
         fdef.block_nid = jet_parser_block_parse(p);
         if(fdef.block_nid == INVALID_NID)
         {
-            jet_diag_cant_parse(diag_start, AST_FUNC_DEF);
             goto fail;
         }
         fdef.fdecl_nid = jet_ast_register_node(p->ast, (const jet_ast_node*)&fdecl_base);
@@ -672,8 +625,6 @@ static node_id jet_parser_func_parse(jet_parser* p)
     {
         out_func_nid = jet_ast_register_node(p->ast, (const jet_ast_node*)&fdecl_base);
     }
-    if(out_func_nid == INVALID_NID)
-        jet_diag_cant_parse_n(jet_parser_peek_prev_tok(p), "function");
     return out_func_nid;
 
 fail:
@@ -686,20 +637,16 @@ static node_id jet_parser_parse_fparam(jet_parser* p)
 {
     JET_ASSERT(p != NULL);
     const jet_token* start_tok = jet_parser_peek_tok(p);
-    const jet_token* diag_start = start_tok;
     jet_ast_node_vdecl vdecl;
     vdecl.tdecl_nid = jet_parser_tdecl_parse(p);
     if(vdecl.tdecl_nid == INVALID_NID)
     {
-        jet_diag_cant_parse_n(diag_start, "function parameter");
         return INVALID_NID;
     }
 
-    diag_start = jet_parser_peek_tok(p);
     vdecl.ident_nid = jet_parser_ident_parse(p);
     if(vdecl.ident_nid == INVALID_NID)
     {
-        jet_diag_cant_parse_n(diag_start, "function parameter");
         return INVALID_NID;
     }
 
@@ -708,11 +655,9 @@ static node_id jet_parser_parse_fparam(jet_parser* p)
     if(tok_type == TOK_ASG)
     {
         jet_parser_consume_tok(p);    
-        diag_start = jet_parser_peek_tok(p);
         vdecl.init_value_nid = jet_parser_parse_expr(p, 0);
         if(!vdecl.init_value_nid)
         {
-            jet_diag_cant_parse_n(diag_start, "function parameter");
             return INVALID_NID;
         } 
     }
@@ -732,7 +677,6 @@ static node_id jet_parser_parse_expr(jet_parser* p, size_t min_prec)
     node_id lhs_nid = jet_parser_parse_primary(p);
     if(lhs_nid == INVALID_NID)
     {
-        jet_diag_cant_parse_n(jet_parser_peek_tok(p), "lhs expression");
         return INVALID_NID;
     }
     while(jet_parser_peek_tok(p) != NULL)
@@ -749,7 +693,6 @@ static node_id jet_parser_parse_expr(jet_parser* p, size_t min_prec)
         node_id rhs_nid = jet_parser_parse_expr(p, op_prec + 1);        
         if(rhs_nid == INVALID_NID)
         {
-            jet_diag_cant_parse_n(jet_parser_peek_tok(p), "rhs expression");
             return INVALID_NID;
         }
         
@@ -779,13 +722,11 @@ static node_id jet_parser_parse_primary(jet_parser* p)
         return INVALID_NID;
 
     node_id out_nid = INVALID_NID;
-    const jet_token* diag_start = jet_parser_peek_tok(p);
 
     switch(cur_tok->type)
     {
         default:
         {
-            jet_diag_unexpected_token(cur_tok);
             return INVALID_NID;
         }
         case TOK_KWD_NULL:
@@ -796,20 +737,17 @@ static node_id jet_parser_parse_primary(jet_parser* p)
         case TOK_LIT_CHAR:
         case TOK_LIT_STR:
         {
-            diag_start = jet_parser_peek_tok(p);
             out_nid = jet_parser_lit_parse(p);
             break;
         }
         case TOK_IDENT:
         {
-            diag_start = jet_parser_peek_tok(p);
             out_nid = jet_parser_ident_parse(p);
             break;
         }
         case TOK_LPAR:
         {
             jet_parser_consume_tok(p);
-            diag_start = jet_parser_peek_tok(p);
             out_nid = jet_parser_parse_expr(p, 0);
             cur_tok = jet_parser_peek_tok(p);
             jet_parser_expect_tok(p, TOK_RPAR);
@@ -819,7 +757,6 @@ static node_id jet_parser_parse_primary(jet_parser* p)
         case TOK_MINUS:
         {
             jet_parser_consume_tok(p);
-            diag_start = jet_parser_peek_tok(p);
             node_id rhs_nid = jet_parser_parse_expr(p, PREC_PREFIX);
             if(rhs_nid == INVALID_NID)
             {
@@ -843,7 +780,6 @@ static node_id jet_parser_parse_primary(jet_parser* p)
 
     if(out_nid == INVALID_NID)
     {
-        jet_diag_cant_parse_n(diag_start, "primary expression");
         return INVALID_NID;
     }
 
@@ -855,12 +791,10 @@ static node_id jet_parser_parse_primary(jet_parser* p)
         jet_parser_consume_tok(p);        
         while(jet_parser_peekn_tok_type(p, 0) != TOK_RPAR)
         {
-            diag_start = jet_parser_peek_tok(p);
             node_id arg_nid = jet_parser_parse_expr(p, 0);
             if(arg_nid == INVALID_NID)
             {
                 jet_da_dispose(&arg_da);
-                jet_diag_cant_parse_n(diag_start, "primary expression");
                 return INVALID_NID;
             }
             JET_ASSERT(jet_da_append(&arg_da, (const void*)&arg_nid));
@@ -872,7 +806,6 @@ static node_id jet_parser_parse_primary(jet_parser* p)
         end_tok = jet_parser_expect_tok(p, TOK_RPAR);
         if(end_tok == NULL)
         {
-            jet_diag_cant_parse_n(jet_parser_peek_tok(p), "primary expression");
             return INVALID_NID;
         }
 
@@ -882,7 +815,6 @@ static node_id jet_parser_parse_primary(jet_parser* p)
         jet_ast_node_call call;
         if(out_nid == INVALID_NID)
         {
-            jet_diag_cant_parse_n(jet_parser_peek_tok(p), "primary expression");
             return INVALID_NID;
         }
 
