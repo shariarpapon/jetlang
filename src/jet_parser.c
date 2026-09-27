@@ -279,8 +279,6 @@ static node_id jet_parser_parse_next_stmt(jet_parser* p)
     node_id parsed_nid = INVALID_NID;
     jet_token_type t = jet_parser_peekn_tok_type(p, 0);
     
-    JET_LOG_INFO("parsing this token: %s", jet_token_type_str(t));
-    
     if(t == TOK_EOF)
         parsed_nid = INVALID_NID;
     else if(t == TOK_INV)
@@ -483,7 +481,7 @@ static node_id jet_parser_lit_parse(jet_parser* p)
 
 static node_id jet_parser_tdecl_parse(jet_parser* p)
 {
-    JET_ASSERT(p != NULL);
+    JET_ASSERT(p != NULL); 
     const jet_token* tok = jet_parser_consume_tok(p);
     jet_ast_node_tdecl tdecl;
     tdecl.tname = jet_parser_create_type_name(tok, &tdecl.is_primitive);
@@ -552,6 +550,7 @@ static node_id jet_parser_func_parse(jet_parser* p)
     JET_ASSERT(p != NULL);
     const jet_token* start_tok = jet_parser_peek_tok(p);
     jet_ast_node_fdecl fdecl;
+
     node_id ret_tdecl_nid = jet_parser_tdecl_parse(p); 
 
     fdecl.ident_nid = jet_parser_ident_parse(p);
@@ -559,10 +558,11 @@ static node_id jet_parser_func_parse(jet_parser* p)
     {
         return INVALID_NID;
     }
+
+    jet_parser_expect_tok(p, TOK_LPAR);
     
     JET_ASSERT(jet_da_init(&fdecl.ret_tdecl_nid_da, 1, sizeof(node_id)));
     JET_ASSERT(jet_da_append(&fdecl.ret_tdecl_nid_da, (const void*)&ret_tdecl_nid));
-
     JET_ASSERT(jet_da_init(&fdecl.param_nid_da, 2, sizeof(node_id)));
 
     node_id vdecl_nid = INVALID_NID;
@@ -570,6 +570,7 @@ static node_id jet_parser_func_parse(jet_parser* p)
     while(jet_parser_peekn_tok_type(p, 0) != TOK_RPAR && jet_parser_peekn_tok_type(p, 0) != TOK_EOF)
     {
         vdecl_nid = jet_parser_parse_fparam(p);
+
         if(vdecl_nid == INVALID_NID)
         {
            goto fail;
@@ -635,10 +636,12 @@ fail:
 
 static node_id jet_parser_parse_fparam(jet_parser* p)
 {
+   
     JET_ASSERT(p != NULL);
     const jet_token* start_tok = jet_parser_peek_tok(p);
     jet_ast_node_vdecl vdecl;
     vdecl.tdecl_nid = jet_parser_tdecl_parse(p);
+     
     if(vdecl.tdecl_nid == INVALID_NID)
     {
         return INVALID_NID;
