@@ -45,8 +45,7 @@ node_id jet_ast_register_node(jet_ast* ast, const jet_ast_node* node)
 {
     JET_ASSERT(ast != NULL);
     JET_ASSERT(node != NULL);
-    if(!jet_da_append(&ast->node_registry, (const void*)node))
-    {
+    if(!jet_da_append(&ast->node_registry, (const void*)node)) {
         JET_LOG_ERROR(" failed to register node, unable to append.\n");
         abort();
         return INVALID_NID;

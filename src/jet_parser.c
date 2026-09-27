@@ -12,7 +12,6 @@
 #include <assert.h>
 #include <string.h>
 
-
 static jet_token_type sync_points[] = 
 {
     TOK_RBRC,

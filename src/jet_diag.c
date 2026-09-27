@@ -16,7 +16,6 @@ typedef struct jet_diag_report
 static bool handler_started = false;
 static const char* cur_filename = NULL;
 
-
 #define JET_DIAG_MAX_REPORT_COUNT (32)
 static jet_diag_report reports[JET_DIAG_MAX_REPORT_COUNT];
 static size_t report_count = 0; 
