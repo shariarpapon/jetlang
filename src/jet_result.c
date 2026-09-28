@@ -8,3 +8,9 @@ bool jet_result_init(jet_result* result, bool success)
     result->success = success;
     return true;
 }
+
+void jet_result_dispose(jet_result* result)
+{
+    if(!result) return;
+    memset(result, 0, sizeof(*result));
+}

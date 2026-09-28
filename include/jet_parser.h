@@ -1,9 +1,8 @@
 #pragma once
-
 #include <jet_token.h>
+#include <jet_ast.h>
 #include <stdbool.h>
 #include <stddef.h>
-#include <jet_ast.h>
 
 typedef struct jet_parse
 {

@@ -4,7 +4,7 @@
 #include <jet_token_print.h>
 #include <jet_ast_print.h>
 #include <jet_logger.h>
-#include <jet_parsing_error.h>
+#include <jet_error.h>
 
 #include <string.h>
 #include <stdio.h>
@@ -33,7 +33,7 @@ bool jet_cu_init(jet_compilation_unit* cu, const char* filename)
 
     arena_init = jet_arena_init(&cu->arena, JET_CU_ARENA_CAP);
     tok_da_init = jet_da_init(&cu->tok_da, JET_CU_TOK_CAP, sizeof(jet_token));
-    errors_init = jet_da_init(&cu->errors, JET_CU_ERROR_CAP, sizeof(jet_parsing_error));
+    errors_init = jet_da_init(&cu->errors, JET_CU_ERROR_CAP, sizeof(jet_error));
     ast_init = jet_ast_init(&cu->ast);
     cu->source = jet_io_read_text(filename, &cu->source_len);
     if(!cu->source || !arena_init || 
@@ -58,6 +58,7 @@ fail:
     if(cu->source) free((void*)cu->source);
     if(arena_init) jet_arena_dispose(&cu->arena);
     if(tok_da_init) jet_da_dispose(&cu->tok_da);
+    if(errors_init) jet_da_dispose(&cu->errors);
     if(ast_init) jet_ast_dispose(&cu->ast);
     return false;
 }
