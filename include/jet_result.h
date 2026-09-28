@@ -1,6 +1,7 @@
 #pragma once
 #include <stdbool.h>
 #include <jet_ast_node.h>
+#include <jet_parsing_error.h>
 
 typedef struct jet_result
 {
@@ -8,6 +9,7 @@ typedef struct jet_result
     union
     {
         node_id nid;
+        jet_parsing_error parsing_error;
     } as;
 } jet_result;
 

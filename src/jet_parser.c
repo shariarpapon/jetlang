@@ -50,10 +50,10 @@ static node_id jet_parser_func_parse(jet_parser* p);
 static node_id jet_parser_parse_fparam(jet_parser* p);
 
 // EXPOSED===
-bool jet_parser_init(jet_parser* p, const char* filename, const jet_da* tok_da, jet_ast* ast)
+bool jet_parser_init(jet_parser* p, const char* filename, const jet_da* tok_da, jet_ast* ast, const jet_da* errors)
 {
     JET_ASSERT(p != NULL);
-    if(!tok_da || !ast || !filename)
+    if(!tok_da || !errors || !ast || !filename)
     {
         JET_LOG_ERROR("could not init parser, null param/s.");
         return false;
@@ -61,6 +61,7 @@ bool jet_parser_init(jet_parser* p, const char* filename, const jet_da* tok_da, 
     memset(p, 0 , sizeof(*p));
     p->filename = filename;
     p->tok_da = tok_da;
+    p->errors = errors;
     p->ast = ast;
     p->tok_cursor = 0;
     return true;

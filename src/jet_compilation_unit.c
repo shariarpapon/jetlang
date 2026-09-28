@@ -4,6 +4,7 @@
 #include <jet_token_print.h>
 #include <jet_ast_print.h>
 #include <jet_logger.h>
+#include <jet_parsing_error.h>
 
 #include <string.h>
 #include <stdio.h>
@@ -14,6 +15,7 @@
 
 #define JET_CU_ARENA_CAP (1024 * 4)
 #define JET_CU_TOK_CAP (64)
+#define JET_CU_ERROR_CAP (16)
 
 bool jet_cu_init(jet_compilation_unit* cu, const char* filename)
 {
@@ -27,13 +29,15 @@ bool jet_cu_init(jet_compilation_unit* cu, const char* filename)
     bool arena_init = false;
     bool tok_da_init = false;
     bool ast_init = false;
+    bool errors_init = false;
 
     arena_init = jet_arena_init(&cu->arena, JET_CU_ARENA_CAP);
     tok_da_init = jet_da_init(&cu->tok_da, JET_CU_TOK_CAP, sizeof(jet_token));
+    errors_init = jet_da_init(&cu->errors, JET_CU_ERROR_CAP, sizeof(jet_parsing_error));
     ast_init = jet_ast_init(&cu->ast);
     cu->source = jet_io_read_text(filename, &cu->source_len);
     if(!cu->source || !arena_init || 
-       !tok_da_init || !ast_init)
+       !tok_da_init || !ast_init || !errors_init)
     {
         goto fail;
     }
@@ -62,6 +66,7 @@ void jet_cu_dispose(jet_compilation_unit* cu)
 {
     if(!cu) return;
     jet_da_dispose(&cu->tok_da); 
+    jet_da_dispose(&cu->errors);
     if(cu->source) 
         free((void*)cu->source);
     jet_arena_dispose(&cu->arena);
@@ -85,7 +90,7 @@ bool jet_cu_run(jet_compilation_unit* cu)
     }
 
     bool parser_init = false;
-    parser_init = jet_parser_init(&parser, cu->filename, (const jet_da*)&cu->tok_da, &cu->ast);
+    parser_init = jet_parser_init(&parser, cu->filename, (const jet_da*)&cu->tok_da, &cu->ast, (const jet_da*)&cu->errors);
     if(!parser_init || !jet_parser_parse(&parser))
     {
         JET_LOG_ERROR("parser failed");
