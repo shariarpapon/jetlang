@@ -11,6 +11,8 @@ typedef struct jet_result
     } as;
 } jet_result;
 
+bool jet_result_init(jet_result* result, bool success);
+
 
     
 
