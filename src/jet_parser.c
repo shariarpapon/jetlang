@@ -261,7 +261,7 @@ static bool jet_parser_is_vdecl(jet_parser* p)
     return jet_parser_is_type_tok(t0) && 
            jet_parser_peekn_tok_type(p, 1) == TOK_IDENT &&
            (jet_parser_peekn_tok_type(p, 2) == TOK_ASG || 
-            jet_parser_peekn_tok_type(p, 2) == TOK_SEMI);
+           jet_parser_peekn_tok_type(p, 2) == TOK_SEMI);
 }
 
 static bool jet_parser_is_func_head(jet_parser* p)
