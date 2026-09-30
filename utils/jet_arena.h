@@ -132,7 +132,7 @@ void* jet_arena_galloc(void* arena_ctx, size_t bytes)
 {
     if(!arena_ctx)
     {
-        fprintf(stderr, "err: cannot agnostic arena alloc, arg arena_ptr is null.\n");
+        fprintf(stderr, "err: cannot allocate agnostically, arg arena_ctx is null.\n");
         return NULL;
     }
     jet_arena* arena = (jet_arena*)arena_ctx;
@@ -165,7 +165,7 @@ static jet_arena* jet_arena_get_next_available(jet_arena* arena, size_t bytes)
             arena->next->block = NULL;
             if(!jet_arena_init(arena->next, next_cap))
             {
-                fprintf(stderr, "err: failed to init arena.\n");
+                fprintf(stderr, "err: failed to init next arena page.\n");
                 free(arena->next);
                 arena->next = NULL;
                 return NULL;

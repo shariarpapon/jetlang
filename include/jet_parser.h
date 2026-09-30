@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-typedef struct jet_parse
+typedef struct jet_parser
 {
     const char* filename;
     const jet_da* tok_da;

@@ -12,12 +12,6 @@
 #include <assert.h>
 #include <string.h>
 
-static jet_token_type sync_points[] = 
-{
-    TOK_RBRC,
-    TOK_SEMI,
-};
-
 // TRAVERSING UTILS
 static const jet_token* jet_parser_peek_prev_tok(jet_parser* p);
 static const jet_token* jet_parser_peek_tok(jet_parser* p);
@@ -25,7 +19,6 @@ static const jet_token* jet_parser_peekn_tok(jet_parser* p, size_t n);
 static const jet_token* jet_parser_consume_tok(jet_parser* p);
 static const jet_token* jet_parser_expect_tok(jet_parser* p, jet_token_type tok_type);
 static jet_token_type jet_parser_peekn_tok_type(jet_parser* p, size_t n);
-static void jet_parser_sync(jet_parser* p);
 
 // PARSING
 static const char* jet_parser_create_type_name(const jet_token* tok, bool* is_primitive);
@@ -39,7 +32,7 @@ static node_id jet_parser_parse_expr_stmt(jet_parser* p);
 static node_id jet_parser_parse_expr(jet_parser* p, size_t min_prec);
 static node_id jet_parser_parse_primary(jet_parser* ast);
 
-//specific node parsing
+//special node parsing
 static node_id jet_parser_prog_parse(jet_parser* p);
 static node_id jet_parser_block_parse(jet_parser* p);
 static node_id jet_parser_ident_parse(jet_parser* p);
@@ -48,6 +41,32 @@ static node_id jet_parser_vdecl_parse(jet_parser* p);
 static node_id jet_parser_lit_parse(jet_parser* p);
 static node_id jet_parser_func_parse(jet_parser* p);
 static node_id jet_parser_parse_fparam(jet_parser* p);
+
+//experimental-------------------------------------------------------------------
+static jet_token_type sync_points[] = 
+{
+    TOK_RBRC,
+    TOK_SEMI,
+};
+static void jet_parser_sync(jet_parser* p);
+static void jet_parser_sync(jet_parser* p)
+{
+    JET_ASSERT(p != NULL);
+    while(jet_parser_peekn_tok_type(p, 0) != TOK_EOF)
+    {
+        bool synced = false;
+        for(size_t i = 0; i < sizeof(sync_points) / sizeof(sync_points[0]); i++)
+            if(sync_points[i] == jet_parser_peekn_tok_type(p, 0))
+            {
+                synced = true;
+                break;
+            }
+
+        if(synced) break;
+        else jet_parser_consume_tok(p);
+    }
+}
+//exp^---------------------------------------------------------------------------
 
 // EXPOSED===
 bool jet_parser_init(jet_parser* p, const char* filename, const jet_da* tok_da, jet_ast* ast, const jet_da* errors)
@@ -103,23 +122,6 @@ parse_fail:
     return false;
 }
 
-static void jet_parser_sync(jet_parser* p)
-{
-    JET_ASSERT(p != NULL);
-    while(jet_parser_peekn_tok_type(p, 0) != TOK_EOF)
-    {
-        bool synced = false;
-        for(size_t i = 0; i < sizeof(sync_points) / sizeof(sync_points[0]); i++)
-            if(sync_points[i] == jet_parser_peekn_tok_type(p, 0))
-            {
-                synced = true;
-                break;
-            }
-
-        if(synced) break;
-        else jet_parser_consume_tok(p);
-    }
-}
 
 static const char* jet_parser_create_type_name(const jet_token* tok, bool* is_primitive)
 {
@@ -274,6 +276,7 @@ static bool jet_parser_is_func_head(jet_parser* p)
            jet_parser_peekn_tok_type(p, 2) == TOK_LPAR;
 }
 
+// parsing functions ------
 static node_id jet_parser_parse_next_stmt(jet_parser* p)
 {
     JET_ASSERT(p != NULL);

@@ -13,7 +13,7 @@ typedef struct jet_compilation_unit
     jet_arena arena;
     jet_da tok_da;
     jet_ast ast;
-    jet_da errors;
+    jet_da parser_errors;
 } jet_compilation_unit;
 
 bool jet_cu_init(jet_compilation_unit* cu, const char* filename);

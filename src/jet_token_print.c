@@ -7,7 +7,7 @@
 #include <inttypes.h>
 
 #define TOK_TB_HEADER_FMT "%-7s %-17s %-10s %-10s %s\n"
-#define TOK_TB_ENTRY_FMT "%-7zu %-17s %-10" PRIu32 " %-10" PRIu32 " %.*s"
+#define TOK_TB_ENTRY_FMT "%-7zu %-17s %-10" PRIu32 " %-10" PRIu32 " %.*s\n" 
 
 void jet_token_tprint_da(const jet_da* tokens)
 {
@@ -23,15 +23,15 @@ void jet_token_tprint_da(const jet_da* tokens)
         return;
     }
     
-    JET_LOG_INFO("token darray [%zu]:", len);
-    JET_LOG_INFO(TOK_TB_HEADER_FMT, "index", "type", "line", "col", "value");        
+    printf("token darray [%zu]:\n", len);
+    printf(TOK_TB_HEADER_FMT, "index", "type", "line", "col", "value");        
    
     for(size_t i = 0; i < len; i++)
     {  
         jet_token* token = jet_da_get(tokens, i);
         const char* type_str = jet_token_type_str(token->type);
         size_t len = token->span.end - token->span.start;
-        JET_LOG_INFO(TOK_TB_ENTRY_FMT, i, type_str, token->span.line, token->span.col, (int)len, token->lexeme);        
+        printf(TOK_TB_ENTRY_FMT, i, type_str, token->span.line, token->span.col, (int)len, token->lexeme);        
     }
     printf("\n");
 }

@@ -2,3 +2,10 @@ int add(int left, int right)
 {
     int sum = left + right;
 }
+
+
+prog
+{
+    //entry point of the function
+    print("hello world");
+}

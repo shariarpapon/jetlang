@@ -33,7 +33,7 @@ bool jet_cu_init(jet_compilation_unit* cu, const char* filename)
 
     arena_init = jet_arena_init(&cu->arena, JET_CU_ARENA_CAP);
     tok_da_init = jet_da_init(&cu->tok_da, JET_CU_TOK_CAP, sizeof(jet_token));
-    errors_init = jet_da_init(&cu->errors, JET_CU_ERROR_CAP, sizeof(jet_error));
+    errors_init = jet_da_init(&cu->parser_errors, JET_CU_ERROR_CAP, sizeof(jet_error));
     ast_init = jet_ast_init(&cu->ast);
     cu->source = jet_io_read_text(filename, &cu->source_len);
     if(!cu->source || !arena_init || 
@@ -58,7 +58,7 @@ fail:
     if(cu->source) free((void*)cu->source);
     if(arena_init) jet_arena_dispose(&cu->arena);
     if(tok_da_init) jet_da_dispose(&cu->tok_da);
-    if(errors_init) jet_da_dispose(&cu->errors);
+    if(errors_init) jet_da_dispose(&cu->parser_errors);
     if(ast_init) jet_ast_dispose(&cu->ast);
     return false;
 }
@@ -67,7 +67,7 @@ void jet_cu_dispose(jet_compilation_unit* cu)
 {
     if(!cu) return;
     jet_da_dispose(&cu->tok_da); 
-    jet_da_dispose(&cu->errors);
+    jet_da_dispose(&cu->parser_errors);
     if(cu->source) 
         free((void*)cu->source);
     jet_arena_dispose(&cu->arena);
@@ -91,7 +91,7 @@ bool jet_cu_run(jet_compilation_unit* cu)
     }
 
     bool parser_init = false;
-    parser_init = jet_parser_init(&parser, cu->filename, (const jet_da*)&cu->tok_da, &cu->ast, (const jet_da*)&cu->errors);
+    parser_init = jet_parser_init(&parser, cu->filename, (const jet_da*)&cu->tok_da, &cu->ast, (const jet_da*)&cu->parser_errors);
     if(!parser_init || !jet_parser_parse(&parser))
     {
         JET_LOG_ERROR("parser failed");

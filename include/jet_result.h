@@ -9,9 +9,7 @@ typedef struct jet_result
     union
     {
         node_id nid;
-        jet_error lexer_error;
         jet_error parser_error;
-        jet_error semantic_error;
     } as;
 } jet_result;
 
