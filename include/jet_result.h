@@ -6,11 +6,8 @@
 typedef struct jet_result
 {
     bool success;
-    union
-    {
-        node_id nid;
-        jet_error parser_error;
-    } as;
+    node_id nid;
+    jet_error error;
 } jet_result;
 
 bool jet_result_init(jet_result* result, bool success);

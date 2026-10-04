@@ -1,6 +1,1 @@
-- working on implementing jet_diag_pushf_range(start_span, end_span, etc)...
--- jet_diag.c and jet_diag.h
--- have to add many fns in c to h
-
-- invalid token fallback system
-    * sync to next end of statement
+- implement: parsing functions should return jet_result instead of ndoe_id

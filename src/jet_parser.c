@@ -5,6 +5,7 @@
 #include <jet_conv.h>
 #include <jet_sb.h>
 #include <jet_logger.h>
+#include <jet_result.h>
 
 #include <inttypes.h>
 #include <stdlib.h>
@@ -282,6 +283,9 @@ static jet_result jet_parser_parse_next_stmt(jet_parser* p)
     JET_ASSERT(p != NULL);
     node_id parsed_nid = INVALID_NID;
     jet_token_type t = jet_parser_peekn_tok_type(p, 0);
+    
+    jet_result result;
+    JET_ASSERT(jet_result_init(&result, false));
     
     if(t == TOK_EOF)
         parsed_nid = INVALID_NID;
