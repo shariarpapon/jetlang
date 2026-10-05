@@ -1,7 +1,7 @@
 #include <jet_result.h>
 #include <string.h>
 
-bool jet_result_init(jet_result* result, bool success)
+static bool jet_result_init(jet_result* result, bool success)
 {
     if(!result) return false;
     memset((void*)result, 0, sizeof(*result));
@@ -9,8 +9,15 @@ bool jet_result_init(jet_result* result, bool success)
     return true;
 }
 
-void jet_result_dispose(jet_result* result)
+jet_result jet_result_base(bool success)
 {
-    if(!result) return;
-    memset(result, 0, sizeof(*result));
+    jet_result result;
+    ASSERT(jet_result_init(&result, success));
+    return result;
+}
+
+jet_result jet_result_error(jet_error* error)
+{
+    jet_result result = jet_result_base(false);
+    result.as.error = &error;
 }

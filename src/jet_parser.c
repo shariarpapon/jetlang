@@ -44,6 +44,7 @@ static jet_result jet_parser_func_parse(jet_parser* p);
 static jet_result jet_parser_parse_fparam(jet_parser* p);
 
 //experimental-------------------------------------------------------------------
+/*
 static jet_token_type sync_points[] = 
 {
     TOK_RBRC,
@@ -67,9 +68,10 @@ static void jet_parser_sync(jet_parser* p)
         else jet_parser_consume_tok(p);
     }
 }
+*/
 //exp^---------------------------------------------------------------------------
 
-// EXPOSED===
+// exposed fns
 bool jet_parser_init(jet_parser* p, const char* filename, const jet_da* tok_da, jet_ast* ast, const jet_da* errors)
 {
     JET_ASSERT(p != NULL);
@@ -187,7 +189,7 @@ fail:
     return NULL;
 }
 
-// DEF=== 
+// local definitions --- 
 static const jet_token* jet_parser_peek_prev_tok(jet_parser* p)
 {
     if(p->tok_cursor == 0)
@@ -240,8 +242,7 @@ static const jet_token* jet_parser_consume_tok(jet_parser* p)
     return (const jet_token*)jet_da_get(p->tok_da , p->tok_cursor - 1);
 }
 
-// PARSING ==============================================================================
-
+//parsing ---
 static bool jet_parser_is_type_tok(jet_token_type tok_type)
 {
     switch(tok_type)

@@ -6,14 +6,16 @@
 typedef struct jet_result
 {
     bool success;
-    node_id nid;
-    jet_error error;
+    union
+    {
+        node_id nid;
+        jet_error error;
+    } as;
 } jet_result;
 
-bool jet_result_init(jet_result* result, bool success);
-void jet_result_dispose(jet_result* result);
+jet_result jet_result_base(bool success);
+jet_result jet_result_error(jet_error* error);
 
 
-    
 
 
