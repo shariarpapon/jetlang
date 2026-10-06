@@ -13,7 +13,7 @@ typedef struct jet_result
     } as;
 } jet_result;
 
-jet_result jet_result_base(bool success);
+jet_result jet_result_nid(node_id nid);
 jet_result jet_result_error(jet_error* error);
 
 

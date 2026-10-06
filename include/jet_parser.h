@@ -14,8 +14,12 @@ typedef struct jet_parser
 } jet_parser;
 
 
-bool jet_parser_init(jet_parser* p, const char* filename, 
-        const jet_da* tok_da, jet_ast* out_ast, const jet_da* errors);
+bool jet_parser_init(
+        jet_parser* p, 
+        const char* filename, 
+        const jet_da* tok_da, 
+        jet_ast* out_ast, 
+        const jet_da* errors);
 
 bool jet_parser_dispose(jet_parser* p);
 bool jet_parser_parse(jet_parser* p);
