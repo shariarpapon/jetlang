@@ -26,8 +26,8 @@ typedef enum jet_ast_node_type
 } jet_ast_node_type;
 
 #define INVALID_NID (0)
-typedef size_t node_id;
 
+typedef size_t node_id;
 typedef struct jet_ast_node jet_ast_node;
 
 // PROGRAM ENTRY POINT
@@ -58,6 +58,8 @@ typedef struct jet_ast_node_lit
        char* s;
    } as;
 } jet_ast_node_lit;
+
+
 
 typedef struct jet_ast_node_block
 {
@@ -136,4 +138,16 @@ bool jet_ast_node_init(jet_ast_node* node, jet_ast_node_type type, size_t start_
 void jet_ast_node_dispose(jet_ast_node* node);
 const char* jet_ast_node_type_str(jet_ast_node_type node_type);
 
+jet_ast_node jet_astn_prog(node_id block_nid);
+jet_ast_node jet_astn_mem(size_t alloc_size);
+jet_ast_node jet_astn_ident(char* str);
+jet_ast_node jet_astn_lit(jet_type_kind type_kind, void* value);
+jet_ast_node jet_astn_block(const jet_da* stmt_nid_da);
+jet_ast_node jet_astn_vdecl(node_id tdecl_nid, node_id ident_nid, node_id init_value_nid);
+jet_ast_node jet_astn_tdecl(const char* tname, size_t byte_size, bool is_primitive);
+jet_ast_node jet_astn_fdecl(node_id ident_nid, const jet_da* ret_tdecl_nid_da, const jet_da* param_nid_da);
+jet_ast_node jet_astn_fdef(node_id fdecl_nid, node_id block_nid);
+jet_ast_node jet_astn_call(node_id callee_nid, const jet_da* arg_nid_da);
+jet_ast_node jet_astn_binop(node_id lhs_nid, node_id rhs_nid, jet_token_type op_type);
+jet_ast_node jet_astn_unop(node_id expr_nid, jet_token_type op_type);
 
