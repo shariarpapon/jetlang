@@ -1,4 +1,5 @@
 #include <jet_result.h>
+#include <jet_logger.h>
 #include <string.h>
 
 static jet_result jet_result_base(bool success);
@@ -20,7 +21,7 @@ jet_result jet_result_nid(node_id nid)
 
 jet_result jet_result_error(jet_error* error)
 {
-    ASSERT(error != NULL);
+    JET_ASSERT(error != NULL);
     jet_result result = jet_result_base(false);
     result.as.error = &error;
     return result;

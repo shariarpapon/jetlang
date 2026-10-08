@@ -1,2 +1,2 @@
-- implement: parsing functions should return jet_result instead of ndoe_id
-- finish implementing ast node consutrctor and replace all manual node generation with constructors
+- impl: parsing functions should return jet_result instead of ndoe_id
+- impl: node creation should be done thru their respective constructors (constructors already implemented) 
