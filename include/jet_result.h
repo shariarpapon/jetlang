@@ -3,7 +3,9 @@
 #include <jet_ast_node.h>
 #include <jet_error.h>
 
-typedef struct jet_result
+typedef struct jet_result jet_result;
+
+struct jet_result
 {
     bool success;
     union
@@ -11,7 +13,7 @@ typedef struct jet_result
         node_id nid;
         jet_error error;
     } as;
-} jet_result;
+}
 
 jet_result jet_result_nid(node_id nid);
 jet_result jet_result_error(jet_error* error);
