@@ -1,2 +1,3 @@
 - impl: parsing functions should return jet_result instead of ndoe_id
 - impl: node creation should be done thru their respective constructors (constructors already implemented) 
+-- need better error propogation so multiple results can be returned, memory allocation might become necessary probably via linked list pattern

@@ -8,11 +8,10 @@ typedef enum jet_error_kind jet_error_kind;
 typedef struct jet_error jet_error;
 typedef struct jet_error_unexpected_token jet_error_unexpected_token;
 typedef struct jet_error_expected_token jet_error_expected_token;
-typedef struct jet_error_invalid_token jet_error_invalid_token;
 
 enum jet_error_kind
 {
-    JET_ERR_UNDEFINED,
+    JET_ERR_UNKNOWN,
     JET_ERR_UNEXPECTED_EOF,
     JET_ERR_UNEXPECTED_TOKEN,
     JET_ERR_EXPECTED_TOKEN,
@@ -42,8 +41,8 @@ struct jet_error
 };
 
 jet_error jet_err(jet_error_kind kind, jet_span span);
-jet_error jet_err_unexpected_token(jet_token* tok);
-jet_error jet_err_expected_token(jet_token* found_tok, jet_token_type expected_type);
+jet_error jet_err_unexpected_token(const jet_token* tok);
+jet_error jet_err_expected_token(const jet_token* found_tok, jet_token_type expected_type);
 
 
 

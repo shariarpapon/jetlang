@@ -7,7 +7,7 @@ jet_error jet_err(jet_error_kind kind, jet_span span)
     return error;
 } 
 
-jet_error jet_err_unexpected_token(jet_token* tok)
+jet_error jet_err_unexpected_token(const jet_token* tok)
 {
     JET_ASSERT(tok != NULL);
     jet_error err = jet_err(JET_ERR_UNEXPECTED_TOKEN, tok->span);
@@ -15,7 +15,7 @@ jet_error jet_err_unexpected_token(jet_token* tok)
     return err;
 }
 
-jet_error jet_err_expected_token(jet_token* found_tok, jet_token_type expected_type)
+jet_error jet_err_expected_token(const jet_token* found_tok, jet_token_type expected_type)
 {
     JET_ASSERT(found_tok != NULL);
     jet_error err = jet_err(JET_ERR_EXPECTED_TOKEN, found_tok->span);

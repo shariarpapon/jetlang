@@ -6,9 +6,7 @@ static jet_result jet_result_base(bool success);
 
 static jet_result jet_result_base(bool success)
 {
-    jet_result result;
-    memset(&result, 0, sizeof(result));
-    result->success = success;
+    jet_result result = { .success = success };
     return result;
 }
 

@@ -111,8 +111,8 @@ bool jet_parser_parse(jet_parser* p)
         jet_result result = jet_parser_parse_next_stmt(p);
         if(result.success == false)
         {
-            jet_da_append(p->errors, (const void*)&result.error);
-            if(jet_da_count(p->errors) >= JET_PARSER_MAX_ERRORS)
+            jet_da_append(&p->errors, (const void*)&result.error);
+            if(jet_da_count(&p->errors) >= JET_PARSER_MAX_ERRORS)
                 return false;
             jet_parser_sync(p);
         }
@@ -304,14 +304,12 @@ static jet_result jet_parser_parse_next_stmt(jet_parser* p)
 static jet_result jet_parser_parse_expr_stmt(jet_parser* p)
 {
     JET_ASSERT(p != NULL);
-    node_id expr_nid = jet_parser_parse_expr(p, 0);
-    if(expr_nid == INVALID_NID)
-    {
-        return INVALID_NID;
-    }
+    jet_result result = jet_parser_parse_expr(p, 0);
     if(jet_parser_expect_tok(p, TOK_SEMI) == NULL)
     {
-        return INVALID_NID;
+        jet_error err = jet_err_expected_token(
+                jet_parser_peek_tok(p), 
+                TOK_SEMI);
     }
     return expr_nid;
 }
