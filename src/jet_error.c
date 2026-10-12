@@ -23,3 +23,11 @@ jet_error jet_err_expected_token(const jet_token* found_tok, jet_token_type expe
     return err;
 
 }
+
+jet_error jet_err_parsing_failed(jet_ast_node_type node_type, const jet_token* cursor_tok)
+{
+    JET_ASSERT(cursor_tok != NULL);
+    jet_error err = jet_err(JET_ERR_PARSING_FAILED, cursor_tok->span);
+    err.as.parsing_failed = {.node_type = node_type};
+    return err;
+}

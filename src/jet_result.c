@@ -10,10 +10,11 @@ static jet_result jet_result_base(bool success)
     return result;
 }
 
+
 jet_result jet_result_nid(node_id nid)
 {
     jet_result result = jet_result_base(true);
-    result.as.nid = nid;
+    result.ctx.nid = nid;
     return result;
 }
 
@@ -21,6 +22,6 @@ jet_result jet_result_error(jet_error* error)
 {
     JET_ASSERT(error != NULL);
     jet_result result = jet_result_base(false);
-    result.as.error = &error;
+    result.ctx.error = &error;
     return result;
 }

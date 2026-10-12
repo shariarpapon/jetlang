@@ -4,7 +4,7 @@
 
 #include <stdint.h>
 
-typedef enum
+typedef enum jet_token_type
 {
     TOK_INV=0,    // Invalid / unrecognized token type
     TOK_EOF,      // End of file
