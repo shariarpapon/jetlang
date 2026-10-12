@@ -413,6 +413,7 @@ static jet_result jet_parser_block_parse(jet_parser* p)
         {
             jet_error err = jet_err(JET_ERR_INVALID_TOKEN, token->span);
             jet_parser_push_err(&err); 
+            jet_parser_consume_tok(p);
             continue;
         }
         else if(t == TOK_RBRC)
