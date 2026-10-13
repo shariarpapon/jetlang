@@ -434,6 +434,7 @@ static jet_result jet_parser_block_parse(jet_parser* p)
     const jet_token* end_tok = jet_parser_expect_tok(p, TOK_RBRC); 
     jet_span span = jet_parser_token_range_span(start_tok, end_tok);
     jet_ast_node node = jet_astn_block(span, (const jet_da*)&stmt_nid_da);
+    jet_da_dispose(&stmt_nid_da);
     return jet_parser_register_node(p, (const jet_ast_node*)&node);
 
 fail:
