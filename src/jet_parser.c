@@ -62,7 +62,7 @@ static bool jet_parser_sync_to_sequence(jet_parser* p, jet_token_type sequence[]
 bool jet_parser_init(jet_parser* p, const char* filename, const jet_da* tok_da, jet_ast* ast, jet_da* err_da)
 {
     JET_ASSERT(p != NULL);
-    if(!tok_da || !errors || !ast || !filename)
+    if(!tok_da || !err_da || !ast || !filename)
     {
         JET_LOG_ERROR("could not init parser, null param/s.");
         return false;
@@ -399,7 +399,7 @@ static jet_result jet_parser_parse_next_toplevel_node(jet_parser* p)
     JET_ASSERT(p != NULL);    
  
     const jet_token* start_tok = jet_parser_peek_tok(p);
-    jet_token_type t = tok->type;
+    jet_token_type t = start_tok->type;
      
     if(t == TOK_EOF)
     {
@@ -426,7 +426,7 @@ static jet_result jet_parser_parse_block_stmt(jet_parser* p)
     JET_ASSERT(p != NULL);    
  
     const jet_token* start_tok = jet_parser_peek_tok(p);
-    jet_token_type t = tok->type;
+    jet_token_type t = start_tok->type;
      
     if(t == TOK_EOF)
     {
@@ -490,13 +490,13 @@ static jet_result jet_parser_block_parse(jet_parser* p)
         if(t == TOK_EOF)
         {
             jet_error err = jet_err(JET_ERR_UNEXPECTED_EOF, token->span);
-            jet_parser_push_err(&err);
+            jet_parser_push_err(p, (const jet_error*)&err);
             break;
         }
         else if(t == TOK_INV)
         {
             jet_error err = jet_err(JET_ERR_INVALID_TOKEN, token->span);
-            jet_parser_push_err(&err); 
+            jet_parser_push_err(p, (const jet_error*)&err); 
             jet_parser_consume_tok(p);
             continue;
         }
@@ -510,8 +510,7 @@ static jet_result jet_parser_block_parse(jet_parser* p)
             jet_da_append(&stmt_nid_da, (const void*)&result.as.nid);
         else 
         {
-            jet_parser_push_err(&result.as.error);
-            
+            jet_parser_push_err(p, &result.as.error); 
             if(!jet_parser_sync_block(p))
                 goto fail;
         }
