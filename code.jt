@@ -1,11 +1,5 @@
-int add(int left, int right)
-{
-    int sum = left + right;
-}
-
-
+str message = "hello world!"; 
 prog
 {
-    //entry point of the function
-    print("hello world");
+    print(message);
 }
