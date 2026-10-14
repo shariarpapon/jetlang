@@ -14,6 +14,7 @@
 #include <string.h>
 
 #define JET_PARSER_MAX_ERRORS (64)
+#define ARRAY_LEN(a) (sizeof(a) / sizeof((a)[0]))
 
 // TRAVERSING UTILS
 static const jet_token* jet_parser_peek_prev_tok(jet_parser* p);
@@ -49,9 +50,47 @@ static jet_result jet_parser_parse_fparam(jet_parser* p);
 static jet_span jet_parser_token_range_span(const jet_token* start, const jet_token* end);
 static jet_result jet_parser_register_node(jet_parser* p, const jet_ast_node* node);
 
+//error recovery and syncrhonization 
 static bool jet_parser_sync_toplevel(jet_parser* p);
 static bool jet_parser_sync_stmt(jet_parser* p);
 static bool jet_parser_sync_block(jet_parser* p);
+static bool jet_parser_sync_to_specified_type(jet_parser* p, jet_token_type target, bool consume);
+static bool jet_parser_sync_to_sequence(jet_parser* p, jet_token_type sequence[], size_t len);
+
+static bool jet_parser_sync_toplevel(jet_parser* p)
+{
+    while(jet_parser_peekn_tok_type(p, 0) != TOK_EOF)
+    {
+        switch(jet_parser_peekn_tok_type(p, 0))
+        {
+            default:
+                jet_parser_consume_tok(p);
+                break;
+
+            case TOK_KWD_PROG:
+            case TOK_KWD_NEEDS:
+            case TOK_KWD_CHAR:
+            case TOK_KWD_VOID:
+            case TOK_KWD_INT:
+            case TOK_KWD_FLOAT:
+            case TOK_KWD_STR:
+            case TOK_KWD_BYTE:
+            case TOK_KWD_BOOL:
+                return true;
+        }
+    }
+    return false;
+}
+
+static bool jet_parser_sync_stmt(jet_parser* p)
+{
+
+}
+
+static bool jet_parser_sync_block(jet_parser* p)
+{
+
+}
 
 // exposed fns
 bool jet_parser_init(jet_parser* p, const char* filename, const jet_da* tok_da, jet_ast* ast, jet_da* err_da)
@@ -117,6 +156,40 @@ bool jet_parser_parse(jet_parser* p)
         }
     }
     return true;
+}
+
+static bool jet_parser_sync_to_sequence(jet_parser* p, jet_token_type sequence[], size_t len)
+{
+    while(jet_parser_peekn_tok_type(p, 0) != TOK_EOF)
+    {
+        bool found = true;
+        for(size_t i = 0; i < len; i++)
+        {
+            if(jet_parser_peekn_tok_type(p, i) != sequence[i])
+            {
+                found = false;
+                break;
+            }
+        }
+        if(found) 
+            return true;
+    }
+    return false;
+}
+
+static bool jet_parser_sync_to_specified_type(jet_parser* p, jet_token_type target, bool consume)
+{
+    while(jet_parser_peekn_tok_type(p, 0) != TOK_EOF)
+    {
+        if(jet_parser_peekn_tok_type(p, 0) == target)
+        {
+            if(consume)
+                jet_parser_consume_tok(p);
+            return true;
+        }
+        jet_parser_consume_tok(p);
+    }
+    return false;
 }
 
 static jet_result jet_parser_register_node(jet_parser* p, const jet_ast_node* node)

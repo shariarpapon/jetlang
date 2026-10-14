@@ -16,8 +16,8 @@ typedef enum jet_token_type
     TOK_KWD_NEEDS,// dependency module specifier
     TOK_KWD_MEM,  // memory allocation keyword
     
-    TOK_KWD_CHAR,   // type decl: char
     TOK_KWD_VOID,   // type decl: void
+    TOK_KWD_CHAR,   // type decl: char
     TOK_KWD_INT,    // type decl: int
     TOK_KWD_FLOAT,  // type decl: loat
     TOK_KWD_STR,    // type decl: string
