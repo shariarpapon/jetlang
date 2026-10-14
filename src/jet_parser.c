@@ -483,7 +483,7 @@ static jet_result jet_parser_block_parse(jet_parser* p)
     jet_result result;
     jet_token_type t = TOK_EOF;
     const jet_token* token;
-
+    bool unexp_eof = false;
     while(true)
     {
         token = jet_parser_peek_tok(p);
@@ -492,6 +492,7 @@ static jet_result jet_parser_block_parse(jet_parser* p)
         {
             jet_error err = jet_err(JET_ERR_UNEXPECTED_EOF, token->span);
             jet_parser_push_err(p, (const jet_error*)&err);
+            unexp_eof = true;
             break;
         }
         else if(t == TOK_INV)
@@ -516,7 +517,14 @@ static jet_result jet_parser_block_parse(jet_parser* p)
                 goto fail;
         }
     }
-    const jet_token* end_tok = jet_parser_expect_tok(p, TOK_RBRC); 
+
+    const jet_token* end_tok;
+
+    if(unexp_eof) 
+        end_tok = jet_parser_peek_tok(p);
+    else
+        end_tok = jet_parser_expect_tok(p, TOK_RBRC); 
+
     jet_span span = jet_parser_token_range_span(start_tok, end_tok);
     jet_ast_node node = jet_astn_block(span, (const jet_da*)&stmt_nid_da);
     jet_da_dispose(&stmt_nid_da);
