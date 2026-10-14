@@ -52,6 +52,7 @@ static jet_span jet_parser_token_range_span(const jet_token* start, const jet_to
 static jet_result jet_parser_register_node(jet_parser* p, const jet_ast_node* node);
 
 //error recovery and syncrhonization 
+static void jet_parser_push_err(jet_parser* p, const jet_error* err)
 static bool jet_parser_sync_toplevel(jet_parser* p);
 static bool jet_parser_sync_block(jet_parser* p);
 static bool jet_parser_sync_to_specified_type(jet_parser* p, jet_token_type target, bool consume);
@@ -104,6 +105,7 @@ bool jet_parser_parse(jet_parser* p)
             jet_ast_push_nid(p->ast, result.nid);
         else
         {
+            jet_parser_push_err(p, (const jet_error*)&result.error);
             if(!jet_parser_sync_toplevel(p))
                 return false;
         }
@@ -177,6 +179,7 @@ static bool jet_parser_sync_to_sequence(jet_parser* p, jet_token_type sequence[]
         }
         if(found) 
             return true;
+        jet_parser_consume_tok(p);
     }
     return false;
 }
