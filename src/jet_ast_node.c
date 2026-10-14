@@ -32,18 +32,23 @@ jet_ast_node jet_astn_ident(jet_span span, char* str)
    return node;
 }
 
-jet_ast_node jet_astn_lit(jet_span span, jet_type_kind tkind, void* value)
+jet_ast_node jet_astn_lit(jet_span span, jet_type_kind tkind, const void* value)
 { 
     JET_ASSERT(value != NULL);
     jet_ast_node node = jet_astn_base(AST_LIT, span);
     jet_ast_node_lit lit = {.tkind = tkind}; 
     switch(tkind)
     {
-        case JET_TYPE_BOOL: lit.as.b = *((bool*)value); break;
-        case JET_TYPE_INT: lit.as.i = *((int64_t*)value); break;
-        case JET_TYPE_FLOAT: lit.as.f = *((double*)value); break;
-        case JET_TYPE_CHAR: lit.as.c = *((char*)value); break;
-        case JET_TYPE_STR: lit.as.s = *((char**)value); break;
+        case JET_TYPE_BOOL: 
+            lit.as.b = *((const bool*)value); break;
+        case JET_TYPE_INT: 
+            lit.as.i = *((const int64_t*)value); break;
+        case JET_TYPE_FLOAT: 
+            lit.as.f = *((const double*)value); break;
+        case JET_TYPE_CHAR: 
+            lit.as.c = *((const char*)value); break;
+        case JET_TYPE_STR: 
+            lit.as.s = *((const char**)value); break;
     }
     node.as.lit = lit;
     return node;
