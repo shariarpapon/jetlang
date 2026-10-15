@@ -2,7 +2,9 @@
 
 typedef enum jet_type_kind
 {
-    JET_TYPE_BOOL = 0,
+    JET_TYPE_INVALID,
+    JET_TYPE_CUSTOM,
+    JET_TYPE_BOOL,
     JET_TYPE_INT,
     JET_TYPE_FLOAT,
     JET_TYPE_CHAR,

@@ -75,9 +75,8 @@ typedef struct jet_ast_node_vdecl
 
 typedef struct jet_ast_node_tdecl 
 {
+  jet_type_kind tkind;
   const char* tname;
-  size_t byte_size;
-  bool is_primitive;
 } jet_ast_node_tdecl;
 
 typedef struct jet_ast_node_fdecl
@@ -144,7 +143,7 @@ jet_ast_node jet_astn_ident(jet_span span, char* str);
 jet_ast_node jet_astn_lit(jet_span span, jet_type_kind tkind, const void* value);
 jet_ast_node jet_astn_block(jet_span span, const jet_da* stmt_nid_da);
 jet_ast_node jet_astn_vdecl(jet_span span, node_id tdecl_nid, node_id ident_nid, node_id init_value_nid);
-jet_ast_node jet_astn_tdecl(jet_span span, const char* tname, size_t byte_size, bool is_primitive);
+jet_ast_node jet_astn_tdecl(jet_span span, jet_type_kind tkind, const char* tname);
 jet_ast_node jet_astn_fdecl(jet_span span, node_id ident_nid, const jet_da* ret_tdecl_nid_da, const jet_da* param_nid_da);
 jet_ast_node jet_astn_fdef(jet_span span, node_id fdecl_nid, node_id block_nid);
 jet_ast_node jet_astn_call(jet_span span, node_id callee_nid, const jet_da* arg_nid_da);

@@ -48,12 +48,12 @@ static jet_result jet_parser_lit_parse(jet_parser* p);
 static jet_result jet_parser_func_parse(jet_parser* p);
 static jet_result jet_parser_parse_fparam(jet_parser* p);
 
-static jet_result jet_parser_result_parsing_failed(jet_ast_node_type node_type);
-
 static jet_span jet_parser_token_range_span(const jet_token* start, const jet_token* end);
 static jet_result jet_parser_register_node(jet_parser* p, const jet_ast_node* node);
+static jet_type_kind jet_parser_tkind_from_token(const jet_token* tok);
 
 //error recovery and syncrhonization 
+static jet_result jet_parser_result_parsing_failed(jet_ast_node_type node_type);
 static void jet_parser_push_err(jet_parser* p, const jet_error* err)
 static bool jet_parser_sync_toplevel(jet_parser* p);
 static bool jet_parser_sync_block(jet_parser* p);
@@ -233,13 +233,26 @@ static jet_result jet_parser_register_node(jet_parser* p, const jet_ast_node* no
     return jet_result_nid(nid);
 }
 
-static const char* jet_parser_create_type_name(const jet_token* tok, bool* is_primitive)
+static jet_type_kind jet_parser_tkind_from_token(const jet_token* tok)
 {
     JET_ASSERT(tok != NULL);
-    JET_ASSERT(is_primitive != NULL);
+    switch(tok->type)
+    {
+        default:             return JET_TYPE_INVALID;
+        case TOK_KWD_IDENT:  return JET_TYPE_CUSTOM;
+        case TOK_KWD_BOOL:   return JET_TYPE_BOOL;
+        case TOK_KWD_INT:    return JET_TYPE_INT;
+        case TOK_KWD_FLOAT:  return JET_TYPE_FLOAT;
+        case TOK_KWD_STR:    return JET_TYPE_STR;
+        case TOK_KWD_CHAR:   return JET_TYPE_CHAR;
+    }
+}
+
+static const char* jet_parser_create_type_name(const jet_token* tok)
+{
+    JET_ASSERT(tok != NULL);
 
     jet_token_type tok_type = tok->type;
-    *is_primitive = true; 
 
     jet_sb sb;
     JET_ASSERT(jet_sb_init(&sb, 32));
@@ -249,7 +262,6 @@ static const char* jet_parser_create_type_name(const jet_token* tok, bool* is_pr
         default: { goto fail; }
         case TOK_IDENT: 
         {
-            *is_primitive = false;
             char* tok_str;
             jet_token_strdup(tok, &tok_str);
             jet_sb_append_cstr(&sb, tok_str);
@@ -614,16 +626,19 @@ static jet_result jet_parser_tdecl_parse(jet_parser* p)
 {
     JET_ASSERT(p != NULL); 
     const jet_token* tok = jet_parser_consume_tok(p);
-    jet_ast_node_tdecl tdecl;
-    tdecl.tname = jet_parser_create_type_name(tok, &tdecl.is_primitive);
-
-    tdecl.byte_size = 4;
-    jet_ast_node node;
-    JET_ASSERT(jet_ast_node_init(&node, AST_TYPE_DECL, 
-                tok->span.start, tok->span.end, 
-                tok->span.line, tok->span.col));
-    node.as.tdecl = tdecl;
-    return jet_ast_register_node(p->ast, (const jet_ast_node*)&node);
+    jet_type_kind tkind = jet_parser_tkind_from_token(tok);
+    char* tname;
+    switch(tkind)
+    {
+        case JET_TYPE_INVALID:
+            return jet_parser_result_parsing_failed(AST_TYPE_DECL, tok);
+        default:
+            tname = jet_parser_create_type_name(tok);
+            JET_ASSERT(tname != NULL); 
+            break;
+    }
+    jet_ast_node node = jet_astn_tdecl(tok->span, tkind, tname);
+    return jet_parser_register_node(p, (const jet_ast_node*)&node);
 }
 
 static jet_result jet_parser_vdecl_parse(jet_parser* p) 

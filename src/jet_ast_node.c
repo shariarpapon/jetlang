@@ -75,15 +75,14 @@ jet_ast_node jet_astn_vdecl(jet_span span, node_id tdecl_nid, node_id ident_nid,
     return node;
 }
 
-jet_ast_node jet_astn_tdecl(jet_span span, const char* tname, size_t byte_size, bool is_primitive)
+jet_ast_node jet_astn_tdecl(jet_span span, jet_type_kind tkind, const char* tname)
 {
     JET_ASSERT(tname != NULL);
     jet_ast_node node = jet_astn_base(AST_TYPE_DECL, span);
     node.as.tdecl = 
     {
+        .tkind = tkind,
         .tname = tname,
-        .byte_size = byte_size,
-        .is_primitive = is_primitive
     };
     return node;
 }
