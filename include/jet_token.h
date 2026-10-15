@@ -15,6 +15,7 @@ typedef enum jet_token_type
     TOK_KWD_PROG, // program entry point
     TOK_KWD_NEEDS,// dependency module specifier
     TOK_KWD_MEM,  // memory allocation keyword
+    TOK_KWD_TYPE, // user-defined-type specifier
     
     TOK_KWD_VOID,   // type decl: void
     TOK_KWD_CHAR,   // type decl: char
@@ -34,6 +35,7 @@ typedef enum jet_token_type
     TOK_KWD_NULL, // placeholder asignment
     TOK_KWD_TRUE, // boolean value: true
     TOK_KWD_FALSE,// boolean value: false
+                  //
     TOK_LIT_INT,   // 0..9 (numeric literal)
     TOK_LIT_FLOAT,  // decimal point numbers (e.g. 3.1415)
     TOK_LIT_STR,   // "string literal"
