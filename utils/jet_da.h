@@ -18,9 +18,12 @@ bool jet_da_clone(jet_da* dest, const jet_da* source);
 void jet_da_dispose(jet_da* da);
 bool jet_da_clear(jet_da* da);
 bool jet_da_is_empty(const jet_da* da);
-bool jet_da_insert(jet_da* da, size_t i, const void* data);
 bool jet_da_append(jet_da* da, const void* data);
 bool jet_da_prepend(jet_da* da, const void* data);
+bool jet_da_insert(jet_da* da, size_t i, const void* data);
+
+void* jet_da_insertp(jet_da* da, size_t i, const void* data);
+void* jet_da_appendp(jet_da* da, const void* data);
 
 bool jet_da_remove(jet_da* da, size_t i);
 bool jet_da_remove_range(jet_da* da, size_t start, size_t end);
@@ -131,6 +134,11 @@ bool jet_da_is_empty(const jet_da* da)
 
 bool jet_da_insert(jet_da* da, size_t i, const void* data)
 {
+    return jet_da_insertp(da, i, data) != NULL;
+}
+
+void* jet_da_insertp(jet_da* da, size_t i, const void* data)
+{
     if(!da)
     {
         fprintf(stderr, "error: cannot insert element, invalid arg da.\n");
@@ -157,9 +165,9 @@ bool jet_da_insert(jet_da* da, size_t i, const void* data)
             da->elm_size * (da->count - i)            
         );
     }
-    memcpy((char*)da->block + da->elm_size  * i, data, da->elm_size); 
+    void* addr = memcpy((char*)da->block + da->elm_size * i, data, da->elm_size); 
     da->count++;
-    return true;
+    return addr;
 }
 
 bool jet_da_prepend(jet_da* da, const void* data)
@@ -170,6 +178,11 @@ bool jet_da_prepend(jet_da* da, const void* data)
 bool jet_da_append(jet_da* da, const void* data)
 {
     return jet_da_insert(da, da->count, data);
+}
+
+void* jet_da_appendp(jet_da* da, const void* data)
+{
+    return jet_da_insertp(da, da->count, data);
 }
 
 bool jet_da_remove(jet_da* da, size_t i)
