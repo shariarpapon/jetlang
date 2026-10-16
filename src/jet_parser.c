@@ -34,7 +34,6 @@ static bool jet_parser_is_tdecl(jet_parser* p);
 static bool jet_parser_is_tdef(jet_parser* p);
 static bool jet_parser_is_user_defined_type(jet_parser* p, const jet_token* tok, char** out_name);
 
-
 //abstract node parsing
 static jet_result jet_parser_parse_next_toplevel_node(jet_parser* p);
 static jet_result jet_parser_parse_expr_stmt(jet_parser* p);
@@ -63,8 +62,6 @@ static jet_result jet_parser_result_parsing_failed(jet_ast_node_type node_type);
 static void jet_parser_push_err(jet_parser* p, const jet_error* err)
 static bool jet_parser_sync_toplevel(jet_parser* p);
 static bool jet_parser_sync_block(jet_parser* p);
-static bool jet_parser_sync_to_tok_type(jet_parser* p, jet_token_type target, bool consume);
-static bool jet_parser_sync_to_sequence(jet_parser* p, jet_token_type sequence[], size_t len);
 
 // exposed fns
 bool jet_parser_init(jet_parser* p, const char* filename, const jet_da* tok_da, jet_ast* ast, jet_da* err_da, jet_da* user_type_da)
@@ -119,7 +116,7 @@ bool jet_parser_parse(jet_parser* p)
 static void jet_parser_register_tdef_name(jet_parser* p, const char* name)
 {
     JET_ASSERT(name != NULL);
-    jet_da_append(p->user_type_da, (const void*)&name);
+    JET_ASSERT(jet_da_append(p->user_type_da, (const void*)&name));
 }
 
 static jet_result jet_parser_result_parsing_failed(jet_ast_node_type node_type, const jet_token* tok)
@@ -158,6 +155,7 @@ static bool jet_parser_sync_toplevel(jet_parser* p)
                 jet_parser_consume_tok(p);
                 break;
 
+            case TOK_KWD_TYPE:
             case TOK_KWD_PROG:
             case TOK_KWD_NEEDS:
             case TOK_KWD_CHAR:
@@ -165,7 +163,6 @@ static bool jet_parser_sync_toplevel(jet_parser* p)
             case TOK_KWD_INT:
             case TOK_KWD_FLOAT:
             case TOK_KWD_STR:
-            case TOK_KWD_BYTE:
             case TOK_KWD_BOOL:
                 return true;
         }
@@ -186,41 +183,6 @@ static bool jet_parser_sync_block(jet_parser* p)
             case TOK_SEMI:
                 jet_parser_consume_tok(p);
                 return true;
-        }
-        jet_parser_consume_tok(p);
-    }
-    return false;
-}
-
-static bool jet_parser_sync_to_sequence(jet_parser* p, jet_token_type sequence[], size_t len)
-{
-    while(jet_parser_peekn_tok_type(p, 0) != TOK_EOF)
-    {
-        bool found = true;
-        for(size_t i = 0; i < len; i++)
-        {
-            if(jet_parser_peekn_tok_type(p, i) != sequence[i])
-            {
-                found = false;
-                break;
-            }
-        }
-        if(found) 
-            return true;
-        jet_parser_consume_tok(p);
-    }
-    return false;
-}
-
-static bool jet_parser_sync_to_tok_type(jet_parser* p, jet_token_type target, bool consume)
-{
-    while(jet_parser_peekn_tok_type(p, 0) != TOK_EOF)
-    {
-        if(jet_parser_peekn_tok_type(p, 0) == target)
-        {
-            if(consume)
-                jet_parser_consume_tok(p);
-            return true;
         }
         jet_parser_consume_tok(p);
     }
@@ -440,6 +402,8 @@ static jet_result jet_parser_parse_next_toplevel_node(jet_parser* p)
         jet_error err = jet_err(JET_ERR_INVALID_TOKEN, start_tok->span);
         return jet_result_error(&err);
     }
+    else if(jet_parser_is_tdef(p))
+        return jet_parser_tdef_parse(p);
     else if(jet_parser_is_prog_entry(p))
         return jet_parser_prog_parse(p);
     else if(jet_parser_is_vdecl(p))

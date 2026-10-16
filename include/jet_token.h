@@ -22,7 +22,6 @@ typedef enum jet_token_type
     TOK_KWD_INT,    // type decl: int
     TOK_KWD_FLOAT,  // type decl: loat
     TOK_KWD_STR,    // type decl: string
-    TOK_KWD_BYTE,   // type decl: byte
     TOK_KWD_BOOL,   // type decl: boolean
 
     TOK_KWD_IF,     // decl: conditional if

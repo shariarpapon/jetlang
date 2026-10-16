@@ -60,7 +60,6 @@ const char* jet_token_type_str(jet_token_type type)
         case TOK_KWD_INT:   return "TOK_KWD_INT";
         case TOK_KWD_FLOAT: return "TOK_KWD_FLOAT";
         case TOK_KWD_STR:   return "TOK_KWD_STR";
-        case TOK_KWD_BYTE:  return "TOK_KWD_BYTE";
         case TOK_KWD_BOOL:  return "TOK_KWD_BOOL";
         case TOK_KWD_TRUE:  return "TOK_KWD_TRUE";
         case TOK_KWD_FALSE: return "TOK_KWD_FALSE";
