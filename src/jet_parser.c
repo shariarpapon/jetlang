@@ -58,7 +58,7 @@ static jet_type_kind jet_parser_tkind_from_token(const jet_token* tok);
 static void jet_parser_register_tdef_name(jet_parser* p, const char* name);
 
 //error recovery and syncrhonization 
-static jet_result jet_parser_result_parsing_failed(jet_ast_node_type node_type);
+static jet_result jet_parser_result_parsing_failed(jet_ast_node_type node_type, const jet_token* tok);
 static void jet_parser_push_err(jet_parser* p, const jet_error* err)
 static bool jet_parser_sync_toplevel(jet_parser* p);
 static bool jet_parser_sync_block(jet_parser* p);
@@ -660,8 +660,11 @@ fail:
 static jet_result jet_parser_vdecl_parse(jet_parser* p) 
 {
     JET_ASSERT(p != NULL);
-
     const jet_token* start_tok = jet_parser_peek_tok(p);
+
+    if(jet_parser_is_vdecl(p) == false)
+        return jet_parser_result_parsing_failed(AST_VAR_DECL, start_tok);
+
 
     jet_ast_node_vdecl vdecl;
     vdecl.tdecl_nid = jet_parser_tdecl_parse(p);

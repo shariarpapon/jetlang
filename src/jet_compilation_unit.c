@@ -77,7 +77,15 @@ void jet_cu_dispose(jet_compilation_unit* cu)
     jet_da_dispose(&cu->parser_err_da);
     jet_arena_dispose(&cu->arena);
     jet_ast_dispose(&cu->ast);
+
+    for(size_t i = 0; i < jet_da_count((const jet_da*)&cu->user_type_da); i++)
+    {
+        char** cstr = (char**)jet_da_get((const jet_da*)&cu->user_type_da, i);
+        if(cstr != NULL && *cstr != NULL)
+            free(*cstr);
+    }
     jet_da_dispose(&cu->user_type_da);
+
     memset(cu, 0, sizeof(*cu));
 }
 
