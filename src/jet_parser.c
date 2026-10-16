@@ -73,8 +73,6 @@ bool jet_parser_init(jet_parser* p, const char* filename, const jet_da* tok_da, 
         return false;
     }
 
-    JET_ASSERT(jet_da_count(tok_da) > 0);
-
     memset(p, 0 , sizeof(*p));
     p->filename = filename;
     p->tok_da = tok_da;
@@ -211,7 +209,7 @@ static jet_type_kind jet_parser_tkind_from_token(const jet_token* tok)
     switch(tok->type)
     {
         default:             return JET_TYPE_INVALID;
-        case TOK_KWD_IDENT:  return JET_TYPE_CUSTOM;
+        case TOK_IDENT:      return JET_TYPE_CUSTOM;
         case TOK_KWD_BOOL:   return JET_TYPE_BOOL;
         case TOK_KWD_INT:    return JET_TYPE_INT;
         case TOK_KWD_FLOAT:  return JET_TYPE_FLOAT;
@@ -456,8 +454,10 @@ static jet_result jet_parser_parse_expr_stmt(jet_parser* p)
 static jet_result jet_parser_prog_parse(jet_parser* p)
 {
     JET_ASSERT(p != NULL);
-    const jet_token* start_tok = jet_parser_peek_tok(p);
-    jet_parser_expect_tok(p, TOK_KWD_PROG); 
+    const jet_token* start_tok = jet_parser_expect_tok(p, TOK_KWD_PROG); 
+    if(start_tok == NULL)
+        return jet_parser_result_parsing_failed(AST_PROG, jet_parser_peek_tok(p));
+
     jet_result result = jet_parser_block_parse(p);
     if(!result.success)
         return result;
