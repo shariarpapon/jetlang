@@ -25,8 +25,8 @@ static const jet_token* jet_parser_expect_tok(jet_parser* p, jet_token_type tok_
 static jet_token_type jet_parser_peekn_tok_type(jet_parser* p, size_t n);
 
 // PARSING
-static const char* jet_parser_get_type_name(const jet_token* tok);
-static bool jet_parser_is_sequence_match(jet_parser* p, jet_token_type seq[]);
+static const char* jet_parser_get_type_name(jet_parser* p, const jet_token* tok);
+static bool jet_parser_is_sequence_match(jet_parser* p, jet_token_type seq[], size_t len);
 static bool jet_parser_is_vdecl(jet_parser* p);
 static bool jet_parser_is_func_head(jet_parser* p);
 static bool jet_parser_is_prog_entry(jet_parser* p);
@@ -59,7 +59,7 @@ static void jet_parser_register_tdef_name(jet_parser* p, const char* name);
 
 //error recovery and syncrhonization 
 static jet_result jet_parser_result_parsing_failed(jet_ast_node_type node_type, const jet_token* tok);
-static void jet_parser_push_err(jet_parser* p, const jet_error* err)
+static void jet_parser_push_err(jet_parser* p, const jet_error* err);
 static bool jet_parser_sync_toplevel(jet_parser* p);
 static bool jet_parser_sync_block(jet_parser* p);
 
@@ -72,6 +72,9 @@ bool jet_parser_init(jet_parser* p, const char* filename, const jet_da* tok_da, 
         JET_LOG_ERROR("could not init parser, null param/s.");
         return false;
     }
+
+    JET_ASSERT(jet_da_count(tok_da) > 0);
+
     memset(p, 0 , sizeof(*p));
     p->filename = filename;
     p->tok_da = tok_da;
@@ -251,8 +254,11 @@ static const jet_token* jet_parser_peekn_tok(jet_parser* p, size_t n)
 { 
     JET_ASSERT(p != NULL);
     size_t count = jet_da_count(p->tok_da);
-    if(count == 0 || n >= count - p->tok_cursor) 
-        return NULL; 
+
+    //count > 0 is asserted at init
+    if(n >= count - p->tok_cursor) 
+        return (const jet_token*)jet_da_get(p->tok_da, count - 1);
+
     return (const jet_token*)jet_da_get(p->tok_da, p->tok_cursor + n);
 }
 
@@ -313,7 +319,7 @@ static bool jet_parser_is_sequence_match(jet_parser* p, jet_token_type seq[], si
 static bool jet_parser_is_tdef(jet_parser* p)
 {
     jet_token_type seq[] = { TOK_KWD_TYPE, TOK_IDENT, TOK_LBRC };
-    return jet_parser_is_sequence_match(p, seq);
+    return jet_parser_is_sequence_match(p, seq, ARRAY_LEN(seq));
 }
 
 static bool jet_parser_is_user_defined_type(jet_parser* p, const jet_token* tok, char** out_name)
@@ -540,7 +546,7 @@ static jet_result jet_parser_ident_parse(jet_parser* p)
     jet_token_strdup(tok, &ident_str);
     JET_ASSERT(ident_str != NULL);
     jet_ast_node node = jet_astn_ident(tok->span, ident_str);
-    jet_parser_consume_tok(p); 
+
     return jet_parser_register_node(p, (const jet_ast_node*)&node);
 }
 
@@ -646,7 +652,7 @@ static jet_result jet_parser_tdecl_parse(jet_parser* p)
         case JET_TYPE_INVALID:
             goto fail;
         default:
-            tname = jet_parser_get_type_name(tok);
+            tname = jet_parser_get_type_name(p, tok);
             JET_ASSERT(tname != NULL); 
             break;
     }
