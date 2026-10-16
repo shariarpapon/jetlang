@@ -16,6 +16,7 @@
 #define JET_CU_ARENA_CAP (1024 * 4)
 #define JET_CU_TOK_CAP (64)
 #define JET_CU_ERROR_CAP (16)
+#define JET_CU_USER_TYPE_DA_CAP (64)
 
 bool jet_cu_init(jet_compilation_unit* cu, const char* filename)
 {
@@ -30,14 +31,17 @@ bool jet_cu_init(jet_compilation_unit* cu, const char* filename)
     bool tok_da_init = false;
     bool ast_init = false;
     bool errors_init = false;
+    bool user_type_da_init = false;
 
     arena_init = jet_arena_init(&cu->arena, JET_CU_ARENA_CAP);
+    ast_init = jet_ast_init(&cu->ast);
     tok_da_init = jet_da_init(&cu->tok_da, JET_CU_TOK_CAP, sizeof(jet_token));
     errors_init = jet_da_init(&cu->parser_err_da, JET_CU_ERROR_CAP, sizeof(jet_error));
-    ast_init = jet_ast_init(&cu->ast);
+    user_type_da_init = jet_da_init(&cu->user_type_da, JET_CU_USER_TYPE_DA_CAP, sizeof(char*));
+
     cu->source = jet_io_read_text(filename, &cu->source_len);
     if(!cu->source || !arena_init || !tok_da_init 
-       || !ast_init || !errors_init)
+       || !ast_init || !errors_init || !user_type_da_init)
     {
         goto fail;
     }
@@ -60,18 +64,20 @@ fail:
     if(tok_da_init) jet_da_dispose(&cu->tok_da);
     if(errors_init) jet_da_dispose(&cu->parser_err_da);
     if(ast_init) jet_ast_dispose(&cu->ast);
+    if(user_type_da_init) jet_da_dispose(&cu->user_type_da);
     return false;
 }
 
 void jet_cu_dispose(jet_compilation_unit* cu)
 {
     if(!cu) return;
-    jet_da_dispose(&cu->tok_da); 
-    jet_da_dispose(&cu->parser_err_da);
     if(cu->source) 
         free((void*)cu->source);
+    jet_da_dispose(&cu->tok_da); 
+    jet_da_dispose(&cu->parser_err_da);
     jet_arena_dispose(&cu->arena);
     jet_ast_dispose(&cu->ast);
+    jet_da_dispose(&cu->user_type_da);
     memset(cu, 0, sizeof(*cu));
 }
 

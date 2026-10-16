@@ -87,6 +87,18 @@ jet_ast_node jet_astn_tdecl(jet_span span, jet_type_kind tkind, const char* tnam
     return node;
 }
 
+jet_ast_node jet_astn_tdef(jet_span span, const char* name, node_id block_nid)
+{
+    JET_ASSERT(name != NULL);
+    jet_ast_node node = jet_astn_base(AST_TYPE_DEF, span);
+    node.as.tdef = 
+    {
+        .name = name,
+        .block_nid = block_nid,
+    };
+    return node;
+}
+
 jet_ast_node jet_astn_fdecl(jet_span span, node_id ident_nid, const jet_da* ret_tdecl_nid_da, const jet_da* param_nid_da)
 {
     jet_ast_node node = jet_astn_base(AST_FUNC_DECL, span);
