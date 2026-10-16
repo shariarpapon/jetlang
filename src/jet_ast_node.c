@@ -164,12 +164,6 @@ void jet_ast_node_dispose(jet_ast_node* node)
                     free((void*)node->as.lit.as.s);
             return;
         }
-        case AST_TYPE_DECL:
-        {
-            if(node->as.tdecl.tname)
-                free((void*)node->as.tdecl.tname);
-            return;
-        }       
         case AST_BLOCK:
         {
             jet_da_dispose(&node->as.block.stmt_nid_da);
