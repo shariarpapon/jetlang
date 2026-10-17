@@ -105,7 +105,7 @@ bool jet_cu_run(jet_compilation_unit* cu)
     }
 
     bool parser_init = false;
-    parser_init = jet_parser_init(&parser, cu->filename, (const jet_da*)&cu->tok_da, &cu->ast, &cu->parser_err_da);
+    parser_init = jet_parser_init(&parser, cu->filename, (const jet_da*)&cu->tok_da, &cu->ast, &cu->parser_err_da, &cu->user_type_da);
     if(!parser_init || !jet_parser_parse(&parser))
     {
         JET_LOG_ERROR("parser failed");
