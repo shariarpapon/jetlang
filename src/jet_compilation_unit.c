@@ -5,6 +5,7 @@
 #include <jet_ast_print.h>
 #include <jet_logger.h>
 #include <jet_error.h>
+#include <jet_ident.h>
 
 #include <string.h>
 #include <stdio.h>
@@ -37,7 +38,7 @@ bool jet_cu_init(jet_compilation_unit* cu, const char* filename)
     ast_init = jet_ast_init(&cu->ast);
     tok_da_init = jet_da_init(&cu->tok_da, JET_CU_TOK_CAP, sizeof(jet_token));
     errors_init = jet_da_init(&cu->parser_err_da, JET_CU_ERROR_CAP, sizeof(jet_error));
-    user_type_da_init = jet_da_init(&cu->user_type_da, JET_CU_USER_TYPE_DA_CAP, sizeof(char*));
+    user_type_da_init = jet_da_init(&cu->user_type_da, JET_CU_USER_TYPE_DA_CAP, sizeof(jet_ident));
 
     cu->source = jet_io_read_text(filename, &cu->source_len);
     if(!cu->source || !arena_init || !tok_da_init 
@@ -77,13 +78,6 @@ void jet_cu_dispose(jet_compilation_unit* cu)
     jet_da_dispose(&cu->parser_err_da);
     jet_arena_dispose(&cu->arena);
     jet_ast_dispose(&cu->ast);
-
-    for(size_t i = 0; i < jet_da_count((const jet_da*)&cu->user_type_da); i++)
-    {
-        char** cstr = (char**)jet_da_get((const jet_da*)&cu->user_type_da, i);
-        if(cstr != NULL && *cstr != NULL)
-            free(*cstr);
-    }
     jet_da_dispose(&cu->user_type_da);
 
     memset(cu, 0, sizeof(*cu));
