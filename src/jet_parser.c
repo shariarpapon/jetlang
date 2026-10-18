@@ -6,6 +6,7 @@
 #include <jet_sb.h>
 #include <jet_logger.h>
 #include <jet_result.h>
+#include <jet_ident.h>
 
 #include <inttypes.h>
 #include <stdlib.h>
@@ -58,7 +59,7 @@ static jet_result jet_parser_lit_parse(jet_parser* p);
 static jet_span jet_parser_token_range_span(const jet_token* start, const jet_token* end);
 static jet_result jet_parser_register_node(jet_parser* p, const jet_ast_node* node);
 static jet_type_kind jet_parser_tkind_from_token(const jet_token* tok);
-static void jet_parser_register_tdef_name(jet_parser* p, const char* name);
+static void jet_parser_register_tdef_name(jet_parser* p, jet_ident type_name);
 
 //error recovery and syncrhonization 
 static jet_result jet_parser_result_parsing_failed(jet_ast_node_type node_type, const jet_token* tok);
@@ -117,10 +118,10 @@ bool jet_parser_parse(jet_parser* p)
     return true;
 }
 
-static void jet_parser_register_tdef_name(jet_parser* p, const char* name)
+static void jet_parser_register_tdef_name(jet_parser* p, jet_ident type_name)
 {
     JET_ASSERT(name != NULL);
-    JET_ASSERT(jet_da_append(p->user_type_da, (const void*)&name));
+    JET_ASSERT(jet_da_append(p->user_type_da, (const void*)&type_name);
 }
 
 static jet_result jet_parser_result_parsing_failed(jet_ast_node_type node_type, const jet_token* tok)
@@ -624,19 +625,18 @@ static jet_result jet_parser_tdef_parse(jet_parser* p)
     const jet_token* ident_tok = jet_parser_expect_tok(p, TOK_IDENT);
     JET_ASSERT(ident_tok != NULL);
 
+    jet_span type_name = jet_ident_init(ident_tok->lexeme, jet_span_len(ident_tok->span));
+
     jet_result block_result = jet_parser_block_parse(p);
     if(!block_result.success)
         return block_result;
 
     const jet_token* end_tok = jet_parser_peek_prev_tok(p);
+
+    jet_parser_register_tdef_name(p, type_name);
+
     jet_span span = jet_parser_token_range_span(start_tok, end_tok);    
-
-    char* name;
-    jet_token_strdup(ident_tok, &name);
-    JET_ASSERT(name != NULL);
-
-    jet_parser_register_tdef_name(p, name);
-    jet_ast_node node = jet_astn_tdef(span, name, block_result.as.nid);
+    jet_ast_node node = jet_astn_tdef(span, type_name, block_result.as.nid);
 
     return jet_parser_register_node(p, (const jet_ast_node*)&node);
 }
@@ -649,17 +649,11 @@ static jet_result jet_parser_tdecl_parse(jet_parser* p)
     
     const jet_token* tok = jet_parser_consume_tok(p);
     jet_type_kind tkind = jet_parser_tkind_from_token(tok);
-    char* tname;
-    switch(tkind)
-    {
-        case JET_TYPE_INVALID:
-            goto fail;
-        default:
-            tname = jet_parser_get_type_name(p, tok);
-            JET_ASSERT(tname != NULL); 
-            break;
-    }
-    jet_ast_node node = jet_astn_tdecl(tok->span, tkind, tname);
+    if(tkind == JET_TYPE_INVALID)
+        goto fail;
+
+    jet_ident type_name = jet_ident_init(tok->lexeme, jet_span_len(tok->span));
+    jet_ast_node node = jet_astn_tdecl(tok->span, type_name, tkind);
     return jet_parser_register_node(p, (const jet_ast_node*)&node);
 
 fail:

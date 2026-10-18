@@ -29,6 +29,7 @@ bool jet_span_dispose(jet_span* span)
     return true;
 }
 
-
-
-
+size_t jet_span_len(jet_span span)
+{
+    return span.end - span.start;
+}
