@@ -25,13 +25,6 @@ jet_ast_node jet_astn_mem(jet_span span, size_t alloc_size)
    return node;
 }
 
-jet_ast_node jet_astn_ident(jet_span span, char* str)
-{
-   jet_ast_node node = jet_astn_base(AST_IDENT, span);
-   node.as.ident = {.str = str};
-   return node;
-}
-
 jet_ast_node jet_astn_lit(jet_span span, jet_type_kind tkind, const void* value)
 { 
     JET_ASSERT(value != NULL);
@@ -63,47 +56,47 @@ jet_ast_node jet_astn_block(jet_span span, const jet_da* stmt_nid_da)
     return node;
 }
 
-jet_ast_node jet_astn_vdecl(jet_span span, node_id tdecl_nid, node_id ident_nid, node_id init_value_nid)
+jet_ast_node jet_astn_vdecl(jet_span span, const jet_ident ref_name, node_id tdecl_nid, node_id init_value_nid)
 {
     jet_ast_node node = jet_astn_base(AST_VAR_DECL, span);
     node.as.vdecl = 
     {
         .tdecl_nid = tdecl_nid, 
-        .ident_nid = ident_nid, 
+        .ref_name = ref_name, 
         .init_value_nid = init_value_nid 
     };
     return node;
 }
 
-jet_ast_node jet_astn_tdecl(jet_span span, jet_type_kind tkind, const char* tname)
+jet_ast_node jet_astn_tdecl(jet_span span, const jet_ident type_name, jet_type_kind tkind)
 {
     JET_ASSERT(tname != NULL);
     jet_ast_node node = jet_astn_base(AST_TYPE_DECL, span);
     node.as.tdecl = 
     {
         .tkind = tkind,
-        .tname = tname,
+        .type_name = type_name,
     };
     return node;
 }
 
-jet_ast_node jet_astn_tdef(jet_span span, const char* name, node_id block_nid)
+jet_ast_node jet_astn_tdef(jet_span span, const jet_ident type_name, node_id block_nid)
 {
     JET_ASSERT(name != NULL);
     jet_ast_node node = jet_astn_base(AST_TYPE_DEF, span);
     node.as.tdef = 
     {
-        .name = name,
+        .type_name = type_name,
         .block_nid = block_nid,
     };
     return node;
 }
 
-jet_ast_node jet_astn_fdecl(jet_span span, node_id ident_nid, const jet_da* ret_tdecl_nid_da, const jet_da* param_nid_da)
+jet_ast_node jet_astn_fdecl(jet_span span, const jet_ident ref_name, const jet_da* ret_tdecl_nid_da, const jet_da* param_nid_da)
 {
     jet_ast_node node = jet_astn_base(AST_FUNC_DECL, span);
 
-    jet_ast_node_fdecl fdecl = {.ident_nid = ident_nid};
+    jet_ast_node_fdecl fdecl = {.ref_name = ref_name};
     JET_ASSERT(jet_da_clone(&fdecl.ret_tdecl_nid_da, ret_tdecl_nid_da));
     JET_ASSERT(jet_da_clone(&fdecl.param_nid_da, param_nid_da));
     
@@ -151,12 +144,6 @@ void jet_ast_node_dispose(jet_ast_node* node)
     {
         default: 
             return;
-        case AST_IDENT: 
-        {
-            if(node->as.ident.str)
-                free((void*)node->as.ident.str);
-            return;
-        }
         case AST_LIT:
         {
             if(node->as.lit.tkind == JET_TYPE_STR && 
@@ -191,7 +178,6 @@ const char* jet_ast_node_type_str(jet_ast_node_type node_type)
         case AST_UNKNOWN: return "AST_UNKNOWN";
         case AST_PROG: return "AST_PROG";
         case AST_MEM: return "AST_MEM";
-        case AST_IDENT: return "AST_IDENT";
         case AST_LIT: return "AST_LIT";
         case AST_BLOCK: return "AST_BLOCK";
         case AST_VAR_DECL: return "AST_VAR_DECL";
