@@ -83,7 +83,7 @@ typedef struct jet_ast_node_tdecl
 typedef struct jet_ast_node_tdef
 {
     const jet_ident type_name;
-    ndoe_id block_nid;
+    node_id block_nid;
 } jet_ast_node_tdef;
 
 typedef struct jet_ast_node_fdef

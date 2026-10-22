@@ -13,7 +13,7 @@ struct jet_result
         node_id nid;
         jet_error error;
     } as;
-}
+};
 
 jet_result jet_result_nid(node_id nid);
 jet_result jet_result_error(jet_error* error);

@@ -11,7 +11,7 @@ const char* jet_type_kind_str(jet_type_kind kind)
             return NULL;
         }
         case JET_TYPE_INVALID: return "JET_TYPE_INVALID";
-        case JET_TYPE_CUSTOM: return "JET_TYPE_CUSTOM"
+        case JET_TYPE_CUSTOM: return "JET_TYPE_CUSTOM";
         case JET_TYPE_BOOL: return "JET_TYPE_BOOL";
         case JET_TYPE_INT: return "JET_TYPE_INT";
         case JET_TYPE_FLOAT: return "JET_TYPE_FLOAT";

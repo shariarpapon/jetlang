@@ -4,7 +4,9 @@
 #define JET_CONV_IMPL
 #define JET_ARENA_IMPL
 #define JET_LOGGER_IMPL
+#define JET_HS_IMPL
 
+#include <jet_hs.h>
 #include <jet_sb.h>
 #include <jet_da.h>
 #include <jet_conv.h>

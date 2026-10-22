@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <jet_span.h>
 #include <jet_ast_node.h>
-#include <jet_token_type.h>
+#include <jet_token.h>
 
 typedef enum jet_error_kind jet_error_kind;
 

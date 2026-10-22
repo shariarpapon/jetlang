@@ -53,7 +53,7 @@ const char* jet_token_type_str(jet_token_type type)
         case TOK_EOF:       return "TOK_EOF";
         
         case TOK_IDENT:     return "TOK_IDENT";
-        case TOK_KWD_TYPE   return "TOK_KWD_TYPE";
+        case TOK_KWD_TYPE:  return "TOK_KWD_TYPE";
         case TOK_KWD_MEM:   return "TOK_KWD_MEM";
         case TOK_KWD_CHAR:  return "TOK_KWD_CHAR";
         case TOK_KWD_NULL:  return "TOK_KWD_NULL";
