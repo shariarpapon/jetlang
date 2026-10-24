@@ -63,13 +63,14 @@ static jet_type_kind jet_parser_tkind_from_token(const jet_token* tok);
 
 //returns the persistent canonical ident stored in the hashset
 static const jet_ident* jet_parser_register_tdef_name(jet_parser* p, jet_ident type_name);
+static void jet_parser_define_primitive_types(jet_parser* p);
 
 //error recovery and syncrhonization 
 static jet_result jet_parser_result_parsing_failed(jet_ast_node_type node_type, const jet_token* tok);
 static void jet_parser_push_err(jet_parser* p, const jet_error* err);
 static bool jet_parser_sync_toplevel(jet_parser* p);
 static bool jet_parser_sync_block(jet_parser* p);
-static void jet_parser_define_primitive_types(jet_parser* p);
+static bool jet_parser_sync_fparam(jet_parser* p);
 
 // exposed fns
 bool jet_parser_init(jet_parser* p, 
@@ -227,6 +228,23 @@ static bool jet_parser_sync_block(jet_parser* p)
     return false;
 }
 
+static bool jet_parser_sync_fparam(jet_parser* p)
+{
+    JET_ASSERT(p != NULL);
+    while(jet_parser_peekn_tok_type(p, 0) != TOK_EOF)
+    {
+        switch(jet_parser_peekn_tok_type(p, 0))
+        {
+            case TOK_COMMA:
+            case TOK_RPAR:
+            case TOK_SEMI:
+                return true;
+        } 
+        jet_parser_consume_tok(p);
+    }
+    return false;
+}
+
 static jet_result jet_parser_register_node(jet_parser* p, const jet_ast_node* node)
 {
     JET_ASSERT(p != NULL);
@@ -359,14 +377,16 @@ static bool jet_parser_is_tdef(jet_parser* p)
 
 static bool jet_parser_is_defined_type(jet_parser* p, const jet_token* tok, const jet_ident** out_ident)
 {
+    JET_ASSERT(p != NULL);
     JET_ASSERT(tok != NULL);
-    if(tok->type != TOK_IDENT) return false;
+    if(tok->type != TOK_IDENT) 
+        return false;
     const jet_ident ident = jet_parser_ident_from_tok(tok);
-    const void* canon_ident;
-    if(jet_hs_contains(p->user_type_hs, &ident, &canon_ident))
+    const void* stored;
+    if(jet_hs_contains(p->user_type_hs, &ident, &stored))
     {
         if(out_ident != NULL)
-            *out_ident = (const jet_ident*)canno_ident;
+            *out_ident = (const jet_ident*)stored;
         return true;
     }
     return false;
@@ -695,58 +715,54 @@ static jet_result jet_parser_func_parse(jet_parser* p)
 {
     JET_ASSERT(p != NULL);
     const jet_token* start_tok = jet_parser_peek_tok(p);
-    jet_ast_node_fdecl fdecl;
-
-    node_id ret_tdecl_nid = jet_parser_tdecl_parse(p); 
-
-    fdecl.ident_nid = jet_parser_ident_from_tok(p);
-    if(fdecl.ident_nid == INVALID_NID)
-    {
-        return INVALID_NID;
-    }
-
-    jet_parser_expect_tok(p, TOK_LPAR);
     
-    JET_ASSERT(jet_da_init(&fdecl.ret_tdecl_nid_da, 1, sizeof(node_id)));
-    JET_ASSERT(jet_da_append(&fdecl.ret_tdecl_nid_da, (const void*)&ret_tdecl_nid));
-    JET_ASSERT(jet_da_init(&fdecl.param_nid_da, 2, sizeof(node_id)));
+    jet_result ret_tdecl_res = jet_parser_tdecl_parse(p);
+    if(!ret_tdecl_res.success)
+        return ret_tdecl_res;
 
-    node_id vdecl_nid = INVALID_NID;
-    jet_token_type t = TOK_EOF;
-    while(jet_parser_peekn_tok_type(p, 0) != TOK_RPAR && jet_parser_peekn_tok_type(p, 0) != TOK_EOF)
+    const jet_token* ident_tok = jet_parser_consume_tok(p);
+    jet_ident ref_name = jet_parser_ident_from_tok(ident_tok);
+
+    const jet_token* lpar_tok = jet_parser_expect_tok(p, TOK_LPAR);
+   
+    jet_da param_nid_da; 
+    bool param_nid_da_init = jet_da_init(&param_nid_da, 2, sizeof(node_id));
+    JET_ASSERT(param_nid_da_init == true);
+
+    jet_result param_res = {.success = false};
+    while(jet_parser_peekn_tok_type(p, 0) != TOK_RPAR && 
+          jet_parser_peekn_tok_type(p, 0) != TOK_EOF)
     {
-        vdecl_nid = jet_parser_parse_fparam(p);
-
-        if(vdecl_nid == INVALID_NID)
+        param_res = jet_parser_parse_fparam(p);
+        if(!param_res.success)
         {
-           goto fail;
+            //TODO: need better fail strategy, currently abrupt fail will leak param_nid_da memory
+            if(!jet_parser_sync_fparam(p))
+                goto fail; 
         }
-
-        JET_ASSERT(jet_da_append(&fdecl.param_nid_da, (const void*)&vdecl_nid));
+        JET_ASSERT(jet_da_append(&param_nid_da, (const void*)&param_nid));
         
-        t = jet_parser_peekn_tok_type(p, 0);
-        switch(t)
+        jet_token_type tok_type = jet_parser_peekn_tok_type(p, 0);
+        const jet_token* comma_tok = jet_parser_expect_tok(p, TOK_COMMA);
+        if(comma_tok == NULL)
         {
-            case TOK_RPAR:
-                break;
-            case TOK_COMMA:
-                jet_parser_consume_tok(p);
-                break;
-            default:
+            if(!jet_parser_sync_fparam(p))
                 goto fail;
         }
     }
 
-    const jet_token* end_tok = jet_parser_expect_tok(p, TOK_RPAR);
-    if(end_tok == NULL)
+    const jet_token* rpar_tok = jet_parser_expect_tok(p, TOK_RPAR);
+    if(rpar_tok == NULL)
     {
-        goto fail;
+        if(!jet_parser_sync_fdef(p))
+            goto fail;
     }
 
-    jet_ast_node fdecl_base;
-    JET_ASSERT(jet_ast_node_init(&fdecl_base, AST_FUNC_DECL, 
-                start_tok->span.start, end_tok->span.end, 
-                start_tok->span.line, start_tok->span.col));
+    if(jet_parser_peekn_tok_type(p, 0) == TOK_SEMI)
+    {
+        const jet_token* semi_tok = jet_parser_consume_tok(p);
+        //TODO: create create fdecl and return.
+    }
 
     fdecl_base.as.fdecl = fdecl;
     node_id out_func_nid = INVALID_NID;
@@ -775,9 +791,10 @@ static jet_result jet_parser_func_parse(jet_parser* p)
     return out_func_nid;
 
 fail:
-    jet_da_dispose(&fdecl.ret_tdecl_nid_da);
-    jet_da_dispose(&fdecl.param_nid_da);
-    return INVALID_NID;
+    if(param_nid_da_init) jet_da_dispose(&param_nid_da);
+
+    //TODO: probably should construct more accurate error.
+    return jet_parser_result_parsing_failed(AST_FUNC_DECL, jet_parser_peek_prev_tok(p));
 }
 
 static jet_result jet_parser_parse_fparam(jet_parser* p)

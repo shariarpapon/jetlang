@@ -46,10 +46,12 @@ static void jet_astp_indent(jet_ast_printer* p, size_t depth);
 static bool jet_astp_is_col_active(jet_ast_printer* p, size_t col);
 static size_t jet_astp_add_col(jet_ast_printer* p, size_t col);
 static void jet_astp_remove_col(jet_ast_printer* p, size_t col_id);
+
 static const char* jet_astp_resolve_node_str(jet_ast_printer* p, const jet_ast_node* n);
 static void jet_astp_print_node(jet_ast_printer* p, const jet_ast_node* node, size_t depth, bool is_last);
 static void jet_astp_print_by_nid(jet_ast_printer* p, node_id nid, size_t depth, bool is_last);
 static void jet_astp_print_nid_da(jet_ast_printer* p, const char* label, const jet_da* nid_da, size_t depth);
+
 static const char* jet_astp_op_str(jet_token_type t);
 static void jet_astp_sb_append_ident(jet_sb* sb, const jet_ident ident);
 
@@ -296,7 +298,7 @@ static void jet_astp_print_node(jet_ast_printer* p, const jet_ast_node* n, size_
             jet_astp_print_by_nid(p, n->as.vdecl.init_value_nid, child_depth, true);
             break;
         case AST_FUNC_DECL:
-            jet_astp_print_nid_da(p, "ret", &n->as.fdecl.ret_tdecl_nid_da, child_depth);
+            jet_astp_print_by_nid(p, n->as.fdecl.ret_tdecl_nid, child_depth);
             jet_astp_print_nid_da(p, "params", &n->as.fdecl.param_nid_da, child_depth);
             break;
         case AST_TYPE_DEF:    

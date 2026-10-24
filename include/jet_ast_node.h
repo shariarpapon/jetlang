@@ -70,7 +70,7 @@ typedef struct jet_ast_node_vdecl
 typedef struct jet_ast_node_fdecl
 {
     const jet_ident ref_name;
-    jet_da ret_tdecl_nid_da;
+    node_id ret_tdecl_nid;
     jet_da param_nid_da; 
 } jet_ast_node_fdecl;
 
