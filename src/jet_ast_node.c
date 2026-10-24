@@ -100,7 +100,7 @@ jet_ast_node jet_astn_fdecl(jet_span span, const jet_ident ref_name, const jet_d
     JET_ASSERT(jet_da_clone(&fdecl.ret_tdecl_nid_da, ret_tdecl_nid_da));
     JET_ASSERT(jet_da_clone(&fdecl.param_nid_da, param_nid_da));
     
-    ndoe.as.fdecl = fdecl;
+    node.as.fdecl = fdecl;
     return node;
 }
 

@@ -300,7 +300,7 @@ static void jet_astp_print_node(jet_ast_printer* p, const jet_ast_node* n, size_
             jet_astp_print_nid_da(p, "params", &n->as.fdecl.param_nid_da, child_depth);
             break;
         case AST_TYPE_DEF:    
-            jet_astp_print_by_nid(p, n->as.block_nid, child_depth, true);
+            jet_astp_print_by_nid(p, n->as.tdef.block_nid, child_depth, true);
             break;
         case AST_FUNC_DEF: 
             jet_astp_print_by_nid(p, n->as.fdef.fdecl_nid, child_depth, false);

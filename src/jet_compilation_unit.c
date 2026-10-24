@@ -17,7 +17,7 @@
 #define JET_CU_ARENA_CAP (1024 * 4)
 #define JET_CU_TOK_CAP (64)
 #define JET_CU_ERROR_CAP (16)
-#define JET_CU_USER_TYPE_DA_CAP (64)
+#define JET_CU_TDEF_NAME_HS_CAP (64)
 
 bool jet_cu_init(jet_compilation_unit* cu, const char* filename)
 {
@@ -32,17 +32,17 @@ bool jet_cu_init(jet_compilation_unit* cu, const char* filename)
     bool tok_da_init = false;
     bool ast_init = false;
     bool errors_init = false;
-    bool user_type_da_init = false;
+    bool tdef_name_hs_init = false;
 
     arena_init = jet_arena_init(&cu->arena, JET_CU_ARENA_CAP);
     ast_init = jet_ast_init(&cu->ast);
     tok_da_init = jet_da_init(&cu->tok_da, JET_CU_TOK_CAP, sizeof(jet_token));
     errors_init = jet_da_init(&cu->parser_err_da, JET_CU_ERROR_CAP, sizeof(jet_error));
-    user_type_da_init = jet_da_init(&cu->user_type_da, JET_CU_USER_TYPE_DA_CAP, sizeof(jet_ident));
+    tdef_name_hs_init = jet_ident_hashset_init(&cu->tdef_name_hs, JET_CU_TDEF_NAME_HS_CAP);
 
     cu->source = jet_io_read_text(filename, &cu->source_len);
     if(!cu->source || !arena_init || !tok_da_init 
-       || !ast_init || !errors_init || !user_type_da_init)
+       || !ast_init || !errors_init || !tdef_name_hs_init)
     {
         goto fail;
     }
@@ -65,7 +65,7 @@ fail:
     if(tok_da_init) jet_da_dispose(&cu->tok_da);
     if(errors_init) jet_da_dispose(&cu->parser_err_da);
     if(ast_init) jet_ast_dispose(&cu->ast);
-    if(user_type_da_init) jet_da_dispose(&cu->user_type_da);
+    if(tdef_name_hs_init) jet_da_dispose(&cu->tdef_name_hs);
     return false;
 }
 
@@ -78,8 +78,7 @@ void jet_cu_dispose(jet_compilation_unit* cu)
     jet_da_dispose(&cu->parser_err_da);
     jet_arena_dispose(&cu->arena);
     jet_ast_dispose(&cu->ast);
-    jet_da_dispose(&cu->user_type_da);
-
+    jet_hs_dispose_full(&cu->tdef_name_hs);
     memset(cu, 0, sizeof(*cu));
 }
 
@@ -99,21 +98,12 @@ bool jet_cu_run(jet_compilation_unit* cu)
     }
 
     bool parser_init = false;
-    parser_init = jet_parser_init(&parser, cu->filename, (const jet_da*)&cu->tok_da, &cu->ast, &cu->parser_err_da, &cu->user_type_da);
+    parser_init = jet_parser_init(&parser, cu->filename, (const jet_da*)&cu->tok_da, &cu->ast, &cu->parser_err_da, &cu->tdef_name_hs);
     if(!parser_init || !jet_parser_parse(&parser))
     {
         JET_LOG_ERROR("parser failed");
         goto fail;
     }
-
-#ifdef JET_DBG_TPRINT_TOKENS
-    jet_token_tprint_da(&cu->tok_da);
-#endif
-
-#ifdef JET_DBG_PRINT_AST
-    jet_ast_print(&cu->ast);
-#endif
-
     jet_lexer_dispose(&lexer);
     jet_parser_dispose(&parser);
     return true;

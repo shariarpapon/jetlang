@@ -4,6 +4,7 @@
 #include <jet_parser.h>
 #include <jet_token.h>
 #include <jet_arena.h>
+#include <jet_hs.h>
 
 typedef struct jet_compilation_unit
 {
@@ -14,7 +15,7 @@ typedef struct jet_compilation_unit
     jet_da tok_da;
     jet_ast ast;
     jet_da parser_err_da;
-    jet_da user_type_da;
+    jet_hs tdef_name_hs;
 } jet_compilation_unit;
 
 bool jet_cu_init(jet_compilation_unit* cu, const char* filename);

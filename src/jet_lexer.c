@@ -44,7 +44,6 @@ static const jet_tok_def kwd_table[] =
    { .value.str = "int"   ,  TOK_KWD_INT      },   
    { .value.str = "float" ,  TOK_KWD_FLOAT    }, 
    { .value.str = "str"   ,  TOK_KWD_STR      },  
-   { .value.str = "byte"  ,  TOK_KWD_BYTE     }, 
    { .value.str = "void"  ,  TOK_KWD_VOID     }, 
    { .value.str = "char"  ,  TOK_KWD_CHAR     }, 
    { .value.str = "mem"   ,  TOK_KWD_MEM      }, 

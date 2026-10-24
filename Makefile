@@ -11,7 +11,7 @@ endif
 CC = gcc
 C_SRC := $(wildcard ./*.c src/*.c utils/*.c libs/*.c)
 C_INCLUDES = -I. -Iinclude -Iutils -Ilibs
-C_FLAGS = -Wall -std=c11
+C_FLAGS = -std=c11
 
 C_COMPILE = $(CC) $(C_FLAGS) $(C_SRC) $(C_INCLUDES) -o $(C_BIN)  
 
