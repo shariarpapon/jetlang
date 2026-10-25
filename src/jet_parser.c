@@ -236,6 +236,8 @@ static bool jet_parser_sync_fparam(jet_parser* p)
         switch(jet_parser_peekn_tok_type(p, 0))
         {
             case TOK_COMMA:
+                jet_parser_consume_tok(p);
+                return true;
             case TOK_RPAR:
             case TOK_SEMI:
                 return true;
@@ -708,7 +710,7 @@ static jet_result jet_parser_vdecl_parse(jet_parser* p)
     jet_span node_span = jet_parser_token_range_span(start_tok, end_tok); 
     node_id init_value_nid = init_value_res.success ? init_value_res.as.nid : INVALID_NID;
     jet_ast_node node = jet_astn_vdecl(node_span, ref_name, tdecl_res.as.nid, init_value_nid); 
-    return jet_parser_register_node(p->ast, (const jet_ast_node*)&node);
+    return jet_parser_register_node(p, (const jet_ast_node*)&node);
 }
 
 static jet_result jet_parser_func_parse(jet_parser* p) 
@@ -723,83 +725,82 @@ static jet_result jet_parser_func_parse(jet_parser* p)
     const jet_token* ident_tok = jet_parser_consume_tok(p);
     jet_ident ref_name = jet_parser_ident_from_tok(ident_tok);
 
-    const jet_token* lpar_tok = jet_parser_expect_tok(p, TOK_LPAR);
-   
+    jet_parser_expect_tok(p, TOK_LPAR); 
+
     jet_da param_nid_da; 
     bool param_nid_da_init = jet_da_init(&param_nid_da, 2, sizeof(node_id));
     JET_ASSERT(param_nid_da_init == true);
 
     jet_result param_res = {.success = false};
     while(jet_parser_peekn_tok_type(p, 0) != TOK_RPAR && 
-          jet_parser_peekn_tok_type(p, 0) != TOK_EOF)
+          jet_parser_peekn_tok_type(p, 0) != TOK_EOF &&
+          jet_parser_peekn_tok_type(p, 0) != TOK_SEMI)
     {
         param_res = jet_parser_parse_fparam(p);
         if(!param_res.success)
         {
-            //TODO: need better fail strategy, currently abrupt fail will leak param_nid_da memory
             if(!jet_parser_sync_fparam(p))
                 goto fail; 
+            continue;
         }
-        JET_ASSERT(jet_da_append(&param_nid_da, (const void*)&param_nid));
         
-        jet_token_type tok_type = jet_parser_peekn_tok_type(p, 0);
+        JET_ASSERT(jet_da_append(&param_nid_da, (const void*)&param_res.as.nid));
+        
         const jet_token* comma_tok = jet_parser_expect_tok(p, TOK_COMMA);
         if(comma_tok == NULL)
         {
             if(!jet_parser_sync_fparam(p))
                 goto fail;
+            continue;
         }
     }
+    const jet_token* fparam_end_tok = jet_parser_peek_tok(p);
 
-    const jet_token* rpar_tok = jet_parser_expect_tok(p, TOK_RPAR);
-    if(rpar_tok == NULL)
+    bool is_decl_only = false;
+    switch(fparam_end_tok->type)
     {
-        if(!jet_parser_sync_fdef(p))
+        case TOK_SEMI:
+        case TOK_EOF:
+            is_decl_only = true;
+            jet_parser_consume_tok(p);
+            break;
+        case TOK_RPAR:
+            jet_parser_consume_tok(p);
+            break;
+        default: 
             goto fail;
     }
 
-    if(jet_parser_peekn_tok_type(p, 0) == TOK_SEMI)
+    jet_span fdecl_span = jet_parser_token_range_span(start_tok, fparam_end_tok);
+    jet_ast_node fdecl_node = jet_astn_fdecl(fdecl_span, ref_name, ret_tdecl_res.as.nid, &param_nid_da);
+    
+    jet_da_dispose(&param_nid_da);
+    param_nid_da_init = false;
+
+    jet_result fdecl_res = jet_parser_register_node(p, &fdecl_node);
+
+    if(is_decl_only)
+        return fdecl_res;
+
+    jet_result block_res = jet_parser_block_parse(p);
+    if(!block_res.success)
     {
-        const jet_token* semi_tok = jet_parser_consume_tok(p);
-        //TODO: create create fdecl and return.
+        jet_parser_push_err(p, &block_res.as.error);
+        return fdecl_res;
     }
 
-    fdecl_base.as.fdecl = fdecl;
-    node_id out_func_nid = INVALID_NID;
-    if(jet_parser_peekn_tok_type(p, 0) == TOK_LBRC)
-    {
-        jet_ast_node_fdef fdef;
-        fdef.block_nid = jet_parser_block_parse(p);
-        if(fdef.block_nid == INVALID_NID)
-        {
-            goto fail;
-        }
-        fdef.fdecl_nid = jet_ast_register_node(p->ast, (const jet_ast_node*)&fdecl_base);
-        end_tok = jet_parser_peek_prev_tok(p);
-        if(!end_tok) end_tok = start_tok;
-
-        jet_ast_node fdef_base;
-        JET_ASSERT(jet_ast_node_init(&fdef_base, AST_FUNC_DEF, start_tok->span.start, end_tok->span.end, start_tok->span.line, start_tok->span.col));
-        
-        fdef_base.as.fdef = fdef;
-        out_func_nid = jet_ast_register_node(p->ast, (const jet_ast_node*)&fdef_base); 
-    }
-    else
-    {
-        out_func_nid = jet_ast_register_node(p->ast, (const jet_ast_node*)&fdecl_base);
-    }
-    return out_func_nid;
+    jet_span fdef_span = jet_parser_token_range_span(start_tok, jet_parser_peek_prev_tok(p));
+    jet_ast_node fdef_node = jet_astn_fdef(fdef_span, fdecl_res.as.nid, block_res.as.nid);
+    return jet_parser_register_node(p, &fdef_node);
 
 fail:
-    if(param_nid_da_init) jet_da_dispose(&param_nid_da);
-
-    //TODO: probably should construct more accurate error.
+    if(param_nid_da_init) 
+        jet_da_dispose(&param_nid_da);
     return jet_parser_result_parsing_failed(AST_FUNC_DECL, jet_parser_peek_prev_tok(p));
 }
 
 static jet_result jet_parser_parse_fparam(jet_parser* p)
 {
-   
     JET_ASSERT(p != NULL);
     const jet_token* start_tok = jet_parser_peek_tok(p);
     jet_ast_node_vdecl vdecl;

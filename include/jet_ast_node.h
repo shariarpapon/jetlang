@@ -143,7 +143,7 @@ jet_ast_node jet_astn_mem(jet_span span, size_t alloc_size);
 jet_ast_node jet_astn_lit(jet_span span, jet_type_kind tkind, const void* value);
 jet_ast_node jet_astn_block(jet_span span, const jet_da* stmt_nid_da);
 jet_ast_node jet_astn_vdecl(jet_span span, const jet_ident ref_name, node_id tdecl_nid, node_id init_value_nid);
-jet_ast_node jet_astn_fdecl(jet_span span, const jet_ident ref_name, const jet_da* ret_tdecl_nid_da, const jet_da* param_nid_da);
+jet_ast_node jet_astn_fdecl(jet_span span, const jet_ident ref_name, node_id ret_tdecl_nid, const jet_da* param_nid_da);
 jet_ast_node jet_astn_tdecl(jet_span span, const jet_ident type_name, jet_type_kind tkind);
 jet_ast_node jet_astn_tdef(jet_span span, const jet_ident type_name, node_id block_nid);
 jet_ast_node jet_astn_fdef(jet_span span, node_id fdecl_nid, node_id block_nid);
