@@ -716,6 +716,10 @@ static jet_result jet_parser_vdecl_parse(jet_parser* p)
 static jet_result jet_parser_func_parse(jet_parser* p) 
 {
     JET_ASSERT(p != NULL);
+
+    if(!jet_parser_is_func_head(p))
+        goto fail;
+
     const jet_token* start_tok = jet_parser_peek_tok(p);
     
     jet_result ret_tdecl_res = jet_parser_tdecl_parse(p);
@@ -796,45 +800,40 @@ static jet_result jet_parser_func_parse(jet_parser* p)
 fail:
     if(param_nid_da_init) 
         jet_da_dispose(&param_nid_da);
-    return jet_parser_result_parsing_failed(AST_FUNC_DECL, jet_parser_peek_prev_tok(p));
+    return jet_parser_result_parsing_failed(AST_FUNC_DECL, jet_parser_peek_tok(p));
 }
 
 static jet_result jet_parser_parse_fparam(jet_parser* p)
 {
     JET_ASSERT(p != NULL);
     const jet_token* start_tok = jet_parser_peek_tok(p);
-    jet_ast_node_vdecl vdecl;
-    vdecl.tdecl_nid = jet_parser_tdecl_parse(p);
-     
-    if(vdecl.tdecl_nid == INVALID_NID)
-    {
-        return INVALID_NID;
-    }
 
-    vdecl.ident_nid = jet_parser_ident_from_tok(p);
-    if(vdecl.ident_nid == INVALID_NID)
-    {
-        return INVALID_NID;
-    }
+    if(jet_parser_is_vdecl(p) == false)
+        return jet_parser_result_parsing_failed(AST_VAR_DECL, start_tok);
 
-    vdecl.init_value_nid = INVALID_NID;
+    jet_result tdecl_res  = jet_parser_tdecl_parse(p);
+    if(!tdecl_res.success)
+        return tdecl_res;
+
+    const jet_ident ref_name = jet_parser_ident_from_tok(p);
     jet_token_type tok_type = jet_parser_peekn_tok_type(p, 0);
+    jet_result init_value_res = {.success = false};
     if(tok_type == TOK_ASG)
     {
-        jet_parser_consume_tok(p);    
-        vdecl.init_value_nid = jet_parser_parse_expr(p, 0);
-        if(!vdecl.init_value_nid)
+        const jet_token* asg_tok = jet_parser_consume_tok(p);    
+        init_value_res = jet_parser_parse_expr(p, 0);
+        if(!init_value_res.success)
         {
-            return INVALID_NID;
-        } 
+            const jet_token* fail_tok = jet_parser_peek_prev_tok(p);
+            jet_span err_span = jet_parser_token_range(asg_tok, fail_tok);
+            jet_error err = jet_err(JET_ERR_EXPECTED_EXPR, err_span);
+            return jet_result_error(&err);
+        }
     }
-    const jet_token* end_tok = jet_parser_peek_prev_tok(p);  
-    jet_ast_node node;
-    JET_ASSERT(jet_ast_node_init(&node, AST_VAR_DECL, 
-                start_tok->span.start, end_tok->span.end, 
-                start_tok->span.line, start_tok->span.col));
-    node.as.vdecl = vdecl;
-    return jet_ast_register_node(p->ast, (const jet_ast_node*)&node);
+    jet_span node_span = jet_parser_token_range_span(start_tok, jet_parser_peek_prev_tok(p)); 
+    node_id init_value_nid = init_value_res.success ? init_value_res.as.nid : INVALID_NID;
+    jet_ast_node node = jet_astn_vdecl(node_span, ref_name, tdecl_res.as.nid, init_value_nid); 
+    return jet_parser_register_node(p, &node);
 }
 
 static jet_result jet_parser_parse_expr(jet_parser* p, size_t min_prec)
