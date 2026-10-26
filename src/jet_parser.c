@@ -148,7 +148,7 @@ static void jet_parser_define_primitive_types(jet_parser* p)
 
 static const jet_ident* jet_parser_register_tdef_name(jet_parser* p, jet_ident type_name)
 {
-    JET_ASSERT(name != NULL);
+    JET_ASSERT(p != NULL);
     const jet_ident* stored = jet_ident_hashset_add(p->tdef_name_hs, type_name);
     if(stored == NULL)
     {
@@ -280,7 +280,7 @@ static bool jet_parser_get_type_name(jet_parser* p, const jet_token* tok, jet_id
     JET_ASSERT(p != NULL);
     JET_ASSERT(tok != NULL);
 
-    jet_ident* stored;
+    const jet_ident* stored;
     if(!jet_parser_is_defined_type(p, tok, &stored))
         goto fail;
     if(out_ident)
@@ -385,7 +385,7 @@ static bool jet_parser_is_defined_type(jet_parser* p, const jet_token* tok, cons
         return false;
     const jet_ident ident = jet_parser_ident_from_tok(tok);
     const void* stored;
-    if(jet_hs_contains(p->user_type_hs, &ident, &stored))
+    if(jet_hs_contains(p->tdef_name_hs, &ident, &stored))
     {
         if(out_ident != NULL)
             *out_ident = (const jet_ident*)stored;
@@ -688,7 +688,9 @@ static jet_result jet_parser_vdecl_parse(jet_parser* p)
     if(!tdecl_res.success)
         return tdecl_res;
 
-    const jet_ident ref_name = jet_parser_ident_from_tok(p);
+    const jet_token* ref_name_tok = jet_parser_expect_tok(p, TOK_IDENT);
+    const jet_ident ref_name = jet_parser_ident_from_tok(ref_name_tok);
+
     jet_token_type tok_type = jet_parser_peekn_tok_type(p, 0);
     jet_result init_value_res = {.success = false};
     if(tok_type == TOK_ASG)
@@ -726,8 +728,8 @@ static jet_result jet_parser_func_parse(jet_parser* p)
     if(!ret_tdecl_res.success)
         return ret_tdecl_res;
 
-    const jet_token* ident_tok = jet_parser_consume_tok(p);
-    jet_ident ref_name = jet_parser_ident_from_tok(ident_tok);
+    const jet_token* ref_name_tok = jet_parser_expect_tok(p, TOK_IDENT);
+    jet_ident ref_name = jet_parser_ident_from_tok(ref_name_tok);
 
     jet_parser_expect_tok(p, TOK_LPAR); 
 
@@ -749,17 +751,16 @@ static jet_result jet_parser_func_parse(jet_parser* p)
         }
         
         JET_ASSERT(jet_da_append(&param_nid_da, (const void*)&param_res.as.nid));
-        
-        const jet_token* comma_tok = jet_parser_expect_tok(p, TOK_COMMA);
-        if(comma_tok == NULL)
+    
+        const jet_token* cur_tok = jet_parser_peek_tok(p);
+        if(cur_tok->type == TOK_COMMA)
         {
-            if(!jet_parser_sync_fparam(p))
-                goto fail;
+            jet_parser_consume_tok(p);
             continue;
         }
     }
-    const jet_token* fparam_end_tok = jet_parser_peek_tok(p);
 
+    const jet_token* fparam_end_tok = jet_parser_peek_tok(p);
     bool is_decl_only = false;
     switch(fparam_end_tok->type)
     {
@@ -815,7 +816,9 @@ static jet_result jet_parser_parse_fparam(jet_parser* p)
     if(!tdecl_res.success)
         return tdecl_res;
 
-    const jet_ident ref_name = jet_parser_ident_from_tok(p);
+    const jet_token* ref_name_tok = jet_parser_expect_tok(p, TOK_IDENT);
+    const jet_ident ref_name = jet_parser_ident_from_tok(ref_name_tok);
+
     jet_token_type tok_type = jet_parser_peekn_tok_type(p, 0);
     jet_result init_value_res = {.success = false};
     if(tok_type == TOK_ASG)

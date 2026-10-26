@@ -1,5 +1,8 @@
-str message = "hello world!"; 
-prog
+str m = "hello world";
+
+int mutliply(int x, int y)
 {
-    print(message);
+    int product = x * y;
+    print(m);
+    return product;
 }
