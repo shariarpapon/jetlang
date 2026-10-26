@@ -32,17 +32,17 @@ bool jet_cu_init(jet_compilation_unit* cu, const char* filename)
     bool tok_da_init = false;
     bool ast_init = false;
     bool errors_init = false;
-    bool tdef_name_hs_init = false;
+    bool defined_type_names_hs_init = false;
 
     arena_init = jet_arena_init(&cu->arena, JET_CU_ARENA_CAP);
     ast_init = jet_ast_init(&cu->ast);
     tok_da_init = jet_da_init(&cu->tok_da, JET_CU_TOK_CAP, sizeof(jet_token));
     errors_init = jet_da_init(&cu->parser_err_da, JET_CU_ERROR_CAP, sizeof(jet_error));
-    tdef_name_hs_init = jet_ident_hashset_init(&cu->tdef_name_hs, JET_CU_TDEF_NAME_HS_CAP);
+    defined_type_names_hs_init = jet_ident_hashset_init(&cu->defined_type_names_hs, JET_CU_TDEF_NAME_HS_CAP);
 
     cu->source = jet_io_read_text(filename, &cu->source_len);
     if(!cu->source || !arena_init || !tok_da_init 
-       || !ast_init || !errors_init || !tdef_name_hs_init)
+       || !ast_init || !errors_init || !defined_type_names_hs_init)
     {
         goto fail;
     }
@@ -65,7 +65,7 @@ fail:
     if(tok_da_init) jet_da_dispose(&cu->tok_da);
     if(errors_init) jet_da_dispose(&cu->parser_err_da);
     if(ast_init) jet_ast_dispose(&cu->ast);
-    if(tdef_name_hs_init) jet_da_dispose(&cu->tdef_name_hs);
+    if(defined_type_names_hs_init) jet_da_dispose(&cu->defined_type_names_hs);
     return false;
 }
 
@@ -78,7 +78,7 @@ void jet_cu_dispose(jet_compilation_unit* cu)
     jet_da_dispose(&cu->parser_err_da);
     jet_arena_dispose(&cu->arena);
     jet_ast_dispose(&cu->ast);
-    jet_hs_dispose_full(&cu->tdef_name_hs);
+    jet_hs_dispose_full(&cu->defined_type_names_hs);
     memset(cu, 0, sizeof(*cu));
 }
 
@@ -98,7 +98,7 @@ bool jet_cu_run(jet_compilation_unit* cu)
     }
 
     bool parser_init = false;
-    parser_init = jet_parser_init(&parser, cu->filename, (const jet_da*)&cu->tok_da, &cu->ast, &cu->parser_err_da, &cu->tdef_name_hs);
+    parser_init = jet_parser_init(&parser, cu->filename, (const jet_da*)&cu->tok_da, &cu->ast, &cu->parser_err_da, &cu->defined_type_names_hs);
     if(!parser_init || !jet_parser_parse(&parser))
     {
         JET_LOG_ERROR("parser failed");

@@ -15,7 +15,7 @@ typedef struct jet_compilation_unit
     jet_da tok_da;
     jet_ast ast;
     jet_da parser_err_da;
-    jet_hs tdef_name_hs;
+    jet_hs defined_type_names_hs;
 } jet_compilation_unit;
 
 bool jet_cu_init(jet_compilation_unit* cu, const char* filename);
