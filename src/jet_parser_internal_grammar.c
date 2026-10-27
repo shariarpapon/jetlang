@@ -1,15 +1,5 @@
 #include <jet_parser_internals.h>
 
-bool jet_parser_is_sequence_match(jet_parser* p, jet_token_type seq[], size_t len)
-{
-    for(size_t i = 0; i < len; i++)
-    {
-        if(seq[i] != jet_parser_peekn_tok_type(p, i))        
-            return false;
-    }
-    return true;
-}
-
 bool jet_parser_is_prog_entry(jet_parser* p)
 {
     return jet_parser_peekn_tok_type(p, 0) == TOK_KWD_PROG;

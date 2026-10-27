@@ -245,7 +245,7 @@ jet_result jet_parser_tdecl_parse(jet_parser* p)
         goto fail;
     
     const jet_token* tok = jet_parser_consume_tok(p);
-    jet_type_kind tkind = jet_parser_tkind_from_token(tok);
+    jet_type_kind tkind = jet_parser_type_kind_from_token(tok);
     if(tkind == JET_TYPE_INVALID)
         goto fail;
 
