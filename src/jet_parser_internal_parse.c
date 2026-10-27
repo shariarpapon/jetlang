@@ -1,10 +1,10 @@
+#include <inttypes.h>
+#include <string.h>
+
 #include <jet_parser_internals.h>
-#include <jet_parser_ops.h>
 #include <jet_conv.h>
 #include <jet_sb.h>
 #include <jet_logger.h>
-#include <inttypes.h>
-#include <string.h>
 
 jet_result jet_parser_parse_toplevel(jet_parser* p)
 {

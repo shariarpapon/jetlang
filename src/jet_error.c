@@ -1,5 +1,6 @@
-#include <jet_error.h>
 #include <string.h>
+#include <jet_error.h>
+#include <jet_logger.h>
 
 jet_error jet_err(jet_error_kind kind, jet_span span)
 {

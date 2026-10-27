@@ -151,7 +151,6 @@ void jet_ast_node_dispose(jet_ast_node* node)
         }
         case AST_FUNC_DECL:
         {
-            jet_da_dispose(&node->as.fdecl.ret_tdecl_nid_da);
             jet_da_dispose(&node->as.fdecl.param_nid_da);
             return;
         }

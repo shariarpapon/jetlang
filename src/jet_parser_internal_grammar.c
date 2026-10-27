@@ -1,4 +1,5 @@
 #include <jet_parser_internals.h>
+#include <jet_logger.h>
 
 bool jet_parser_is_prog_entry(jet_parser* p)
 {
