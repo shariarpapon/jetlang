@@ -214,6 +214,8 @@ static const char* jet_astp_resolve_node_str(jet_ast_printer* p, const jet_ast_n
             switch(n->as.lit.tkind)
             {
                 default: 
+                    JET_LOG_WARNING("printing logic for type kind <%d> unknown." 
+                            (int)n->as.lit.tkind);
                     break;
                 case JET_TYPE_BOOL:
                     jet_sb_append_cstr(&p->sb, jet_conv_btos(n->as.lit.as.b));
@@ -230,6 +232,9 @@ static const char* jet_astp_resolve_node_str(jet_ast_printer* p, const jet_ast_n
                 case JET_TYPE_FLOAT:
                     jet_sb_appendf(&p->sb, "%f", n->as.lit.as.f);
                     break;
+                case JET_TYPE_CUSTOM:
+                    jet_astp_sb_append_ident(&p->sb, n->as.lit.as.ident);
+                    break
             }
             break;
         }

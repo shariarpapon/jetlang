@@ -52,10 +52,11 @@ jet_type_kind jet_parser_type_kind_from_token(const jet_token* tok);
 
 //### parse
 jet_result jet_parser_parse_toplevel(jet_parser* p);
+jet_result jet_parser_parse_block_stmt(jet_parser* p);
+
+//### parse expr
 jet_result jet_parser_parse_expr_stmt(jet_parser* p);
 jet_result jet_parser_parse_expr(jet_parser* p, size_t min_prec);
-jet_result jet_parser_parse_primary(jet_parser* ast);
-jet_result jet_parser_parse_block_stmt(jet_parser* p);
 
 jet_result jet_parser_parse_fparam(jet_parser* p);
 jet_result jet_parser_vdecl_parse(jet_parser* p);

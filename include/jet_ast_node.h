@@ -52,6 +52,7 @@ typedef struct jet_ast_node_lit
        bool b;
        char c;
        char* s;
+       jet_ident ident;
    } as;
 } jet_ast_node_lit;
 

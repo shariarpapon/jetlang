@@ -9,7 +9,12 @@ else
 endif
 
 CC = gcc
-C_SRC := $(wildcard src/*.c utils/*.c)
+C_SRC_PATHS := src/*.c \
+			   utils/*.c \
+			   src/parser_internals/*.c
+
+C_SRC := $(wildcard $(C_SRC_PATHS))
+
 C_INCLUDES = -Iinclude -Iutils
 C_FLAGS = -std=c11
 
@@ -19,7 +24,7 @@ jf ?=
 JET_CODE_FILE = code.jt
 JET_EXEC = $(RUN) $(JET_CODE_FILE)
 
-.PHONY: all rebuild rb clean info_build ib
+.PHONY: all rebuild rb clean 
 
 all:
 	$(C_COMPILE)

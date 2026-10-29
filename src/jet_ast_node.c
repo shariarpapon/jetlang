@@ -42,6 +42,8 @@ jet_ast_node jet_astn_lit(jet_span span, jet_type_kind tkind, const void* value)
             lit.as.c = *((const char*)value); break;
         case JET_TYPE_STR: 
             lit.as.s = *((const char**)value); break;
+        case JET_TYPE_CUSTOM:
+            lit.as.ident = *((const jet_ident*)value) break;
     }
     node.as.lit = lit;
     return node;
