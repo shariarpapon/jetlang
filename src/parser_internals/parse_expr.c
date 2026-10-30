@@ -54,6 +54,23 @@ jet_result jet_parser_parse_expr(jet_parser* p, size_t min_prec)
     return lhs_nid;
 }
 
+jet_result jet_parser_unop_parse(jet_parser* p)
+{
+    JET_ASSERT(p != NULL);
+    const jet_token* start_tok = jet_parser_peek_tok(p);
+    uint8_t prec = jet_parser_get_op_prec(start_tok->type);
+    if(prec == PREC_NONE)
+        return jet_parser_result_parsing_failed(AST_UNOP, start_tok);
+    jet_parser_consume_tok(p);
+    jet_result expr_res = jet_parser_parse_expr(p, prec + 1);
+    if(!expr_res.success)
+        return expr_res;
+    const jet_token* end_tok = jet_parser_peek_prev_tok(p);
+    jet_span span = jet_parser_token_range_span(start_tok, end_tok);
+    jet_ast_node node = jet_astn_unop(span, expr_res.as.nid, start_tok->type);
+    return jet_parser_register_node(p, (const jet_ast_node*)&node);
+}
+
 static jet_result jet_parser_parse_primary(jet_parser* p)
 {
     JET_ASSERT(p != NULL);
@@ -78,13 +95,9 @@ static jet_result jet_parser_parse_primary(jet_parser* p)
         case TOK_LIT_FLOAT:
         case TOK_LIT_CHAR:
         case TOK_LIT_STR:
-        {
-            out_nid = jet_parser_lit_parse(p);
-            break;
-        }
         case TOK_IDENT:
         {
-            out_nid = jet_parser_ident_from_tok(p);
+            out_nid = jet_parser_lit_parse(p);
             break;
         }
         case TOK_LPAR:
@@ -173,3 +186,33 @@ static jet_result jet_parser_parse_primary(jet_parser* p)
     }
     return out_nid;
 }
+
+static jet_result jet_parser_parse_primary_term(jet_parser* p)
+{
+    JET_ASSERT(p != NULL);
+    jet_result res;
+    const jet_token* start_tok = jet_parser_peek_tok(p);
+    switch(start_tok->type)
+    {
+        default:
+            break;
+        case TOK_IDENT:
+        case TOK_KWD_INT:
+        case TOK_KWD_BOOL:
+        case TOK_KWD_FLOAT:
+        case TOK_KWD_STR:
+        case TOK_KWD_CHAR:
+            res = jet_parser_lit_parse(p);
+            break;
+        case TOK_LPAR:
+            jet_parser_consume_tok(p);
+            res = jet_parser_parse_expr(p, 0);
+            jet_parser_expect_tok(p, TOK_RPAR);
+            break;
+        case TOK_MINUS:
+        case TOK_NOT:
+            res = jet_parser_unop_parse(jet_parser* p);
+            break;
+    }
+}
+
