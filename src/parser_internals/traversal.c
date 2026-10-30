@@ -63,3 +63,22 @@ const jet_token* jet_parser_expect_tok(jet_parser* p, jet_token_type tok_type)
     return jet_parser_consume_tok(p);
 }
 
+const jet_token* jet_parser_expect_tok_keep(jet_parser* p, jet_token_type tok_type)
+{
+    JET_ASSERT(p != NULL);
+    const jet_token* tok = jet_parser_peek_tok(p);
+    if(!tok)
+    {
+        jet_error err = jet_err_expected_token(jet_parser_peek_prev_tok(p), tok_type);
+        jet_parser_push_err(p, &err);
+        return NULL;
+    }
+    else if(tok->type != tok_type)
+    {
+        jet_error err = jet_err_expected_token(tok, tok_type);
+        jet_parser_push_err(p, (const jet_error*)&err);
+        return NULL;
+    }
+    return tok;
+}
+
