@@ -37,3 +37,22 @@ bool jet_parser_is_func_head(jet_parser* p)
            jet_parser_peekn_tok_type(p, 2) == TOK_LPAR;
 }
 
+bool jet_parser_is_unop_head(jet_parser* p)
+{
+    JET_ASSERT(p != NULL);
+    switch(jet_parser_peekn_tok_type(p, 0))
+    {
+        default:
+            return false;
+        case TOK_MINUS:
+        case TOK_NOT:
+            return true;
+    }
+}
+
+bool jet_parser_is_call_head(jet_parser* p)
+{
+    JET_ASSERT(p != NULL);
+    return jet_parser_peekn_tok_type(p, 0) == TOK_LPAR;
+}
+

@@ -1,6 +1,48 @@
 #include <jet_parser_internals.h>
 #include <jet_logger.h>
 
+//returns da of node_ids
+jet_da jet_parser_parse_by_delim(jet_parser* p, 
+        bool(*is_head_match)(jet_parser*), 
+        jet_result (*parse_node)(jet_parser*), 
+        jet_token_type delim, 
+        jet_token_type end)
+{
+    JET_ASSERT(p != NULL);
+    JET_ASSERT(is_head_match != NULL);
+    JET_ASSERT(parse_node != NULL);
+
+    jet_token_type sync_points[2];
+    sync_points[0] = delim;
+    sync_points[1] = end;
+
+    jet_da res_da;
+    const size_t capacity = 4;
+    JET_ASSERT(jet_da_init(&res_da, capacity, sizeof(node_id)));
+    while(is_head_match(p))
+    {
+        jet_result r = parse_node(p);
+        if(r.success) 
+        {
+            JET_ASSERT(jet_da_append(&res_da, (const void*)&r.as.nid));
+        }
+        else 
+        {
+            jet_parser_push_err(p, &r.as.error);
+            if(!jet_parser_sync_to_any(p, sync_points, ARRAY_LEN(sync_points)))
+                break;
+        }
+        if(jet_parser_peekn_tok_type(p, 0) == delim)
+        {
+            jet_parser_consume_tok(p);
+            continue;
+        }
+        else break;
+    }
+    jet_parser_expect_tok(p, end);
+    return res_da;
+}
+
 jet_result jet_parser_register_node(jet_parser* p, const jet_ast_node* node)
 {
     JET_ASSERT(p != NULL);

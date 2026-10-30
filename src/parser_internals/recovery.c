@@ -77,3 +77,55 @@ bool jet_parser_sync_fparam(jet_parser* p)
     }
     return false;
 }
+
+bool jet_parser_sync_to(jet_parser* p, jet_token_type sync_point)
+{
+    JET_ASSERT(p != NULL);
+    size_t look_ahead = 0;
+    jet_token_type tok_type;
+    while(true)
+    {
+        tok_type = jet_parser_peekn_tok_type(p, look_ahead);
+        if(tok_type == sync_point)
+        {
+            for(size_t j = 0; j < look_ahead; j++)
+                jet_parser_consume_tok(p);
+            return true;
+        }
+        if(tok_type == TOK_EOF)
+            return false;
+        look_ahead++;
+    }
+}
+
+bool jet_parser_sync_to_any(jet_parser* p, jet_token_type sync_points[], size_t len)
+{
+    JET_ASSERT(p != NULL);
+    JET_ASSERT(sync_points != NULL || len == 0);
+
+    if(len == 0) 
+        return true;
+
+    size_t look_ahead = 0;
+    jet_token_type tok_type;
+    while(true)
+    {
+        tok_type = jet_parser_peekn_tok_type(p, look_ahead);
+        for(size_t i = 0; i < len; i++)
+        {
+            if(tok_type == sync_points[i])
+            {
+                for(size_t j = 0; j < look_ahead; j++)
+                    jet_parser_consume_tok(p);
+                return true;
+            }
+        }
+        if(tok_type == TOK_EOF)
+            return false;
+        look_ahead++;
+    }
+}
+
+
+
+

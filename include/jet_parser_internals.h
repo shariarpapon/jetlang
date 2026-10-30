@@ -42,6 +42,8 @@ bool jet_parser_is_func_head(jet_parser* p);
 bool jet_parser_is_prog_entry(jet_parser* p);
 bool jet_parser_is_tdecl(jet_parser* p);
 bool jet_parser_is_tdef(jet_parser* p);
+bool jet_parser_is_unop_head(jet_parser* p);
+bool jet_parser_is_call_head(jet_parser* p);
 
 //### types
 const jet_ident* jet_parser_register_type_name(jet_parser* p, jet_ident type_name);
@@ -66,6 +68,8 @@ jet_result jet_parser_tdef_parse(jet_parser* p);
 jet_result jet_parser_prog_parse(jet_parser* p);
 jet_result jet_parser_block_parse(jet_parser* p);
 jet_result jet_parser_lit_parse(jet_parser* p);
+jet_result jet_parser_unop_parse(jet_parser* p);
+jet_result jet_parser_call_parse(jet_parser* p);
 
 //### ast
 jet_result jet_parser_register_node(jet_parser* p, const jet_ast_node* node);
@@ -73,15 +77,24 @@ jet_result jet_parser_register_node(jet_parser* p, const jet_ast_node* node);
 //### recovery
 jet_result jet_parser_result_parsing_failed(jet_ast_node_type node_type, const jet_token* tok);
 void jet_parser_push_err(jet_parser* p, const jet_error* err);
+
 bool jet_parser_sync_toplevel(jet_parser* p);
 bool jet_parser_sync_block(jet_parser* p);
 bool jet_parser_sync_fparam(jet_parser* p);
+
+bool jet_parser_sync_to_any(jet_parser* p, jet_token_type sync_points[], size_t len);
+bool jet_parser_sync_to(jet_parser* p, jet_token_type sync_point);
 
 //### utils
 jet_span jet_parser_token_range_span(const jet_token* start, const jet_token* end);
 const jet_ident jet_parser_ident_from_tok(const jet_token* tok);
 uint8_t jet_parser_get_op_prec(jet_token_type op_type);
 
+jet_da jet_parser_parse_by_delim(jet_parser* p, 
+        bool(*is_head_match)(jet_parser*), 
+        jet_result (*parse_node)(jet_parser*), 
+        jet_token_type delim, 
+        jet_token_type end);
 
 
 
