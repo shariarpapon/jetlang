@@ -302,7 +302,7 @@ static void jet_astp_print_node(jet_ast_printer* p, const jet_ast_node* n, size_
             jet_astp_print_by_nid(p, n->as.vdecl.init_value_nid, child_depth, true);
             break;
         case AST_FUNC_DECL:
-            jet_astp_print_by_nid(p, n->as.fdecl.ret_tdecl_nid, child_depth, false);
+            jet_astp_print_by_nid(p, n->as.fdecl.ret_tdecl_nid, child_depth, true);
             jet_astp_print_nid_da(p, "params", &n->as.fdecl.param_nid_da, child_depth);
             break;
         case AST_TYPE_DEF:    
@@ -313,7 +313,7 @@ static void jet_astp_print_node(jet_ast_printer* p, const jet_ast_node* n, size_
             jet_astp_print_by_nid(p, n->as.fdef.block_nid, child_depth, true);
             break;
         case AST_CALL:      
-            jet_astp_print_by_nid(p, n->as.call.callee_nid, child_depth, false);
+            jet_astp_print_by_nid(p, n->as.call.callee_nid, child_depth, true);
             jet_astp_print_nid_da(p, "args", &n->as.call.arg_nid_da, child_depth);
             break;
         case AST_BINOP:     
