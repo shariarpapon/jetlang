@@ -65,8 +65,6 @@ bool jet_parser_is_defined_type(jet_parser* p, const jet_token* tok, const jet_i
 {
     JET_ASSERT(p != NULL);
     JET_ASSERT(tok != NULL);
-    if(tok->type != TOK_IDENT) 
-        return false;
     const jet_ident ident = jet_parser_ident_from_tok(tok);
     const void* stored;
     if(jet_hs_contains(p->defined_type_names_hs, &ident, &stored))

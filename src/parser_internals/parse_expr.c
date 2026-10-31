@@ -60,7 +60,7 @@ jet_result jet_parser_parse_expr(jet_parser* p, size_t min_prec)
 static jet_result jet_parser_parse_primary_term(jet_parser* p)
 {
     JET_ASSERT(p != NULL);
-    jet_result res;
+    jet_result res = {.success = false};
     const jet_token* start_tok = jet_parser_peek_tok(p);
     switch(start_tok->type)
     {
