@@ -67,11 +67,12 @@ static jet_result jet_parser_parse_primary_term(jet_parser* p)
         default:
             break;
         case TOK_IDENT:
-        case TOK_KWD_INT:
-        case TOK_KWD_BOOL:
-        case TOK_KWD_FLOAT:
-        case TOK_KWD_STR:
-        case TOK_KWD_CHAR:
+        case TOK_LIT_INT:
+        case TOK_LIT_FLOAT:
+        case TOK_LIT_STR:
+        case TOK_LIT_CHAR:
+        case TOK_KWD_TRUE:
+        case TOK_KWD_FALSE:
             res = jet_parser_lit_parse(p);
             break;
         case TOK_LPAR:
