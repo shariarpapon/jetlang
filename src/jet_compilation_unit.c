@@ -1,6 +1,5 @@
 #include <jet_compilation_unit.h>
 #include <jet_io.h>
-#include <jet_config.h>
 #include <jet_token_print.h>
 #include <jet_ast_print.h>
 #include <jet_logger.h>
@@ -65,7 +64,7 @@ fail:
     if(tok_da_init) jet_da_dispose(&cu->tok_da);
     if(errors_init) jet_da_dispose(&cu->parser_err_da);
     if(ast_init) jet_ast_dispose(&cu->ast);
-    if(defined_type_names_hs_init) jet_da_dispose(&cu->defined_type_names_hs);
+    if(defined_type_names_hs_init) jet_hs_dispose_full(&cu->defined_type_names_hs);
     return false;
 }
 

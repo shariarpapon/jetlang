@@ -37,7 +37,6 @@ const jet_token* jet_parser_expect_tok_keep(jet_parser* p, jet_token_type tok_ty
 jet_token_type jet_parser_peekn_tok_type(jet_parser* p, size_t n);
 
 //### grammar
-bool jet_parser_is_sequence_match(jet_parser* p, jet_token_type seq[], size_t len);
 bool jet_parser_is_vdecl(jet_parser* p);
 bool jet_parser_is_func_head(jet_parser* p);
 bool jet_parser_is_prog_entry(jet_parser* p);
@@ -65,7 +64,7 @@ jet_da jet_parser_parse_call_args(jet_parser* p);
 //### parse expr
 jet_result jet_parser_parse_new_expr(jet_parser* p);
 jet_result jet_parser_parse_expr_stmt(jet_parser* p);
-jet_result jet_parser_parse_expr(jet_parser* p, size_t min_prec);
+jet_result jet_parser_parse_expr(jet_parser* p, size_t min_precedence);
 jet_da jet_parser_parse_expr_seq(jet_parser* p, jet_token_type delim, jet_token_type end);
 
 jet_result jet_parser_parse_fparam(jet_parser* p);
@@ -77,7 +76,7 @@ jet_result jet_parser_prog_parse(jet_parser* p);
 jet_result jet_parser_block_parse(jet_parser* p);
 jet_result jet_parser_lit_parse(jet_parser* p);
 jet_result jet_parser_unop_parse(jet_parser* p);
-jet_result jet_parser_call_parse(jet_parser* p);
+jet_result jet_parser_call_parse(jet_parser* p, node_id callee);
 
 //### ast
 jet_result jet_parser_register_node(jet_parser* p, const jet_ast_node* node);
@@ -97,7 +96,7 @@ bool jet_parser_sync_to(jet_parser* p, jet_token_type sync_point);
 jet_span jet_parser_token_range_span(const jet_token* start, const jet_token* end);
 const jet_ident jet_parser_ident_from_tok(const jet_token* tok);
 uint8_t jet_parser_get_op_prec(jet_token_type op_type);
-
+bool jet_parser_is_sequence_match(jet_parser* p, jet_token_type seq[], size_t len);
 
 
 

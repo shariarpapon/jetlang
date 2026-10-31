@@ -196,16 +196,16 @@ jet_result jet_parser_lit_parse(jet_parser* p)
         case TOK_IDENT:
         {
             tkind = JET_TYPE_CUSTOM;
-            const jet_ident ident = jet_parser_ident_from_token(tok);
-            const jet_ident* ptr = (const jet_ident*)malloc(sizeof(jet_ident));
+            const jet_ident ident = jet_parser_ident_from_tok(tok);
+            jet_ident* ptr = (jet_ident*)malloc(sizeof(jet_ident));
             *ptr = ident;
             value = ptr;
             break;
         }
     }
-    jet_parser_consume_tok(p);
-    jet_ast_node node = jet_astn_lit(tkind, value);
-    free(value);
+    const jet_token* lit_tok = jet_parser_consume_tok(p);
+    jet_ast_node node = jet_astn_lit(lit_tok->span, tkind, value);
+    free((void*)value);
     return jet_parser_register_node(p, (const jet_ast_node*)&node);
 }
 
@@ -280,7 +280,7 @@ jet_result jet_parser_vdecl_parse(jet_parser* p)
         if(!init_value_res.success)
         {
             const jet_token* fail_tok = jet_parser_peek_prev_tok(p);
-            jet_span err_span = jet_parser_token_range(asg_tok, fail_tok);
+            jet_span err_span = jet_parser_token_range_span(asg_tok, fail_tok);
             jet_error err = jet_err(JET_ERR_EXPECTED_EXPR, err_span);
             return jet_result_error(&err);
         }
@@ -408,7 +408,7 @@ jet_result jet_parser_parse_fparam(jet_parser* p)
         if(!init_value_res.success)
         {
             const jet_token* fail_tok = jet_parser_peek_prev_tok(p);
-            jet_span err_span = jet_parser_token_range(asg_tok, fail_tok);
+            jet_span err_span = jet_parser_token_range_span(asg_tok, fail_tok);
             jet_error err = jet_err(JET_ERR_EXPECTED_EXPR, err_span);
             return jet_result_error(&err);
         }
@@ -477,8 +477,8 @@ jet_result jet_parser_call_parse(jet_parser* p, node_id callee)
     const jet_token* start_tok = jet_parser_peek_tok(p);
     const jet_token* end_tok = start_tok;
     jet_span span = start_tok->span;
-    jet_ast_node call_node = {0};
-    jet_da args_da = {0};
+    jet_ast_node call_node;
+    jet_da args_da;
     jet_result call_res;
 
     while(jet_parser_peekn_tok_type(p, 0) == TOK_LPAR)
@@ -495,6 +495,33 @@ jet_result jet_parser_call_parse(jet_parser* p, node_id callee)
 parsing_fail:
         return jet_parser_result_parsing_failed(AST_CALL, jet_parser_peek_tok(p));
 }
+
+jet_result jet_parser_unop_parse(jet_parser* p)
+{
+    JET_ASSERT(p != NULL);
+
+    if(!jet_parser_is_unop_head(p))
+        goto parsing_fail;
+
+    const jet_token* start_tok = jet_parser_peek_tok(p);
+    uint8_t prec = jet_parser_get_op_prec(start_tok->type);
+    if(prec == PREC_NONE)
+        goto parsing_fail;
+
+    jet_parser_consume_tok(p);
+    jet_result expr_res = jet_parser_parse_expr(p, PREC_PREFIX);
+    if(!expr_res.success)
+        return expr_res;
+    const jet_token* end_tok = jet_parser_peek_prev_tok(p);
+    jet_span span = jet_parser_token_range_span(start_tok, end_tok);
+    jet_ast_node node = jet_astn_unop(span, expr_res.as.nid, start_tok->type);
+    return jet_parser_register_node(p, (const jet_ast_node*)&node);
+
+
+parsing_fail:
+    return jet_parser_result_parsing_failed(AST_UNOP, jet_parser_peek_tok(p));
+}
+
 
 
 

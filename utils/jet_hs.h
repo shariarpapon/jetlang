@@ -9,7 +9,21 @@
 #include <inttypes.h>
 #include <stddef.h>
 
-typedef struct jet_hs jet_hs;
+typedef struct jet_hs_slot
+{
+    void* key;
+    struct jet_hs_slot* next;
+} jet_hs_slot;
+
+typedef struct jet_hs
+{
+    jet_hs_slot* slots;
+    size_t capacity;
+    size_t count;
+
+    uint64_t (*hash) (const void*);
+    bool (*equals) (const void*, const void*);
+} jet_hs;
 
 bool jet_hs_init(
         jet_hs* hs,
@@ -25,28 +39,12 @@ bool jet_hs_contains(jet_hs* hs, const void* key, const void** out_key);
 const void* jet_hs_add(jet_hs* hs, const void* key, size_t key_size);
 bool jet_hs_remove(jet_hs* hs, const void* key);
 
-#ifdef JET_HT_IMPL
+#ifdef JET_HS_IMPL
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-
-typedef struct jet_hs_slot
-{
-    void* key;
-    struct jet_hs_slot* next;
-} jet_hs_slot;
-
-struct jet_hs
-{
-    jet_hs_slot* slots;
-    size_t capacity;
-    size_t count;
-
-    uint64_t (*hash) (const void*);
-    bool (*equals) (const void*, const void*);
-};
 
 static bool jet_hs_invalid(jet_hs* hs);
 static bool jet_hs_slot_fill(jet_hs_slot* slot, const void* key, size_t key_size);

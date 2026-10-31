@@ -2,6 +2,7 @@
 
 #include <jet_parser_internals.h>
 #include <jet_logger.h>
+#include <jet_hs.h>
 
 void jet_parser_define_primitive_types(jet_parser* p)
 {

@@ -63,27 +63,27 @@ typedef struct jet_ast_node_block
 
 typedef struct jet_ast_node_vdecl
 {    
-  const jet_ident ref_name;
+  jet_ident ref_name;
   node_id tdecl_nid;
   node_id init_value_nid;
 } jet_ast_node_vdecl;
 
 typedef struct jet_ast_node_fdecl
 {
-    const jet_ident ref_name;
+    jet_ident ref_name;
     node_id ret_tdecl_nid;
     jet_da param_nid_da; 
 } jet_ast_node_fdecl;
 
 typedef struct jet_ast_node_tdecl 
 {
-  const jet_ident type_name;
+  jet_ident type_name;
   jet_type_kind tkind;
 } jet_ast_node_tdecl;
 
 typedef struct jet_ast_node_tdef
 {
-    const jet_ident type_name;
+    jet_ident type_name;
     node_id block_nid;
 } jet_ast_node_tdef;
 

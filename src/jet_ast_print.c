@@ -214,8 +214,7 @@ static const char* jet_astp_resolve_node_str(jet_ast_printer* p, const jet_ast_n
             switch(n->as.lit.tkind)
             {
                 default: 
-                    JET_LOG_WARNING("printing logic for type kind <%d> unknown." 
-                            (int)n->as.lit.tkind);
+                    JET_LOG_WARNING("printing logic for type kind <%d> unknown.", (int)(n->as.lit.tkind));
                     break;
                 case JET_TYPE_BOOL:
                     jet_sb_append_cstr(&p->sb, jet_conv_btos(n->as.lit.as.b));
@@ -234,7 +233,7 @@ static const char* jet_astp_resolve_node_str(jet_ast_printer* p, const jet_ast_n
                     break;
                 case JET_TYPE_CUSTOM:
                     jet_astp_sb_append_ident(&p->sb, n->as.lit.as.ident);
-                    break
+                    break;
             }
             break;
         }
@@ -303,7 +302,7 @@ static void jet_astp_print_node(jet_ast_printer* p, const jet_ast_node* n, size_
             jet_astp_print_by_nid(p, n->as.vdecl.init_value_nid, child_depth, true);
             break;
         case AST_FUNC_DECL:
-            jet_astp_print_by_nid(p, n->as.fdecl.ret_tdecl_nid, child_depth);
+            jet_astp_print_by_nid(p, n->as.fdecl.ret_tdecl_nid, child_depth, false);
             jet_astp_print_nid_da(p, "params", &n->as.fdecl.param_nid_da, child_depth);
             break;
         case AST_TYPE_DEF:    

@@ -8,20 +8,20 @@ static jet_ast_node jet_astn_base(jet_ast_node_type type, jet_span span);
 
 static jet_ast_node jet_astn_base(jet_ast_node_type type, jet_span span)
 {
-    return (jet_ast_node){.type = type, .span = span};
+    return (jet_ast_node){.node_type = type, .span = span};
 }
 
 jet_ast_node jet_astn_prog(jet_span span, node_id block_nid)
 {
    jet_ast_node node = jet_astn_base(AST_PROG, span);
-   node.as.prog = {.block_nid = block_nid};
+   node.as.prog = (jet_ast_node_prog){.block_nid = block_nid};
    return node;
 }
 
 jet_ast_node jet_astn_mem(jet_span span, size_t alloc_size)
 {
    jet_ast_node node = jet_astn_base(AST_MEM, span);
-   node.as.mem = {.alloc_size = alloc_size };
+   node.as.mem = (jet_ast_node_mem){.alloc_size = alloc_size };
    return node;
 }
 
@@ -29,21 +29,27 @@ jet_ast_node jet_astn_lit(jet_span span, jet_type_kind tkind, const void* value)
 { 
     JET_ASSERT(value != NULL);
     jet_ast_node node = jet_astn_base(AST_LIT, span);
-    jet_ast_node_lit lit = {.tkind = tkind}; 
+    jet_ast_node_lit lit = (jet_ast_node_lit){.tkind = tkind}; 
     switch(tkind)
     {
         case JET_TYPE_BOOL: 
-            lit.as.b = *((const bool*)value); break;
+            lit.as.b = *((const bool*)value); 
+            break;
         case JET_TYPE_INT: 
-            lit.as.i = *((const int64_t*)value); break;
+            lit.as.i = *((const int64_t*)value); 
+            break;
         case JET_TYPE_FLOAT: 
-            lit.as.f = *((const double*)value); break;
+            lit.as.f = *((const double*)value); 
+            break;
         case JET_TYPE_CHAR: 
-            lit.as.c = *((const char*)value); break;
+            lit.as.c = *((const char*)value); 
+            break;
         case JET_TYPE_STR: 
-            lit.as.s = *((const char**)value); break;
+            lit.as.s = *((char**)value); 
+            break;
         case JET_TYPE_CUSTOM:
-            lit.as.ident = *((const jet_ident*)value) break;
+            lit.as.ident = *((const jet_ident*)value);
+            break;
     }
     node.as.lit = lit;
     return node;
@@ -61,8 +67,7 @@ jet_ast_node jet_astn_block(jet_span span, const jet_da* stmt_nid_da)
 jet_ast_node jet_astn_vdecl(jet_span span, const jet_ident ref_name, node_id tdecl_nid, node_id init_value_nid)
 {
     jet_ast_node node = jet_astn_base(AST_VAR_DECL, span);
-    node.as.vdecl = 
-    {
+    node.as.vdecl = (jet_ast_node_vdecl){
         .tdecl_nid = tdecl_nid, 
         .ref_name = ref_name, 
         .init_value_nid = init_value_nid 
@@ -72,10 +77,9 @@ jet_ast_node jet_astn_vdecl(jet_span span, const jet_ident ref_name, node_id tde
 
 jet_ast_node jet_astn_tdecl(jet_span span, const jet_ident type_name, jet_type_kind tkind)
 {
-    JET_ASSERT(tname != NULL);
     jet_ast_node node = jet_astn_base(AST_TYPE_DECL, span);
     node.as.tdecl = 
-    {
+    (jet_ast_node_tdecl){
         .tkind = tkind,
         .type_name = type_name,
     };
@@ -84,9 +88,8 @@ jet_ast_node jet_astn_tdecl(jet_span span, const jet_ident type_name, jet_type_k
 
 jet_ast_node jet_astn_tdef(jet_span span, const jet_ident type_name, node_id block_nid)
 {
-    JET_ASSERT(name != NULL);
     jet_ast_node node = jet_astn_base(AST_TYPE_DEF, span);
-    node.as.tdef = {.type_name = type_name, .block_nid = block_nid};
+    node.as.tdef = (jet_ast_node_tdef){.type_name = type_name, .block_nid = block_nid};
     return node;
 }
 
@@ -102,7 +105,7 @@ jet_ast_node jet_astn_fdecl(jet_span span, const jet_ident ref_name, node_id ret
 jet_ast_node jet_astn_fdef(jet_span span, node_id fdecl_nid, node_id block_nid)
 {
     jet_ast_node node = jet_astn_base(AST_FUNC_DEF, span);
-    node.as.fdef = {.fdecl_nid = fdecl_nid, .block_nid = block_nid };
+    node.as.fdef = (jet_ast_node_fdef){.fdecl_nid = fdecl_nid, .block_nid = block_nid };
     return node;
 }
 
@@ -118,14 +121,14 @@ jet_ast_node jet_astn_call(jet_span span, node_id callee_nid, const jet_da* arg_
 jet_ast_node jet_astn_binop(jet_span span, node_id lhs_nid, node_id rhs_nid, jet_token_type op_type)
 {
     jet_ast_node node = jet_astn_base(AST_BINOP, span);
-    node.as.binop = {.lhs_nid = lhs_nid, .rhs_nid = rhs_nid, .op_type = op_type };
+    node.as.binop = (jet_ast_node_binop){.lhs_nid = lhs_nid, .rhs_nid = rhs_nid, .op_type = op_type };
     return node;
 }
 
 jet_ast_node jet_astn_unop(jet_span span, node_id expr_nid, jet_token_type op_type)
 {
     jet_ast_node node = jet_astn_base(AST_UNOP, span);
-    node.as.unop = {.expr_nid = expr_nid, .op_type = op_type };
+    node.as.unop = (jet_ast_node_unop){.expr_nid = expr_nid, .op_type = op_type };
     return node;
 }
 
