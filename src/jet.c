@@ -6,45 +6,58 @@
 #include <jet_logger.h>
 #include <jet_ast_print.h>
 #include <jet_token_print.h>
+#include <jet_cli_flags.h>
 
-#define JET_FLAG_PRINT_TOKENS ("t")
-#define JET_FLAG_PRINT_AST ("a")
-#define JET_FLAG_PRINT_PARSER_ERRORS ("pse")
+#define JET_FILEPATH_SIZE (512)
 
-static int arg_count = 0;
-static char** args = NULL;
+//PROGRAM
+#define JET_FLAG_FILE ("f")
 
-static const char* jet_get_arg_at(size_t index);
+//DEBUG
+#define JET_FLAG_PRINT ("p")
+#define JET_FLAG_TOKENS ("t")
+#define JET_FLAG_AST ("a")
+#define JET_FLAG_PARSER_ERRORS ("pe")
+
 static const char* jet_get_filepath();
-
-static void jet_init_args(int argc, char** argv);
 static bool jet_compile(const char* filepath, jet_compilation_unit* cu);
-static bool jet_has_flag(const char* flag);
 
 int main(int argc, char** argv)
-{   
-    printf("\n");
-    jet_init_args(argc, argv);
+{
+    argv++;
+    argc--;
+
+    jet_flag_registry fr;
+    JET_ASSERT(jet_flagreg_init(&fr, argv, argc));
+
+    const jet_flag_arg* file_arg = jet_flagreg_get_argi(&fr, JET_FLAG_FILE, 0);
+    if(file_arg == NULL)
+    {
+        JET_LOG_FATAL("a valid file must be provided as argument (e.g. -f<filepath>)");
+        return 1;
+    }
     
-    const char* filepath = jet_get_filepath();
+    char filepath[JET_FILEPATH_SIZE];
+    strncpy(filepath, file_arg->name.str, file_arg->name.len);
     JET_ASSERT(filepath != NULL);
 
+    printf("\n");
     JET_LOG_INFO("all internal modules built, initiating jet compiler...");
-
     jet_compilation_unit cu;
     if(jet_compile(filepath, &cu))
         JET_LOG_INFO("input compiled successfully.");
     else 
         JET_LOG_ERROR("failed to compile input.");
-    
     printf("\n");
 
-    if(jet_has_flag(JET_FLAG_PRINT_TOKENS))
-        jet_token_tprint_da((const jet_da*)&cu.tok_da);
-    if(jet_has_flag(JET_FLAG_PRINT_AST))
-        jet_ast_print((const jet_ast*)&cu.ast);
+
+    if(jet_flagreg_has_arg(&fr, JET_FLAG_PRINT, JET_FLAG_AST))
+        jet_ast_print(&cu.ast);
+    if(jet_flagreg_has_arg(&fr, JET_FLAG_PRINT, JET_FLAG_TOKENS))
+        jet_token_table_print_da(&cu.tok_da);
 
     jet_cu_dispose(&cu);
+    jet_flagreg_dispose(&fr);
 }
 
 static bool jet_compile(const char* filepath, jet_compilation_unit* cu)
@@ -54,40 +67,3 @@ static bool jet_compile(const char* filepath, jet_compilation_unit* cu)
         return false;
     return jet_cu_run(cu);
 }
-
-static void jet_init_args(int argc, char** argv)
-{
-    JET_ASSERT(argv != NULL);
-    JET_ASSERT(*argv != NULL);
-    arg_count = argc;
-    args = argv; 
-}
-
-static const char* jet_get_filepath()
-{ 
-    const char* filepath = jet_get_arg_at(1);
-    JET_ASSERTM(filepath != NULL, "no valid filepath arg.");
-    return filepath;
-}
-
-static const char* jet_get_arg_at(size_t index)
-{
-    if(index >= arg_count)
-    {
-        JET_LOG_FATAL("cannot get arg, index = %zu is out of bounds.", index); 
-    }
-    char** temp = args;
-    for(size_t i = 0; i < index; i++)
-        temp++;
-    return (const char*)*temp;
-}
-
-static bool jet_has_flag(const char* flag)
-{
-    if(arg_count < 3) return false;
-    for(size_t i = 2; i < arg_count; i++)
-        if(strcmp(jet_get_arg_at(i), flag) == 0)
-            return true;
-    return false;
-}
-

@@ -9,7 +9,7 @@
 #define TOK_TB_HEADER_FMT "%-7s %-17s %-10s %-10s %s\n"
 #define TOK_TB_ENTRY_FMT "%-7zu %-17s %-10" PRIu32 " %-10" PRIu32 " %.*s\n" 
 
-void jet_token_tprint_da(const jet_da* tokens)
+void jet_token_table_print_da(const jet_da* tokens)
 {
     if(!tokens)
     {
