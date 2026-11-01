@@ -298,7 +298,7 @@ static void jet_astp_print_node(jet_ast_printer* p, const jet_ast_node* n, size_
             jet_astp_print_nid_da(p, "stmts", &n->as.block.stmt_nid_da, child_depth);
             break;
         case AST_VAR_DECL:  
-            jet_astp_print_by_nid(p, n->as.vdecl.tdecl_nid, child_depth, false);
+            jet_astp_print_by_nid(p, n->as.vdecl.tdecl_nid, child_depth, n->as.vdecl.init_value_nid == INVALID_NID);
             jet_astp_print_by_nid(p, n->as.vdecl.init_value_nid, child_depth, true);
             break;
         case AST_FUNC_DECL:

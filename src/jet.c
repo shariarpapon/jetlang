@@ -7,14 +7,16 @@
 #include <jet_ast_print.h>
 #include <jet_token_print.h>
 
-#define JET_FLAG_PRINT_TOKENS ("p-tok")
-#define JET_FLAG_PRINT_AST ("p-ast")
+#define JET_FLAG_PRINT_TOKENS ("t")
+#define JET_FLAG_PRINT_AST ("a")
+#define JET_FLAG_PRINT_PARSER_ERRORS ("pse")
 
 static int arg_count = 0;
 static char** args = NULL;
 
 static const char* jet_get_arg_at(size_t index);
 static const char* jet_get_filepath();
+
 static void jet_init_args(int argc, char** argv);
 static bool jet_compile(const char* filepath, jet_compilation_unit* cu);
 static bool jet_has_flag(const char* flag);
@@ -37,9 +39,9 @@ int main(int argc, char** argv)
     
     printf("\n");
 
-    if(jet_has_flag(JET_FLAG_PRINT_TOKENS) == true)
+    if(jet_has_flag(JET_FLAG_PRINT_TOKENS))
         jet_token_tprint_da((const jet_da*)&cu.tok_da);
-    if(jet_has_flag(JET_FLAG_PRINT_AST) == true)
+    if(jet_has_flag(JET_FLAG_PRINT_AST))
         jet_ast_print((const jet_ast*)&cu.ast);
 
     jet_cu_dispose(&cu);
@@ -78,7 +80,6 @@ static const char* jet_get_arg_at(size_t index)
     for(size_t i = 0; i < index; i++)
         temp++;
     return (const char*)*temp;
-
 }
 
 static bool jet_has_flag(const char* flag)

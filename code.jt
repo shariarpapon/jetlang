@@ -1,8 +1,19 @@
+type Foo 
+{
+    bool bar;
+}
+
 str m = "hello world";
 
 int mutliply(int x, int y)
 {
     int product = x * y;
-    print(m);
     return product;
+    print(m);
+}
+
+
+prog
+{
+    Foo foo = multiply(2, 3);
 }
