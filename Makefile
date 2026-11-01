@@ -20,7 +20,7 @@ C_FLAGS = -std=c11
 
 C_COMPILE = $(CC) $(C_FLAGS) $(C_SRC) $(C_INCLUDES) -o $(C_BIN)  
 
-JET_FLAGS = -f,code.jt
+JET_FLAGS = -f,code.jt -p,pe
 JET_EXEC = $(RUN) $(JET_FLAGS)
 
 .PHONY: all rebuild rb clean 

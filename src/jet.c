@@ -6,6 +6,7 @@
 #include <jet_logger.h>
 #include <jet_ast_print.h>
 #include <jet_token_print.h>
+#include <jet_error_print.h>
 #include <jet_cli_flags.h>
 
 #define JET_FILEPATH_SIZE (512)
@@ -50,7 +51,8 @@ int main(int argc, char** argv)
         JET_LOG_ERROR("failed to compile input.");
     printf("\n");
 
-
+    if(jet_flagreg_has_arg(&fr, JET_FLAG_PRINT, JET_FLAG_PARSER_ERRORS))
+        jet_error_print_da(&cu.parser_err_da);
     if(jet_flagreg_has_arg(&fr, JET_FLAG_PRINT, JET_FLAG_AST))
         jet_ast_print(&cu.ast);
     if(jet_flagreg_has_arg(&fr, JET_FLAG_PRINT, JET_FLAG_TOKENS))
