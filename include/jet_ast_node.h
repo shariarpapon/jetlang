@@ -24,6 +24,8 @@ typedef enum jet_ast_node_type
   AST_CALL,
   AST_BINOP,
   AST_UNOP,
+  AST_IF,
+  AST_ELSE
 } jet_ast_node_type;
 
 #define INVALID_NID (0)
@@ -36,6 +38,14 @@ typedef struct jet_ast_node_prog
 {
     node_id block_nid;
 } jet_ast_node_prog;
+
+
+typedef struct jet_ast_node_if
+{
+    node_id condition_expr;
+    node_id body_block;
+    node_id elif;
+} jet_ast_node_if;
 
 typedef struct jet_ast_node_mem
 {
