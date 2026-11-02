@@ -65,6 +65,8 @@ static jet_result jet_parser_parse_primary_term(jet_parser* p)
     switch(start_tok->type)
     {
         default:
+            jet_span err_span = jet_parser_token_range_span(start_tok, start_tok);
+            res.as.error = jet_err(JET_ERR_PRIMARY_EXPR_PARSING_FAILED, err_span);
             break;
         case TOK_IDENT:
         case TOK_LIT_INT:

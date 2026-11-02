@@ -22,6 +22,8 @@ const char* jet_error_kind_str(jet_error_kind kind)
              return "JET_ERR_PARSING_FAILED";
         case JET_ERR_EXPECTED_EXPR:
              return "JET_ERR_EXPECTED_EXPR";
+        case JET_ERR_PRIMARY_EXPR_PARSING_FAILED:
+             return "JET_ERR_PRIMARY_EXPR_PARSING_FAILED";
     }
 
 }
