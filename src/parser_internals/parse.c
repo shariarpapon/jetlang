@@ -321,48 +321,11 @@ jet_result jet_parser_func_parse(jet_parser* p)
 
     jet_parser_expect_tok(p, TOK_LPAR); 
 
-    jet_da param_nid_da; 
-    bool param_nid_da_init = jet_da_init(&param_nid_da, 2, sizeof(node_id));
-    JET_ASSERT(param_nid_da_init == true);
-
-    jet_result param_res = {.success = false};
-    while(jet_parser_peekn_tok_type(p, 0) != TOK_RPAR && 
-          jet_parser_peekn_tok_type(p, 0) != TOK_EOF &&
-          jet_parser_peekn_tok_type(p, 0) != TOK_SEMI)
-    {
-        param_res = jet_parser_parse_fparam(p);
-        if(!param_res.success)
-        {
-            if(!jet_parser_sync_fparam(p))
-                goto fail; 
-            continue;
-        }
-        
-        JET_ASSERT(jet_da_append(&param_nid_da, (const void*)&param_res.as.nid));
-    
-        const jet_token* cur_tok = jet_parser_peek_tok(p);
-        if(cur_tok->type == TOK_COMMA)
-        {
-            jet_parser_consume_tok(p);
-            continue;
-        }
-    }
+    jet_da param_nid_da = jet_parser_parse_by_delim(p, jet_parser_parse_fparam, TOK_COMMA, TOK_RPAR);
+    bool param_nid_da_init = true;
 
     const jet_token* fparam_end_tok = jet_parser_peek_tok(p);
-    bool is_decl_only = false;
-    switch(fparam_end_tok->type)
-    {
-        case TOK_SEMI:
-        case TOK_EOF:
-            is_decl_only = true;
-            jet_parser_consume_tok(p);
-            break;
-        case TOK_RPAR:
-            jet_parser_consume_tok(p);
-            break;
-        default: 
-            goto fail;
-    }
+    bool is_decl_only = fparam_end_tok->type == TOK_SEMI;
 
     jet_span fdecl_span = jet_parser_token_range_span(start_tok, fparam_end_tok);
     jet_ast_node fdecl_node = jet_astn_fdecl(fdecl_span, ref_name, ret_tdecl_res.as.nid, &param_nid_da);

@@ -1,11 +1,16 @@
+int function_x(bool x, str y)
+{
+    if(to_str(x) == y)
+    {
+        return 1;
+    }
+    else
+    {
+        return 2;
+    }
+}
+
 prog
 {
-    while(x != y)
-    {
-        x = x + y/x;
-        if(x == y/2)
-        {
-            break;
-        }
-    }
+    function_x(1,2);
 }
