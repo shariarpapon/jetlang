@@ -3,6 +3,8 @@ type Foo
     bool bar;
 }
 
+prog{}
+
 str m = "hello world";
 
 int mutliply(int x, int y)
