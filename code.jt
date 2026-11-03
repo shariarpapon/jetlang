@@ -1,19 +1,4 @@
-type Foo 
-{
-    bool bar;
-}
-
-str m = "hello world";
-
-int mutliply(int x, int y)
-{
-    int product = x * y;
-    return product;
-    print(m);
-}
-
-
 prog
 {
-    Foo foo = multiply(2, 3);
+    if(true){}
 }

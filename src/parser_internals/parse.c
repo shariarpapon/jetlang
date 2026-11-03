@@ -52,6 +52,10 @@ jet_result jet_parser_parse_scoped_stmt(jet_parser* p)
         jet_error err = jet_err(JET_ERR_INVALID_TOKEN, start_tok->span);
         return jet_result_error(&err);
     }
+    else if(jet_parser_is_if_head(p))
+        return jet_parser_if_parse(p);
+    else if(jet_parser_is_while_head(p))
+        return jet_parser_while_parse(p);
     else if(jet_parser_is_vdecl_head(p))
         return jet_parser_vdecl_parse(p); 
     else 

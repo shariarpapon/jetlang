@@ -45,6 +45,7 @@ bool jet_parser_is_tdef(jet_parser* p);
 bool jet_parser_is_unop_head(jet_parser* p);
 bool jet_parser_is_call_head(jet_parser* p);
 bool jet_parser_is_if_head(jet_parser* p);
+bool jet_parser_is_elseif_head(jet_parser* p);
 bool jet_parser_is_else_head(jet_parser* p);
 bool jet_parser_is_while_head(jet_parser* p);
 

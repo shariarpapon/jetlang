@@ -20,15 +20,25 @@ jet_result jet_parser_if_parse(jet_parser* p)
         return block_res;
 
     jet_result elif_res = {.success = false};
-    if(jet_parser_is_else_head(p))
-        elif_res = jet_parser_else_parse(p);
-    else if(jet_parser_is_if_head(p))
+    bool has_alt_branch = true;
+    if(jet_parser_is_elseif_head(p))
+    {
+        jet_parser_expect_tok(p, TOK_KWD_ELSE);
         elif_res = jet_parser_if_parse(p);
+    }
+    else if(jet_parser_is_else_head(p))
+    {
+        elif_res = jet_parser_else_parse(p);
+    }
+    else has_alt_branch = false;
 
     node_id elif_nid = INVALID_NID;
-    if(elif_res.success)
-        elif_nid = elif_res.as.nid;
-    else jet_parser_push_err(p, (const jet_error*)&elif_res.as.error);
+    if(has_alt_branch)
+    {
+        if(!elif_res.success)
+            jet_parser_push_err(p, (const jet_error*)&elif_res.as.error);
+        else elif_nid = elif_res.as.nid;
+    }
 
     const jet_token* end_tok = jet_parser_peek_prev_tok(p);
     jet_span span = jet_parser_token_range_span(start_tok, end_tok);

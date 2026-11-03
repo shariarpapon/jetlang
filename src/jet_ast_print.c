@@ -192,6 +192,9 @@ static void jet_astp_print_node(jet_ast_printer* p, const jet_ast_node* n, size_
             jet_astp_print_by_nid(p, n->as._if.block_nid, child_depth, n->as._if.elif_nid == INVALID_NID);
             jet_astp_print_by_nid(p, n->as._if.elif_nid, child_depth, true);
             break;
+        case AST_ELSE:
+            jet_astp_print_by_nid(p, n->as._else.block_nid, child_depth, true);
+            break;
         case AST_WHILE:
             jet_astp_print_by_nid(p, n->as._while.cond_expr_nid, child_depth, false);
             jet_astp_print_by_nid(p, n->as._while.block_nid, child_depth, true);
