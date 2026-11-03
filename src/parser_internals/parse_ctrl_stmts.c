@@ -1,6 +1,30 @@
 #include <jet_parser_internals.h>
 #include <jet_logger.h>
 
+jet_result jet_parser_return_parse(jet_parser* p)
+{
+    JET_ASSERT(p != NULL);
+    if(!jet_parser_is_return_head(p))
+        return jet_parser_result_parsing_failed(AST_RETURN, jet_parser_peek_tok(p));
+    const jet_token* start_tok = jet_parser_expect_tok(p, TOK_KWD_RETURN);
+
+    node_id value_expr_nid = INVALID_NID;
+    if(jet_parser_peekn_tok_type(p,0) != TOK_SEMI)
+    {
+        jet_result value_expr_res = jet_parser_parse_new_expr(p);
+        if(!value_expr_res.success)
+            return value_expr_res;
+        value_expr_nid = value_expr_res.as.nid;
+    }
+    const jet_token* end_tok = jet_parser_expect_tok(p, TOK_SEMI);
+    if(!end_tok) 
+        end_tok = jet_parser_peek_prev_tok(p);
+    jet_span span = jet_parser_token_range_span(start_tok, end_tok);
+    jet_ast_node node = jet_astn_return(span, value_expr_nid);
+    return jet_parser_register_node(p, (const jet_ast_node*)&node);
+}
+
+
 jet_result jet_parser_if_parse(jet_parser* p)
 {
     JET_ASSERT(p != NULL);

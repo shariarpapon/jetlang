@@ -48,6 +48,7 @@ bool jet_parser_is_if_head(jet_parser* p);
 bool jet_parser_is_elseif_head(jet_parser* p);
 bool jet_parser_is_else_head(jet_parser* p);
 bool jet_parser_is_while_head(jet_parser* p);
+bool jet_parser_is_return_head(jet_parser* p);
 
 //### types
 const jet_ident* jet_parser_register_type_name(jet_parser* p, jet_ident type_name);
@@ -85,6 +86,7 @@ jet_result jet_parser_call_parse(jet_parser* p, node_id callee);
 jet_result jet_parser_if_parse(jet_parser* p);
 jet_result jet_parser_else_parse(jet_parser* p);
 jet_result jet_parser_while_parse(jet_parser* p);
+jet_result jet_parser_return_parse(jet_parser* p);
 
 //### ast
 jet_result jet_parser_register_node(jet_parser* p, const jet_ast_node* node);

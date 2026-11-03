@@ -187,6 +187,9 @@ static void jet_astp_print_node(jet_ast_printer* p, const jet_ast_node* n, size_
     {
         default: 
             break;
+        case AST_RETURN:
+            jet_astp_print_by_nid(p, n->as._return.value_expr_nid, child_depth, true);
+            break;
         case AST_IF:
             jet_astp_print_by_nid(p, n->as._if.cond_expr_nid, child_depth, false);
             jet_astp_print_by_nid(p, n->as._if.block_nid, child_depth, n->as._if.elif_nid == INVALID_NID);

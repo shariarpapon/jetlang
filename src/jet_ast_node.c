@@ -66,6 +66,7 @@ const char* jet_ast_node_type_str(jet_ast_node_type node_type)
         case AST_IF: return "AST_IF";
         case AST_ELSE: return "AST_ELSE";
         case AST_WHILE: return "AST_WHILE";
+        case AST_RETURN: return "AST_RETURN";
     }    
 }
 
@@ -220,4 +221,10 @@ jet_ast_node jet_astn_while(jet_span span, node_id cond_expr_nid, node_id block_
     return node;
 }
 
+jet_ast_node jet_astn_return(jet_span span, node_id value_expr_nid)
+{
+    jet_ast_node node = jet_astn_base(AST_RETURN, span);
+    node.as._return = (jet_ast_node_return){.value_expr_nid = value_expr_nid}; 
+    return node;
+}
 

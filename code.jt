@@ -1,4 +1,5 @@
 prog
 {
-    if(true){}
+    return hello;
+    return;
 }
