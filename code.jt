@@ -1,5 +1,11 @@
 prog
 {
-    return hello;
-    break;
+    while(x != y)
+    {
+        x = x + y/x;
+        if(x == y/2)
+        {
+            break;
+        }
+    }
 }
