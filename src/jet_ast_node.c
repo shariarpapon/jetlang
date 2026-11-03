@@ -11,6 +11,64 @@ static jet_ast_node jet_astn_base(jet_ast_node_type type, jet_span span)
     return (jet_ast_node){.node_type = type, .span = span};
 }
 
+void jet_ast_node_dispose(jet_ast_node* node)
+{
+    //dispose according to type
+    if(!node) 
+        return;
+
+    switch(node->node_type)
+    {
+        default: 
+            return;
+        case AST_LIT:
+        {
+            if(node->as.lit.tkind == JET_TYPE_STR && node->as.lit.as.s)
+                free((void*)node->as.lit.as.s);
+            return;
+        }
+        case AST_BLOCK:
+        {
+            jet_da_dispose(&node->as.block.stmt_nid_da);
+            return;
+        }
+        case AST_FUNC_DECL:
+        {
+            jet_da_dispose(&node->as.fdecl.param_nid_da);
+            return;
+        }
+        case AST_CALL:
+        {
+            jet_da_dispose(&node->as.call.arg_nid_da);
+            return;
+        }
+    }
+}
+
+const char* jet_ast_node_type_str(jet_ast_node_type node_type)
+{
+    switch(node_type)
+    {
+        default: return "## ast_node_type_no_str_rep ##";
+        case AST_UNKNOWN: return "AST_UNKNOWN";
+        case AST_PROG: return "AST_PROG";
+        case AST_MEM: return "AST_MEM";
+        case AST_LIT: return "AST_LIT";
+        case AST_BLOCK: return "AST_BLOCK";
+        case AST_VAR_DECL: return "AST_VAR_DECL";
+        case AST_TYPE_DECL: return "AST_TYPE_DECL";
+        case AST_TYPE_DEF: return "AST_TYPE_DEF";
+        case AST_FUNC_DECL: return "AST_FUNC_DECL";
+        case AST_FUNC_DEF: return "AST_FUNC_DEF";
+        case AST_CALL: return "AST_CALL";
+        case AST_BINOP: return "AST_BINOP";
+        case AST_UNOP: return "AST_UNOP";
+        case AST_IF: return "AST_IF";
+        case AST_ELSE: return "AST_ELSE";
+        case AST_WHILE: return "AST_WHILE";
+    }    
+}
+
 jet_ast_node jet_astn_prog(jet_span span, node_id block_nid)
 {
    jet_ast_node node = jet_astn_base(AST_PROG, span);
@@ -132,58 +190,34 @@ jet_ast_node jet_astn_unop(jet_span span, node_id expr_nid, jet_token_type op_ty
     return node;
 }
 
-void jet_ast_node_dispose(jet_ast_node* node)
+jet_ast_node jet_astn_if(jet_span span, node_id cond_expr_nid, node_id block_nid, node_id elif_nid)
 {
-    //dispose according to type
-    if(!node) 
-        return;
-
-    switch(node->node_type)
+    jet_ast_node node = jet_astn_base(AST_IF, span);
+    node.as._if = (jet_ast_node_if)
     {
-        default: 
-            return;
-        case AST_LIT:
-        {
-            if(node->as.lit.tkind == JET_TYPE_STR && 
-               node->as.lit.as.s)
-                    free((void*)node->as.lit.as.s);
-            return;
-        }
-        case AST_BLOCK:
-        {
-            jet_da_dispose(&node->as.block.stmt_nid_da);
-            return;
-        }
-        case AST_FUNC_DECL:
-        {
-            jet_da_dispose(&node->as.fdecl.param_nid_da);
-            return;
-        }
-        case AST_CALL:
-        {
-            jet_da_dispose(&node->as.call.arg_nid_da);
-            return;
-        }
-    }
+        .cond_expr_nid = cond_expr_nid,
+        .block_nid = block_nid,
+        .elif_nid = elif_nid
+    };
+    return node;
 }
 
-const char* jet_ast_node_type_str(jet_ast_node_type node_type)
+jet_ast_node jet_astn_else(jet_span span, node_id block_nid)
 {
-    switch(node_type)
-    {
-        default: return "## ast_node_type_undefined ##";
-        case AST_UNKNOWN: return "AST_UNKNOWN";
-        case AST_PROG: return "AST_PROG";
-        case AST_MEM: return "AST_MEM";
-        case AST_LIT: return "AST_LIT";
-        case AST_BLOCK: return "AST_BLOCK";
-        case AST_VAR_DECL: return "AST_VAR_DECL";
-        case AST_TYPE_DECL: return "AST_TYPE_DECL";
-        case AST_TYPE_DEF: return "AST_TYPE_DEF";
-        case AST_FUNC_DECL: return "AST_FUNC_DECL";
-        case AST_FUNC_DEF: return "AST_FUNC_DEF";
-        case AST_CALL: return "AST_CALL";
-        case AST_BINOP: return "AST_BINOP";
-        case AST_UNOP: return "AST_UNOP";
-    }    
+    jet_ast_node node = jet_astn_base(AST_ELSE, span);
+    node.as._else = (jet_ast_node_else){ .block_nid = block_nid };
+    return node;
 }
+
+jet_ast_node jet_astn_while(jet_span span, node_id cond_expr_nid, node_id block_nid)
+{
+    jet_ast_node node = jet_astn_base(AST_WHILE, span);
+    node.as._while = (jet_ast_node_while)
+    {
+        .cond_expr_nid = cond_expr_nid,
+        .block_nid = block_nid
+    };
+    return node;
+}
+
+

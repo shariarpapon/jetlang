@@ -25,7 +25,8 @@ typedef enum jet_ast_node_type
   AST_BINOP,
   AST_UNOP,
   AST_IF,
-  AST_ELSE
+  AST_ELSE,
+  AST_WHILE,
 } jet_ast_node_type;
 
 #define INVALID_NID (0)
@@ -38,14 +39,6 @@ typedef struct jet_ast_node_prog
 {
     node_id block_nid;
 } jet_ast_node_prog;
-
-
-typedef struct jet_ast_node_if
-{
-    node_id condition_expr;
-    node_id body_block;
-    node_id elif;
-} jet_ast_node_if;
 
 typedef struct jet_ast_node_mem
 {
@@ -122,6 +115,24 @@ typedef struct jet_ast_node_unop
     jet_token_type op_type;
 } jet_ast_node_unop;
 
+typedef struct jet_ast_node_if
+{
+    node_id cond_expr_nid;
+    node_id block_nid;
+    node_id elif_nid;
+} jet_ast_node_if;
+
+typedef struct jet_ast_node_else
+{
+    node_id block_nid;
+} jet_ast_node_else;
+
+typedef struct jet_ast_node_while
+{
+    node_id cond_expr_nid;
+    node_id block_nid;
+} jet_ast_node_while;
+
 // NODE BASE STRUCT
 struct jet_ast_node
 {
@@ -129,6 +140,10 @@ struct jet_ast_node
     jet_span span;
     union
     {
+        jet_ast_node_if _if;
+        jet_ast_node_else _else;
+        jet_ast_node_while _while;
+
         jet_ast_node_vdecl vdecl;
         jet_ast_node_tdecl tdecl;
         jet_ast_node_fdecl fdecl;
@@ -149,6 +164,9 @@ bool jet_ast_node_init(jet_ast_node* node, jet_ast_node_type type, size_t start_
 void jet_ast_node_dispose(jet_ast_node* node);
 const char* jet_ast_node_type_str(jet_ast_node_type node_type);
 
+jet_ast_node jet_astn_if(jet_span span, node_id cond_expr_nid, node_id block_nid, node_id elif_nid);
+jet_ast_node jet_astn_else(jet_span span, node_id block_nid);
+jet_ast_node jet_astn_while(jet_span span, node_id cond_expr_nid, node_id block_nid);
 jet_ast_node jet_astn_prog(jet_span span, node_id block_nid);
 jet_ast_node jet_astn_mem(jet_span span, size_t alloc_size);
 jet_ast_node jet_astn_lit(jet_span span, jet_type_kind tkind, const void* value);

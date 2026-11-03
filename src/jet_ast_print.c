@@ -81,6 +81,158 @@ fail:
     return false;
 }
 
+static const char* jet_astp_resolve_node_str(jet_ast_printer* p, const jet_ast_node* n)
+{
+    JET_ASSERT(p != NULL);
+    jet_sb_clear(&p->sb);
+    const char* str = jet_ast_node_type_str(n->node_type);
+    if(!str)
+    {
+        jet_sb_appendf(&p->sb, "NO_STR_CONV<%d>", (int)n->node_type);
+        str = jet_sb_arena_dup(&p->sb, (void*)&p->arena, jet_arena_galloc);
+    } 
+    jet_sb_appendf(&p->sb, "%s(", str);
+    switch(n->node_type)
+    {
+        default: 
+            jet_sb_clear(&p->sb);
+            return str;
+        case AST_MEM:
+            jet_sb_append_sizet(&p->sb, n->as.mem.alloc_size);
+            break;
+        case AST_TYPE_DEF:
+            jet_astp_sb_append_ident(&p->sb, n->as.tdef.type_name);
+            break;
+        case AST_TYPE_DECL:
+            jet_astp_sb_append_ident(&p->sb, n->as.tdecl.type_name);
+            break;
+        case AST_VAR_DECL:
+            jet_astp_sb_append_ident(&p->sb, n->as.vdecl.ref_name);
+            break;
+        case AST_FUNC_DECL:
+            jet_astp_sb_append_ident(&p->sb, n->as.fdecl.ref_name);
+            break;
+        case AST_LIT:
+        {
+            switch(n->as.lit.tkind)
+            {
+                default: 
+                    JET_LOG_WARNING("printing logic for type kind <%d> unknown.", (int)(n->as.lit.tkind));
+                    break;
+                case JET_TYPE_BOOL:
+                    jet_sb_append_cstr(&p->sb, jet_conv_btos(n->as.lit.as.b));
+                    break;
+                case JET_TYPE_STR:
+                    jet_sb_append_cstr(&p->sb, n->as.lit.as.s);
+                    break;
+                case JET_TYPE_CHAR:
+                    jet_sb_append_char(&p->sb, n->as.lit.as.c);
+                    break;
+                case JET_TYPE_INT:
+                    jet_sb_appendf(&p->sb,"%"PRId64, n->as.lit.as.i);
+                    break;
+                case JET_TYPE_FLOAT:
+                    jet_sb_appendf(&p->sb, "%f", n->as.lit.as.f);
+                    break;
+                case JET_TYPE_CUSTOM:
+                    jet_astp_sb_append_ident(&p->sb, n->as.lit.as.ident);
+                    break;
+            }
+            break;
+        }
+        case AST_BINOP:    
+        {
+            const char* bop_str = 
+                jet_astp_op_str(n->as.binop.op_type);
+            jet_sb_append_cstr(&p->sb, bop_str);
+            break;
+        }
+        case AST_UNOP:
+        {
+            const char* uop_str = 
+                jet_astp_op_str(n->as.unop.op_type);
+            jet_sb_append_cstr(&p->sb, uop_str);
+            break;
+        }
+    }
+    jet_sb_append_char(&p->sb, ')');
+    const char* out = (const char*)jet_sb_arena_dup(
+            &p->sb, 
+            (void*)&p->arena, 
+            jet_arena_galloc);
+    jet_sb_clear(&p->sb);
+    return out;
+}
+
+static void jet_astp_print_node(jet_ast_printer* p, const jet_ast_node* n, size_t depth, bool is_last)
+{
+    JET_ASSERT(p != NULL);
+    if(n == NULL) return;
+
+    const char* node_str = jet_astp_resolve_node_str(p, n); 
+    size_t col_id = jet_astp_add_col(p, depth);
+    size_t child_depth = depth + 1;
+
+    if(is_last)
+        jet_astp_remove_col(p, col_id);
+    
+    jet_astp_indent(p, depth);
+
+    if(is_last) ANSI_PRINTF(ANSI_GREEN2, "%s", JET_ASTP_HLINK_LAST);
+    else ANSI_PRINTF(ANSI_GREEN2, "%s", JET_ASTP_HLINK_MID);
+
+    ANSI_PRINTF(ANSI_WHITE3, "%s\n", node_str);
+    //print children
+    switch(n->node_type)
+    {
+        default: 
+            break;
+        case AST_IF:
+            jet_astp_print_by_nid(p, n->as._if.cond_expr_nid, child_depth, false);
+            jet_astp_print_by_nid(p, n->as._if.block_nid, child_depth, n->as._if.elif_nid == INVALID_NID);
+            jet_astp_print_by_nid(p, n->as._if.elif_nid, child_depth, true);
+            break;
+        case AST_WHILE:
+            jet_astp_print_by_nid(p, n->as._while.cond_expr_nid, child_depth, false);
+            jet_astp_print_by_nid(p, n->as._while.block_nid, child_depth, true);
+            break;
+        case AST_PROG:      
+            jet_astp_print_by_nid(p, n->as.prog.block_nid, child_depth, true);
+            break;
+        case AST_BLOCK:     
+            jet_astp_print_nid_da(p, "stmts", &n->as.block.stmt_nid_da, child_depth);
+            break;
+        case AST_VAR_DECL:  
+            jet_astp_print_by_nid(p, n->as.vdecl.tdecl_nid, child_depth, n->as.vdecl.init_value_nid == INVALID_NID);
+            jet_astp_print_by_nid(p, n->as.vdecl.init_value_nid, child_depth, true);
+            break;
+        case AST_FUNC_DECL:
+            jet_astp_print_by_nid(p, n->as.fdecl.ret_tdecl_nid, child_depth, true);
+            jet_astp_print_nid_da(p, "params", &n->as.fdecl.param_nid_da, child_depth);
+            break;
+        case AST_TYPE_DEF:    
+            jet_astp_print_by_nid(p, n->as.tdef.block_nid, child_depth, true);
+            break;
+        case AST_FUNC_DEF: 
+            jet_astp_print_by_nid(p, n->as.fdef.fdecl_nid, child_depth, false);
+            jet_astp_print_by_nid(p, n->as.fdef.block_nid, child_depth, true);
+            break;
+        case AST_CALL:      
+            jet_astp_print_by_nid(p, n->as.call.callee_nid, child_depth, true);
+            jet_astp_print_nid_da(p, "args", &n->as.call.arg_nid_da, child_depth);
+            break;
+        case AST_BINOP:     
+            jet_astp_print_by_nid(p, n->as.binop.lhs_nid, child_depth, false);
+            jet_astp_print_by_nid(p, n->as.binop.rhs_nid, child_depth, true);
+            break;
+        case AST_UNOP:      
+            jet_astp_print_by_nid(p, n->as.unop.expr_nid, child_depth, true);
+            break;
+    }
+    if(!is_last)
+        jet_astp_remove_col(p, col_id);
+}
+
 static void jet_astp_reset(jet_ast_printer* p)
 {
     JET_ASSERT(p != NULL);
@@ -178,89 +330,6 @@ static bool jet_astp_is_col_active(jet_ast_printer* p, size_t col)
     return false;
 }
 
-static const char* jet_astp_resolve_node_str(jet_ast_printer* p, const jet_ast_node* n)
-{
-    JET_ASSERT(p != NULL);
-    jet_sb_clear(&p->sb);
-    const char* str = jet_ast_node_type_str(n->node_type);
-    if(!str)
-    {
-        jet_sb_appendf(&p->sb, "NO_STR_CONV<%d>", (int)n->node_type);
-        str = jet_sb_arena_dup(&p->sb, (void*)&p->arena, jet_arena_galloc);
-    } 
-    jet_sb_appendf(&p->sb, "%s(", str);
-    switch(n->node_type)
-    {
-        default: 
-            jet_sb_clear(&p->sb);
-            return str;
-        case AST_MEM:
-            jet_sb_append_sizet(&p->sb, n->as.mem.alloc_size);
-            break;
-        case AST_TYPE_DEF:
-            jet_astp_sb_append_ident(&p->sb, n->as.tdef.type_name);
-            break;
-        case AST_TYPE_DECL:
-            jet_astp_sb_append_ident(&p->sb, n->as.tdecl.type_name);
-            break;
-        case AST_VAR_DECL:
-            jet_astp_sb_append_ident(&p->sb, n->as.vdecl.ref_name);
-            break;
-        case AST_FUNC_DECL:
-            jet_astp_sb_append_ident(&p->sb, n->as.fdecl.ref_name);
-            break;
-        case AST_LIT:
-        {
-            switch(n->as.lit.tkind)
-            {
-                default: 
-                    JET_LOG_WARNING("printing logic for type kind <%d> unknown.", (int)(n->as.lit.tkind));
-                    break;
-                case JET_TYPE_BOOL:
-                    jet_sb_append_cstr(&p->sb, jet_conv_btos(n->as.lit.as.b));
-                    break;
-                case JET_TYPE_STR:
-                    jet_sb_append_cstr(&p->sb, n->as.lit.as.s);
-                    break;
-                case JET_TYPE_CHAR:
-                    jet_sb_append_char(&p->sb, n->as.lit.as.c);
-                    break;
-                case JET_TYPE_INT:
-                    jet_sb_appendf(&p->sb,"%"PRId64, n->as.lit.as.i);
-                    break;
-                case JET_TYPE_FLOAT:
-                    jet_sb_appendf(&p->sb, "%f", n->as.lit.as.f);
-                    break;
-                case JET_TYPE_CUSTOM:
-                    jet_astp_sb_append_ident(&p->sb, n->as.lit.as.ident);
-                    break;
-            }
-            break;
-        }
-        case AST_BINOP:    
-        {
-            const char* bop_str = 
-                jet_astp_op_str(n->as.binop.op_type);
-            jet_sb_append_cstr(&p->sb, bop_str);
-            break;
-        }
-        case AST_UNOP:
-        {
-            const char* uop_str = 
-                jet_astp_op_str(n->as.unop.op_type);
-            jet_sb_append_cstr(&p->sb, uop_str);
-            break;
-        }
-    }
-    jet_sb_append_char(&p->sb, ')');
-    const char* out = (const char*)jet_sb_arena_dup(
-            &p->sb, 
-            (void*)&p->arena, 
-            jet_arena_galloc);
-    jet_sb_clear(&p->sb);
-    return out;
-}
-
 static void jet_astp_print_by_nid(jet_ast_printer* p, node_id nid, size_t depth, bool is_last)
 {
     JET_ASSERT(p != NULL);
@@ -268,66 +337,6 @@ static void jet_astp_print_by_nid(jet_ast_printer* p, node_id nid, size_t depth,
     const jet_ast_node* n = jet_ast_node_get(p->ast, nid); 
     if(!n) return;
     jet_astp_print_node(p, n, depth, is_last);
-}
-
-static void jet_astp_print_node(jet_ast_printer* p, const jet_ast_node* n, size_t depth, bool is_last)
-{
-    JET_ASSERT(p != NULL);
-    if(n == NULL) return;
-
-    const char* node_str = jet_astp_resolve_node_str(p, n); 
-    size_t col_id = jet_astp_add_col(p, depth);
-    size_t child_depth = depth + 1;
-
-    if(is_last)
-        jet_astp_remove_col(p, col_id);
-    
-    jet_astp_indent(p, depth);
-
-    if(is_last) ANSI_PRINTF(ANSI_GREEN2, "%s", JET_ASTP_HLINK_LAST);
-    else ANSI_PRINTF(ANSI_GREEN2, "%s", JET_ASTP_HLINK_MID);
-
-    ANSI_PRINTF(ANSI_WHITE3, "%s\n", node_str);
-    //print children
-    switch(n->node_type)
-    {
-        case AST_PROG:      
-            jet_astp_print_by_nid(p, n->as.prog.block_nid, child_depth, true);
-            break;
-        case AST_BLOCK:     
-            jet_astp_print_nid_da(p, "stmts", &n->as.block.stmt_nid_da, child_depth);
-            break;
-        case AST_VAR_DECL:  
-            jet_astp_print_by_nid(p, n->as.vdecl.tdecl_nid, child_depth, n->as.vdecl.init_value_nid == INVALID_NID);
-            jet_astp_print_by_nid(p, n->as.vdecl.init_value_nid, child_depth, true);
-            break;
-        case AST_FUNC_DECL:
-            jet_astp_print_by_nid(p, n->as.fdecl.ret_tdecl_nid, child_depth, true);
-            jet_astp_print_nid_da(p, "params", &n->as.fdecl.param_nid_da, child_depth);
-            break;
-        case AST_TYPE_DEF:    
-            jet_astp_print_by_nid(p, n->as.tdef.block_nid, child_depth, true);
-            break;
-        case AST_FUNC_DEF: 
-            jet_astp_print_by_nid(p, n->as.fdef.fdecl_nid, child_depth, false);
-            jet_astp_print_by_nid(p, n->as.fdef.block_nid, child_depth, true);
-            break;
-        case AST_CALL:      
-            jet_astp_print_by_nid(p, n->as.call.callee_nid, child_depth, true);
-            jet_astp_print_nid_da(p, "args", &n->as.call.arg_nid_da, child_depth);
-            break;
-        case AST_BINOP:     
-            jet_astp_print_by_nid(p, n->as.binop.lhs_nid, child_depth, false);
-            jet_astp_print_by_nid(p, n->as.binop.rhs_nid, child_depth, true);
-            break;
-        case AST_UNOP:      
-            jet_astp_print_by_nid(p, n->as.unop.expr_nid, child_depth, true);
-            break;
-        default: 
-            break;
-    }
-    if(!is_last)
-        jet_astp_remove_col(p, col_id);
 }
 
 static void jet_astp_print_nid_da(jet_ast_printer* p, const char* label, const jet_da* nid_da, size_t depth)
