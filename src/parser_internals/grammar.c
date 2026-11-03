@@ -1,6 +1,27 @@
 #include <jet_parser_internals.h>
 #include <jet_logger.h>
 
+bool jet_parser_is_if_head(jet_parser* p)
+{
+    JET_ASSERT(p != NULL);
+    return jet_parser_peekn_tok_type(p, 0) == TOK_KWD_IF &&
+           jet_parser_peekn_tok_type(p, 1) == TOK_LPAR;
+}
+
+bool jet_parser_is_else_head(jet_parser* p)
+{
+    JET_ASSERT(p != NULL);
+    return jet_parser_peekn_tok_type(p, 0) == TOK_KWD_ELSE &&
+           jet_parser_peekn_tok_type(p, 1) == TOK_LBRC;
+}
+
+bool jet_parser_is_while_head(jet_parser* p)
+{
+    JET_ASSERT(p != NULL);
+    return jet_parser_peekn_tok_type(p, 0) == TOK_KWD_WHILE &&
+           jet_parser_peekn_tok_type(p, 1) == TOK_LPAR;
+}
+
 bool jet_parser_is_prog_entry(jet_parser* p)
 {
     return jet_parser_peekn_tok_type(p, 0) == TOK_KWD_PROG;
