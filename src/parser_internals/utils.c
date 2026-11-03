@@ -76,6 +76,9 @@ uint8_t jet_parser_get_op_prec(jet_token_type op_type)
             return PREC_AND;
         case TOK_OR: 
             return PREC_OR;
+        case TOK_EQ:
+        case TOK_NEQ:
+            return PREC_EQUALITY;
         case TOK_GTE:
         case TOK_LTE:
         case TOK_GT:
