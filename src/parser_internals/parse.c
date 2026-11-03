@@ -27,7 +27,7 @@ jet_result jet_parser_parse_toplevel(jet_parser* p)
         return jet_parser_tdef_parse(p);
     else if(jet_parser_is_prog_head(p))
         return jet_parser_prog_parse(p);
-    else if(jet_parser_is_vdecl(p))
+    else if(jet_parser_is_vdecl_head(p))
         return jet_parser_vdecl_parse(p); 
     else if(jet_parser_is_func_head(p))
         return jet_parser_func_parse(p);
@@ -52,7 +52,7 @@ jet_result jet_parser_parse_scoped_stmt(jet_parser* p)
         jet_error err = jet_err(JET_ERR_INVALID_TOKEN, start_tok->span);
         return jet_result_error(&err);
     }
-    else if(jet_parser_is_vdecl(p))
+    else if(jet_parser_is_vdecl_head(p))
         return jet_parser_vdecl_parse(p); 
     else 
         return jet_parser_parse_expr_stmt(p);
@@ -261,7 +261,7 @@ jet_result jet_parser_vdecl_parse(jet_parser* p)
     JET_ASSERT(p != NULL);
     const jet_token* start_tok = jet_parser_peek_tok(p);
 
-    if(jet_parser_is_vdecl(p) == false)
+    if(jet_parser_is_vdecl_head(p) == false)
         return jet_parser_result_parsing_failed(AST_VAR_DECL, start_tok);
 
     jet_result tdecl_res  = jet_parser_tdecl_parse(p);
@@ -389,7 +389,7 @@ jet_result jet_parser_parse_fparam(jet_parser* p)
     JET_ASSERT(p != NULL);
     const jet_token* start_tok = jet_parser_peek_tok(p);
 
-    if(jet_parser_is_vdecl(p) == false)
+    if(jet_parser_is_vdecl_head(p) == false)
         return jet_parser_result_parsing_failed(AST_VAR_DECL, start_tok);
 
     jet_result tdecl_res  = jet_parser_tdecl_parse(p);

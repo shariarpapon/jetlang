@@ -41,7 +41,7 @@ bool jet_parser_is_tdecl(jet_parser* p)
     return jet_parser_is_defined_type(p, tok, NULL);
 }
 
-bool jet_parser_is_vdecl(jet_parser* p)
+bool jet_parser_is_vdecl_head(jet_parser* p)
 {
     JET_ASSERT(p != NULL);
     return  jet_parser_is_tdecl(p) &&
