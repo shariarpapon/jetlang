@@ -28,6 +28,7 @@ typedef enum jet_ast_node_type
   AST_ELSE,
   AST_WHILE,
   AST_RETURN,
+  AST_BREAK,
 } jet_ast_node_type;
 
 #define INVALID_NID (0)
@@ -137,7 +138,7 @@ typedef struct jet_ast_node_while
 typedef struct jet_ast_node_return
 {
     node_id value_expr_nid;
-}jet_ast_node_return;
+} jet_ast_node_return;
 
 // NODE BASE STRUCT
 struct jet_ast_node
@@ -172,6 +173,7 @@ void jet_ast_node_dispose(jet_ast_node* node);
 const char* jet_ast_node_type_str(jet_ast_node_type node_type);
 
 
+jet_ast_node jet_astn_break(jet_span span);
 jet_ast_node jet_astn_return(jet_span span, node_id value_expr_nid);
 jet_ast_node jet_astn_if(jet_span span, node_id cond_expr_nid, node_id block_nid, node_id elif_nid);
 jet_ast_node jet_astn_else(jet_span span, node_id block_nid);

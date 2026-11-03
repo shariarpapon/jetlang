@@ -58,6 +58,8 @@ jet_result jet_parser_parse_scoped_stmt(jet_parser* p)
         return jet_parser_while_parse(p);
     else if(jet_parser_is_return_head(p))
         return jet_parser_return_parse(p);
+    else if(jet_parser_is_break_head(p))
+        return jet_parser_break_parse(p);
     else if(jet_parser_is_vdecl_head(p))
         return jet_parser_vdecl_parse(p); 
     else 

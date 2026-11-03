@@ -1,8 +1,15 @@
 #include <jet_parser_internals.h>
 #include <jet_logger.h>
 
+bool jet_parser_is_break_head(jet_parser* p)
+{
+    JET_ASSERT(p != NULL);
+    return jet_parser_peekn_tok_type(p,0) == TOK_KWD_BREAK;
+}
+
 bool jet_parser_is_return_head(jet_parser* p)
 {
+    JET_ASSERT(p != NULL);
     return jet_parser_peekn_tok_type(p,0) == TOK_KWD_RETURN;
 }
 
