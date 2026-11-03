@@ -57,7 +57,7 @@ jet_type_kind jet_parser_type_kind_from_token(const jet_token* tok);
 
 //### parse
 jet_result jet_parser_parse_toplevel(jet_parser* p);
-jet_result jet_parser_parse_block_stmt(jet_parser* p);
+jet_result jet_parser_parse_scoped_stmt(jet_parser* p);
 jet_da jet_parser_parse_by_delim(jet_parser* p, 
         jet_result (*parse_node)(jet_parser*), 
         jet_token_type delim, 
