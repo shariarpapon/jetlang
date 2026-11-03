@@ -94,6 +94,33 @@ static jet_result jet_parser_parse_primary_term(jet_parser* p)
     return res;
 }
 
+jet_result jet_parser_unop_parse(jet_parser* p)
+{
+    JET_ASSERT(p != NULL);
+
+    if(!jet_parser_is_unop_head(p))
+        goto parsing_fail;
+
+    const jet_token* start_tok = jet_parser_peek_tok(p);
+    uint8_t prec = jet_parser_get_op_prec(start_tok->type);
+    if(prec == PREC_NONE)
+        goto parsing_fail;
+
+    jet_parser_consume_tok(p);
+    jet_result expr_res = jet_parser_parse_expr(p, PREC_PREFIX);
+    if(!expr_res.success)
+        return expr_res;
+    const jet_token* end_tok = jet_parser_peek_prev_tok(p);
+    jet_span span = jet_parser_token_range_span(start_tok, end_tok);
+    jet_ast_node node = jet_astn_unop(span, expr_res.as.nid, start_tok->type);
+    return jet_parser_register_node(p, (const jet_ast_node*)&node);
+
+
+parsing_fail:
+    return jet_parser_result_parsing_failed(AST_UNOP, jet_parser_peek_tok(p));
+}
+
+
 
 
 

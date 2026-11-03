@@ -22,9 +22,10 @@ bool jet_parser_is_while_head(jet_parser* p)
            jet_parser_peekn_tok_type(p, 1) == TOK_LPAR;
 }
 
-bool jet_parser_is_prog_entry(jet_parser* p)
+bool jet_parser_is_prog_head(jet_parser* p)
 {
-    return jet_parser_peekn_tok_type(p, 0) == TOK_KWD_PROG;
+    return jet_parser_peekn_tok_type(p, 0) == TOK_KWD_PROG && 
+           jet_parser_peekn_tok_type(p, 1) == TOK_LBRC;
 }
 
 bool jet_parser_is_tdef(jet_parser* p)

@@ -39,7 +39,7 @@ jet_token_type jet_parser_peekn_tok_type(jet_parser* p, size_t n);
 //### grammar
 bool jet_parser_is_vdecl(jet_parser* p);
 bool jet_parser_is_func_head(jet_parser* p);
-bool jet_parser_is_prog_entry(jet_parser* p);
+bool jet_parser_is_prog_head(jet_parser* p);
 bool jet_parser_is_tdecl(jet_parser* p);
 bool jet_parser_is_tdef(jet_parser* p);
 bool jet_parser_is_unop_head(jet_parser* p);
