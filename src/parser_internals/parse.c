@@ -397,9 +397,6 @@ jet_result jet_parser_parse_fparam(jet_parser* p)
     JET_ASSERT(p != NULL);
     const jet_token* start_tok = jet_parser_peek_tok(p);
 
-    if(jet_parser_is_vdecl_head(p) == false)
-        return jet_parser_result_parsing_failed(AST_VAR_DECL, start_tok);
-
     jet_result tdecl_res  = jet_parser_tdecl_parse(p);
     if(!tdecl_res.success)
         return tdecl_res;
