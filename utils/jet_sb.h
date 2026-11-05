@@ -19,6 +19,7 @@ size_t jet_sb_len(const jet_sb* sb);
 const char* jet_sb_view(const jet_sb* sb);
 
 char* jet_sb_dup(const jet_sb* sb);
+bool jet_sb_copy(const jet_sb* sb, char* dest_buf, size_t buf_capacity);
 
 const char* jet_sb_arena_dup(
         jet_sb* sb, 
@@ -43,9 +44,8 @@ void jet_sb_append_int(jet_sb* sb, int i);
 #define JET_SB_GROWTH_FAC (2)
 #define JET_SB_MIN_CAP (2)
 
-
 static void jet_sb_ensure_extra_cap(jet_sb* sb, size_t n);
-static void jet_sb_grow(jet_sb* sb);
+static void jet_sb_grow(jet_sb* sb, size_t new_cap);
 
 //must init fresh sb only, otherwise mem leak will occur
 bool jet_sb_init(jet_sb* sb, size_t cap)
@@ -90,6 +90,14 @@ size_t jet_sb_len(const jet_sb* sb)
 {
     assert(sb != NULL);
     return sb->len;
+}
+
+bool jet_sb_copy(const jet_sb* sb, char* dest_buf, size_t buf_capacity)
+{
+    if(sb == NULL || dest_buf == NULL || buf_capacity < sb->len + 1)
+        return false;
+    strcpy(dest_buf, jet_sb_view(sb));
+    return true;
 }
 
 char* jet_sb_dup(const jet_sb* sb)
@@ -214,25 +222,25 @@ void jet_sb_append_sizet(jet_sb* sb, size_t v)
 static void jet_sb_ensure_extra_cap(jet_sb* sb, size_t n)
 {
     assert(sb != NULL);
-    while(sb->len + n >= sb->cap)
-    {
-        jet_sb_grow(sb);
-    }
+    size_t new_cap = sb->cap;
+    while(n >= new_cap - sb->len)
+        new_cap *= JET_SB_GROWTH_FAC;
+    if(new_cap <= sb->cap)
+        return;
+    jet_sb_grow(sb, new_cap);
 }
 
-static void jet_sb_grow(jet_sb* sb)
+static void jet_sb_grow(jet_sb* sb, size_t new_cap)
 {
     assert(sb != NULL);
-    size_t new_cap = sb->cap * JET_SB_GROWTH_FAC;
-    if(new_cap <= sb->cap)
-        new_cap = sb->cap + 1;
+    assert(new_cap > sb->cap);
     char* new_buf = realloc(sb->buf, new_cap);
     if(!new_buf)
     {
         fprintf(stderr, "err: couldn't grow sb buf, out of mem.\n");
         abort();
     }
-    sb->cap *= JET_SB_GROWTH_FAC;
+    sb->cap = new_cap;
     sb->buf = new_buf;
 }
 
