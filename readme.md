@@ -32,9 +32,16 @@ jetlang is an experiemental programming language and compiler project. I mainly 
 
 ### Step 3: Run
 
+##### Flags:
+-p = print
+-p,a = print AST
+-p,t = print token array
+-p,pe = print parser errors
+###### Arguments can be supplied together (e.g. -p,a,t,pe)
+
 - Linux:
-    ./jet [filename]
+    ./jet -f,filename
 
 - Windows:
-    jet.exe [filename]
+    jet.exe -f,filename
 
