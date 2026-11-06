@@ -36,7 +36,7 @@ jetlang is an experiemental programming language and compiler project. I mainly 
     -p,a = print AST.
     -p,t = print token array.
     -p,pe = print parser errors.
-Arguments can be supplied together (e.g. ```text-p,a,t,pe```).
+Arguments can be supplied together (e.g. ```text -p,a,t,pe```).
 
 - Linux:
     ./jet -f,filename
