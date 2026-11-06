@@ -33,11 +33,11 @@ jetlang is an experiemental programming language and compiler project. I mainly 
 ### Step 3: Run
 
 ##### Flags:
--p = print
--p,a = print AST
--p,t = print token array
--p,pe = print parser errors
-###### Arguments can be supplied together (e.g. -p,a,t,pe)
+Arguments can be supplied together (e.g. -p,a,t,pe)
+    -p = print
+    -p,a = print AST
+    -p,t = print token array
+    -p,pe = print parser errors
 
 - Linux:
     ./jet -f,filename
