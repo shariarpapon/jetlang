@@ -4,7 +4,7 @@
 
 #include <jet_cli_flags.h>
 static size_t jet_flagreg_max_arg_count(const char* input, char delim);
-static bool jet_flagreg_parse_flag(const char* input, jet_flag* out);
+static bool jet_flagreg_parse_flag(const char* input, jet_flag* out, const char cmd_start, const char delim);
 
 bool jet_flagreg_init(jet_flag_registry* fr, char** argv, size_t argc)
 {
@@ -17,7 +17,7 @@ bool jet_flagreg_init(jet_flag_registry* fr, char** argv, size_t argc)
     for(size_t i = 0; i < argc; i++)
     {
         jet_flag flag = (jet_flag){0};
-        if(jet_flagreg_parse_flag(argv[i], &flag))
+        if(jet_flagreg_parse_flag(argv[i], &flag, JET_CLI_FLAG_CMD, JET_CLI_FLAG_DELIM))
         {
             if(!jet_flagreg_register_flag(fr, flag))
                 return false;
@@ -43,7 +43,6 @@ bool jet_flagreg_register_flag(jet_flag_registry* fr, jet_flag flag)
     fr->flags[fr->flag_count++] = flag;
     return true;
 }
-
 
 jet_flag* jet_flagreg_get_flag(jet_flag_registry* fr, const char* f)
 {
@@ -116,17 +115,16 @@ static size_t jet_flagreg_max_arg_count(const char* input, char delim)
 //input = "pr,ast" -> strlen=6
 //len = 1 | *input = r
 //len = 2 | *input = , -> flag_name{base, len} 
-static bool jet_flagreg_parse_flag(const char* input, jet_flag* out)
+static bool jet_flagreg_parse_flag(const char* input, jet_flag* out, const char cmd_start, const char delim)
 {
     if(input == NULL || out == NULL || 
-       strlen(input) == 0 || *input != '-') 
+       strlen(input) == 0 || *input != cmd_start) 
         return false;
     
     input++;
     if(*input == '\0') 
         return false;
 
-    const char delim = ',';
     const char* start = input;
     size_t len = 0;
     

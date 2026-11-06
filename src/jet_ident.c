@@ -2,6 +2,8 @@
 #include <jet_logger.h>
 #include <string.h>
 
+static bool jet_ident_generic_equals(const void* ident_ptr_a, const void* ident_ptr_b);
+
 jet_ident jet_ident_init(const char* str, size_t len)
 {
     jet_ident ident = {.str = str, .len = len};
@@ -24,7 +26,7 @@ const jet_ident* jet_ident_hashset_add(jet_hs* hs, jet_ident ident)
 bool jet_ident_hashset_init(jet_hs* hs, size_t capacity)
 {
     JET_ASSERT(hs != NULL);
-    return jet_hs_init(hs, capacity, jet_ident_hash, jet_ident_equals);
+    return jet_hs_init(hs, capacity, jet_ident_hash, jet_ident_generic_equals);
 }
 
 uint64_t jet_ident_hash(const void* ident_ptr)
@@ -44,18 +46,22 @@ uint64_t jet_ident_hash(const void* ident_ptr)
     return hash;
 }
 
-bool jet_ident_equals(const void* ident_ptr_a, const void* ident_ptr_b)
+bool jet_ident_value_equals(const jet_ident* a, const jet_ident* b)
 {
-    if(ident_ptr_a == NULL || ident_ptr_b == NULL)
+    if(a == NULL || b == NULL) 
     {
-        JET_LOG_ERROR("attempeting to compare NULL pointer.");
         return false;
+        JET_LOG_ERROR("attempeting to compare NULL pointer.");
     }
-    const jet_ident* a = ident_ptr_a;
-    const jet_ident* b = ident_ptr_b;
-    if(a->len != b->len) 
+    if(a->len != b->len)
         return false;
     return memcmp(a->str, b->str, a->len) == 0;
 }
+
+static bool jet_ident_generic_equals(const void* ident_ptr_a, const void* ident_ptr_b)
+{
+    return jet_ident_value_equals((const jet_ident*)ident_ptr_a, (const jet_ident*)ident_ptr_b);
+}
+
 
 

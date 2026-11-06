@@ -2,6 +2,9 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+#define JET_CLI_FLAG_CMD ('-')
+#define JET_CLI_FLAG_DELIM (',')
+
 #define JET_CLI_MAX_FLAGS (256)
 
 typedef struct jet_flag_registry jet_flag_registry;
