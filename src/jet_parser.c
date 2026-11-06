@@ -7,30 +7,25 @@
 #define JET_PARSER_MAX_ERRORS (64)
 #define ARRAY_LEN(a) (sizeof(a) / sizeof((a)[0]))
 
-bool jet_parser_init(jet_parser* p, 
-        const char* filename, 
-        const jet_da* tok_da, 
-        jet_ast* ast, 
-        jet_da* err_da, 
-        jet_hs* defined_type_names_hs)
+bool jet_parser_init(jet_parser* p, jet_compilation_unit* cu)
 {
     JET_ASSERT(p != NULL);
-    if(!tok_da || !err_da || !defined_type_names_hs || !ast || !filename)
+    if(cu == NULL)
     {
         JET_LOG_ERROR("could not init parser, null param/s.");
         return false;
     }
 
     memset(p, 0 , sizeof(*p));
-    p->filename = filename;
-    p->tok_da = tok_da;
-    p->err_da = err_da;
-    p->defined_type_names_hs = defined_type_names_hs;
-    p->ast = ast;
+    p->filename = cu->filename;
+    p->tok_da = &cu->tok_da;
+    p->err_da = &cu->parser_err_da;
+    p->type_name_hs = &cu->type_name_hs;
+    p->ast = &cu->ast;
     p->tok_cursor = 0;
 
     //parser should be valid initialized state by this point
-    jet_parser_define_primitive_types(p);
+    jet_parser_add_primitive_type_names(p);
     return true;
 }
 

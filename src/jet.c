@@ -43,7 +43,7 @@ int main(int argc, char** argv)
     JET_ASSERT(filepath != NULL);
 
     printf("\n");
-    JET_LOG_INFO("all internal modules built, initiating jet compiler...");
+    JET_LOG_INFO("all internal modules built. now compiling file '%s'", filepath);
     jet_compilation_unit cu;
     if(jet_compile(filepath, &cu))
         JET_LOG_INFO("input compiled successfully.");

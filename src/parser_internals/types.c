@@ -4,10 +4,10 @@
 #include <jet_logger.h>
 #include <jet_hs.h>
 
-void jet_parser_define_primitive_types(jet_parser* p)
+void jet_parser_add_primitive_type_names(jet_parser* p)
 {
     JET_ASSERT(p != NULL);
-    JET_ASSERT(p->defined_type_names_hs != NULL);
+    JET_ASSERT(p->type_name_hs != NULL);
 
     const char* names[] = {"int", "float", "str", "char", "bool"};
     for(size_t i = 0; i < ARRAY_LEN(names); i++)
@@ -21,10 +21,10 @@ void jet_parser_define_primitive_types(jet_parser* p)
 const jet_ident* jet_parser_register_type_name(jet_parser* p, jet_ident type_name)
 {
     JET_ASSERT(p != NULL);
-    const jet_ident* stored = jet_ident_hashset_add(p->defined_type_names_hs, type_name);
+    const jet_ident* stored = jet_ident_hashset_add(p->type_name_hs, type_name);
     if(stored == NULL)
     {
-        JET_LOG_ERROR("failed to store ident to defined_type_names_hs.");
+        JET_LOG_ERROR("failed to store ident to type_name_hs.");
         return NULL;
     }
     return stored;
@@ -67,7 +67,7 @@ bool jet_parser_is_defined_type(jet_parser* p, const jet_token* tok, const jet_i
     JET_ASSERT(tok != NULL);
     const jet_ident ident = jet_parser_ident_from_tok(tok);
     const void* stored;
-    if(jet_hs_contains(p->defined_type_names_hs, &ident, &stored))
+    if(jet_hs_contains(p->type_name_hs, &ident, &stored))
     {
         if(out_ident != NULL)
             *out_ident = (const jet_ident*)stored;

@@ -1,31 +1,20 @@
 #pragma once
 #include <stdbool.h>
 #include <stddef.h>
-
-#include <jet_token.h>
-#include <jet_ast.h>
-#include <jet_da.h>
-#include <jet_hs.h>
+#include <jet_compilation_unit.h>
 
 typedef struct jet_parser
 {
     const char* filename;
     const jet_da* tok_da;
     jet_da* err_da;
-    jet_da* user_type_da;
     jet_ast* ast;
-    jet_hs* defined_type_names_hs;
+    jet_hs* type_name_hs;
     size_t tok_cursor;
 } jet_parser;
 
 
-bool jet_parser_init(
-        jet_parser* p, 
-        const char* filename, 
-        const jet_da* tok_da, 
-        jet_ast* out_ast, 
-        jet_da* err_da,
-        jet_hs* defined_type_names_hs);
+bool jet_parser_init(jet_parser* p, jet_compilation_unit* cu);
 
 bool jet_parser_dispose(jet_parser* p);
 bool jet_parser_parse(jet_parser* p);

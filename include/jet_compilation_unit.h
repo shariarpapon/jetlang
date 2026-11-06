@@ -1,10 +1,8 @@
 #pragma once
-#include <jet_ast.h>
-#include <jet_lexer.h>
-#include <jet_parser.h>
-#include <jet_token.h>
 #include <jet_arena.h>
+#include <jet_ast.h>
 #include <jet_hs.h>
+#include <jet_da.h>
 
 typedef struct jet_compilation_unit
 {
@@ -15,7 +13,8 @@ typedef struct jet_compilation_unit
     jet_da tok_da;
     jet_ast ast;
     jet_da parser_err_da;
-    jet_hs defined_type_names_hs;
+    jet_hs type_name_hs;
+    jet_da typedef_da;
 } jet_compilation_unit;
 
 bool jet_cu_init(jet_compilation_unit* cu, const char* filename);
