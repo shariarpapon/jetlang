@@ -1,16 +1,15 @@
-int function_x(bool x, str y)
+type Vector2 
 {
-    if(to_str(x) == y)
-    {
-        return 1;
-    }
-    else
-    {
-        return 2;
-    }
+    int x;
+    int y;
 }
 
 prog
 {
-    function_x(1,2);
+    Vector2 pos;
 }
+
+
+
+
+
