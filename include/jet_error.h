@@ -11,6 +11,7 @@ typedef struct jet_error jet_error;
 typedef struct jet_error_unexpected_token jet_error_unexpected_token;
 typedef struct jet_error_expected_token jet_error_expected_token;
 typedef struct jet_error_parsing_failed jet_error_parsing_failed;
+typedef struct jet_error_invalid_token jet_error_invalid_token;
 
 enum jet_error_kind
 {
@@ -22,6 +23,11 @@ enum jet_error_kind
     JET_ERR_PARSING_FAILED,
     JET_ERR_EXPECTED_EXPR,
     JET_ERR_PRIMARY_EXPR_PARSING_FAILED,
+};
+
+struct jet_error_invalid_token
+{
+    const jet_token* inv_tok;
 };
 
 struct jet_error_parsing_failed
@@ -49,10 +55,12 @@ struct jet_error
         jet_error_unexpected_token unexpected_token;
         jet_error_expected_token expected_token;
         jet_error_parsing_failed parsing_failed;
+        jet_error_invalid_token invalid_token;
     } as;
 };
 
 jet_error jet_err(jet_error_kind kind, jet_span span);
+jet_error jet_err_invalid_token(const jet_token* inv_tok);
 jet_error jet_err_unexpected_token(const jet_token* tok);
 jet_error jet_err_expected_token(const jet_token* found_tok, jet_token_type expected_type);
 jet_error jet_err_parsing_failed(jet_ast_node_type node_type, const jet_token* cursor_tok);

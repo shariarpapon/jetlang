@@ -8,6 +8,14 @@ jet_error jet_err(jet_error_kind kind, jet_span span)
     return error;
 } 
 
+jet_error jet_err_invalid_token(const jet_token* inv_tok)
+{
+    JET_ASSERT(inv_tok != NULL);
+    jet_error err = jet_err(JET_ERR_INVALID_TOKEN, inv_tok->span);
+    err.as.invalid_token = (jet_error_invalid_token){.inv_tok = inv_tok};
+    return err;
+}
+
 jet_error jet_err_unexpected_token(const jet_token* tok)
 {
     JET_ASSERT(tok != NULL);
@@ -22,7 +30,6 @@ jet_error jet_err_expected_token(const jet_token* found_tok, jet_token_type expe
     jet_error err = jet_err(JET_ERR_EXPECTED_TOKEN, found_tok->span);
     err.as.expected_token = (jet_error_expected_token){.found = found_tok->type, .expected = expected_type };
     return err;
-
 }
 
 jet_error jet_err_parsing_failed(jet_ast_node_type node_type, const jet_token* cursor_tok)

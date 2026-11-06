@@ -20,7 +20,7 @@ jet_result jet_parser_parse_toplevel(jet_parser* p)
     }
     else if(t == TOK_INV)
     {
-        jet_error err = jet_err(JET_ERR_INVALID_TOKEN, start_tok->span);
+        jet_error err = jet_err_invalid_token(start_tok);
         return jet_result_error(&err);
     }
     else if(jet_parser_is_tdef(p))
@@ -49,7 +49,7 @@ jet_result jet_parser_parse_scoped_stmt(jet_parser* p)
     }
     else if(t == TOK_INV)
     {
-        jet_error err = jet_err(JET_ERR_INVALID_TOKEN, start_tok->span);
+        jet_error err = jet_err_invalid_token(start_tok);
         return jet_result_error(&err);
     }
     else if(jet_parser_is_if_head(p))
@@ -111,15 +111,13 @@ jet_result jet_parser_block_parse(jet_parser* p)
         }
         else if(t == TOK_INV)
         {
-            jet_error err = jet_err(JET_ERR_INVALID_TOKEN, token->span);
+            jet_error err = jet_err_invalid_token(token);
             jet_parser_push_err(p, (const jet_error*)&err); 
             jet_parser_consume_tok(p);
             continue;
         }
         else if(t == TOK_RBRC)
-        {
             break;
-        }
 
         result = jet_parser_parse_scoped_stmt(p);
         if(result.success)

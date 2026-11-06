@@ -6,7 +6,7 @@ int function_x(bool x, str y)
     }
     else
     {
-        return 2;
+    #21    return 2;
     }
 }
 

@@ -85,6 +85,15 @@ static bool jet_error_resolve_str(const jet_error* e, char* out_buf, size_t buf_
             jet_sb_appendf(&sb, "unexpected token %s", unexp_str);
             break;
         }
+        case JET_ERR_INVALID_TOKEN:
+        {
+            char* tok_str = NULL;
+            jet_token_strdup(e->as.invalid_token.inv_tok, &tok_str);
+            JET_ASSERT(tok_str != NULL);
+            jet_sb_appendf(&sb, "invalid token encountered '%s'", tok_str);
+            free((void*)tok_str);
+            break;
+        }
     }
     bool success = jet_sb_copy(&sb, out_buf, buf_size);
     jet_sb_dispose(&sb);
