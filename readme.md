@@ -37,8 +37,8 @@ jetlang is an experiemental programming language and compiler project. I mainly 
     -p,t = print token array.
     -p,pe = print parser errors.
 
-For the same command arguments can be supplied together (e.g. ```-p,a,t,pe```).
-File command ```-f,filepath``` is required.
+File command ```-f,filepath``` is required.  
+For the same command arguments can be supplied together (e.g. ```-p,a,t,pe```).  
 
 - Linux:
     ./jet -f,filepath
