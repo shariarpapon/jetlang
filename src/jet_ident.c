@@ -2,6 +2,11 @@
 #include <jet_logger.h>
 #include <string.h>
 
+#define JET_CMP_INPUT_VALID(a,b) \
+        ((a) != NULL && (b) != NULL && \
+        ((a)->len == 0 || (a)->str != NULL) && \
+        ((b)->len == 0 || (b)->str != NULL))
+
 static bool jet_ident_generic_equals(const void* ident_ptr_a, const void* ident_ptr_b);
 static uint64_t jet_ident_generic_hash(const void* ident_tpr);
 
@@ -32,13 +37,15 @@ bool jet_ident_hashset_init(jet_hs* hs, size_t capacity)
 
 bool jet_ident_value_equals(const jet_ident* a, const jet_ident* b)
 {
-    if(a == NULL || b == NULL) 
+    if(!JET_CMP_INPUT_VALID(a,b)) 
     {
+        JET_LOG_ERROR("invalid input/s.");
         return false;
-        JET_LOG_ERROR("attempeting to compare NULL pointer.");
     }
     if(a->len != b->len)
         return false;
+    if(a->len == 0) 
+        return true;
     return memcmp(a->str, b->str, a->len) == 0;
 }
 

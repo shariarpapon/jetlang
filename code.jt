@@ -4,10 +4,14 @@ type Vector2
     int y;
 }
 
-prog
+Vector2 vec2_add(Vector2 a, Vector2 b)
 {
-    Vector2 pos;
+    Vector2 c;
+    c.x = a.x + b.x;
+    c.y = a.y + b.y;
+    return c;
 }
+
 
 
 
