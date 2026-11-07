@@ -99,32 +99,18 @@ bool jet_cu_run(jet_compilation_unit* cu)
     JET_ASSERT(cu != NULL);    
 
     jet_lexer lexer;
+    JET_ASSERT(jet_lexer_init(&lexer, cu->filename, cu->source, &cu->tok_da));
+    JET_ASSERT(jet_lexer_tokenize(&lexer));
+
     jet_parser parser;
-
-    bool lexer_init = jet_lexer_init(&lexer, cu->filename, cu->source, &cu->tok_da);
-    if(!lexer_init || !jet_lexer_tokenize(&lexer)) 
-    {
-        JET_LOG_ERROR("lexer failed");
-        goto fail;
-    }
-
-    bool parser_init = jet_parser_init(&parser, cu);
-    if(!parser_init || !jet_parser_parse(&parser))
-    {
-        JET_LOG_ERROR("parser failed");
-        goto fail;
-    }
+    JET_ASSERT(jet_parser_init(&parser, cu));
+    JET_ASSERT(jet_parser_parse(&parser));
     
-    jet_sema_resolve_typedefs(cu);
+    JET_ASSERT(jet_sema_init());
+    JET_ASSERT(jet_sema_resolve_typedefs(cu));
 
     jet_lexer_dispose(&lexer);
     jet_parser_dispose(&parser);
     return true;
-
-fail:
-    JET_LOG_ERROR("abrupt compilation failure.");
-    if(lexer_init) jet_lexer_dispose(&lexer);
-    if(parser_init) jet_parser_dispose(&parser);
-    return false;
 }
 
