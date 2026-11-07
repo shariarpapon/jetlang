@@ -25,26 +25,19 @@
 
 bool jet_cu_init(jet_compilation_unit* cu, const char* filename)
 {
-    JET_ASSERT(cu != NULL);
-    if(!filename) return false;
+    if(!cu || !filename) 
+        return false;
 
     memset(cu, 0, sizeof(*cu));
     cu->filename = filename;
     cu->source_len = 0; 
-
-    bool arena_init = false;
-    bool tok_da_init = false;
-    bool ast_init = false;
-    bool errors_init = false;
-    bool type_name_hs_init = false;
-    bool typedef_da_init = false;
-
-    arena_init = jet_arena_init(&cu->arena, JET_CU_ARENA_CAP);
-    ast_init = jet_ast_init(&cu->ast);
-    tok_da_init = jet_da_init(&cu->tok_da, JET_CU_TOK_CAP, sizeof(jet_token));
-    errors_init = jet_da_init(&cu->parser_err_da, JET_CU_ERROR_CAP, sizeof(jet_error));
-    type_name_hs_init = jet_ident_hashset_init(&cu->type_name_hs, JET_CU_TYPE_NAME_CAP);
-    typedef_da_init = jet_da_init(&cu->typedef_da, JET_CU_TYPEDEF_CAP, sizeof(jet_typedef));
+    
+    bool arena_init = jet_arena_init(&cu->arena, JET_CU_ARENA_CAP);
+    bool ast_init = jet_ast_init(&cu->ast);
+    bool tok_da_init = jet_da_init(&cu->tok_da, JET_CU_TOK_CAP, sizeof(jet_token));
+    bool errors_init = jet_da_init(&cu->parser_err_da, JET_CU_ERROR_CAP, sizeof(jet_error));
+    bool type_name_hs_init = jet_ident_hashset_init(&cu->type_name_hs, JET_CU_TYPE_NAME_CAP);
+    bool typedef_da_init = jet_da_init(&cu->typedef_da, JET_CU_TYPEDEF_CAP, sizeof(jet_typedef));
 
     cu->source = jet_io_read_text(filename, &cu->source_len);
     if(!cu->source || !arena_init || !tok_da_init 

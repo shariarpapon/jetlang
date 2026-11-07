@@ -1,3 +1,11 @@
 #pragma once
+#include <stdbool.h>
+#include <jet_compilation_unit.h>
 
-//here beings semantics
+
+bool jet_sema_resolve_typedefs(jet_compilation_unit* cu);
+bool jet_sema_resolve_symbols(jet_compilation_unit* cu);
+
+
+
+

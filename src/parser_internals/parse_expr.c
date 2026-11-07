@@ -13,7 +13,8 @@ jet_result jet_parser_parse_expr_stmt(jet_parser* p)
 {
     JET_ASSERT(p != NULL);
     jet_result result = jet_parser_parse_expr(p, 0);
-    if(result.success)
+    JET_ASSERT(result.kind == JET_RESULT_NID || result.kind == JET_RESULT_ERROR);
+    if(result.kind != JET_RESULT_ERROR)
         jet_parser_expect_tok(p, TOK_SEMI);
     return result;
 }
@@ -29,7 +30,8 @@ jet_result jet_parser_parse_expr(jet_parser* p, size_t min_prec)
     JET_ASSERT(p != NULL);
     const jet_token* start_tok = jet_parser_peek_tok(p);
     jet_result primary_res = jet_parser_parse_primary_term(p);
-    if(!primary_res.success)
+    JET_ASSERT(primary_res.kind == JET_RESULT_NID || primary_res.kind == JET_RESULT_ERROR);
+    if(primary_res.kind == JET_RESULT_ERROR)
         return primary_res;
 
     const jet_token* end_tok = start_tok;
@@ -47,7 +49,8 @@ jet_result jet_parser_parse_expr(jet_parser* p, size_t min_prec)
             break;
         jet_parser_consume_tok(p);
         rhs_res = jet_parser_parse_expr(p, operator_prec + 1);
-        if(!rhs_res.success)
+        JET_ASSERT(rhs_res.kind == JET_RESULT_NID || rhs_res.kind == JET_RESULT_ERROR);
+        if(rhs_res.kind == JET_RESULT_ERROR)
             return rhs_res;
         end_tok = jet_parser_peek_prev_tok(p);
         span = jet_parser_token_range_span(start_tok, end_tok);
@@ -60,7 +63,7 @@ jet_result jet_parser_parse_expr(jet_parser* p, size_t min_prec)
 static jet_result jet_parser_parse_primary_term(jet_parser* p)
 {
     JET_ASSERT(p != NULL);
-    jet_result res = {.success = false};
+    jet_result res = {0};
     const jet_token* start_tok = jet_parser_peek_tok(p);
     switch(start_tok->type)
     {
@@ -80,14 +83,17 @@ static jet_result jet_parser_parse_primary_term(jet_parser* p)
         case TOK_LPAR:
             jet_parser_consume_tok(p);
             res = jet_parser_parse_new_expr(p);
-            jet_parser_expect_tok(p, TOK_RPAR);
+            JET_ASSERT(res.kind == JET_RESULT_NID || res.kind == JET_RESULT_ERROR);
+            if(res.kind == JET_RESULT_NID)
+                jet_parser_expect_tok(p, TOK_RPAR);
             break;
         case TOK_MINUS:
         case TOK_NOT:
             res = jet_parser_unop_parse(p);
+            JET_ASSERT(res.kind == JET_RESULT_NID || res.kind == JET_RESULT_ERROR);
             break;
     }    
-    if(!res.success) 
+    if(res.kind == JET_RESULT_ERROR) 
         return res;
     if(jet_parser_is_call_head(p))
         res = jet_parser_call_parse(p, res.as.nid);
@@ -108,7 +114,8 @@ jet_result jet_parser_unop_parse(jet_parser* p)
 
     jet_parser_consume_tok(p);
     jet_result expr_res = jet_parser_parse_expr(p, PREC_PREFIX);
-    if(!expr_res.success)
+    JET_ASSERT(expr_res.kind == JET_RESULT_NID || expr_res.kind == JET_RESULT_ERROR);
+    if(expr_res.kind == JET_RESULT_ERROR)
         return expr_res;
     const jet_token* end_tok = jet_parser_peek_prev_tok(p);
     jet_span span = jet_parser_token_range_span(start_tok, end_tok);
