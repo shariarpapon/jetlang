@@ -1,6 +1,7 @@
 #pragma once
 #include <stddef.h>
 #include <stdbool.h>
+#include <jet_ident.h>
 
 typedef enum jet_type_kind
 {
@@ -15,6 +16,7 @@ typedef enum jet_type_kind
 
 typedef struct jet_typedef
 {
+    jet_ident name;
     bool is_primitive;
     size_t size_bytes;
 } jet_typedef;

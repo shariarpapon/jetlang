@@ -12,6 +12,7 @@
 #include <jet_error.h>
 #include <jet_ident.h>
 #include <jet_type.h>
+#include <jet_type_lookup.h>
 
 #ifdef _WIN32
 #include<windows.h>
@@ -38,10 +39,17 @@ bool jet_cu_init(jet_compilation_unit* cu, const char* filename)
     bool errors_init = jet_da_init(&cu->parser_err_da, JET_CU_ERROR_CAP, sizeof(jet_error));
     bool type_name_hs_init = jet_ident_hashset_init(&cu->type_name_hs, JET_CU_TYPE_NAME_CAP);
     bool typedef_da_init = jet_da_init(&cu->typedef_da, JET_CU_TYPEDEF_CAP, sizeof(jet_typedef));
+    bool type_id_hs_init = jet_type_hs_init(&cu->type_id_hs, JET_CU_TYPEDEF_CAP);
 
     cu->source = jet_io_read_text(filename, &cu->source_len);
-    if(!cu->source || !arena_init || !tok_da_init 
-       || !ast_init || !errors_init || !type_name_hs_init || !typedef_da_init)
+    if(!cu->source 
+       || !arena_init 
+       || !tok_da_init 
+       || !ast_init 
+       || !errors_init 
+       || !type_name_hs_init 
+       || !typedef_da_init 
+       || !type_id_hs_init)
     {
         goto fail;
     }
@@ -66,6 +74,7 @@ fail:
     if(ast_init) jet_ast_dispose(&cu->ast);
     if(type_name_hs_init) jet_hs_dispose_full(&cu->type_name_hs);
     if(typedef_da_init) jet_da_dispose(&cu->typedef_da);
+    if(type_id_hs_init) jet_hs_dispose_full(&cu->type_id_hs);
     return false;
 }
 
@@ -74,6 +83,7 @@ void jet_cu_dispose(jet_compilation_unit* cu)
     if(!cu) return;
     if(cu->source) 
         free((void*)cu->source);
+    jet_hs_dispose_full(&cu->type_id_hs);
     jet_da_dispose(&cu->typedef_da);
     jet_hs_dispose_full(&cu->type_name_hs);
     jet_da_dispose(&cu->parser_err_da);

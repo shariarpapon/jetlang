@@ -33,7 +33,7 @@ bool jet_hs_init(
 
 void jet_hs_dispose_full(jet_hs* hs);
 void jet_hs_dispose_preserve_keys(jet_hs* hs);
-bool jet_hs_contains(jet_hs* hs, const void* key, const void** out_key);
+bool jet_hs_contains(const jet_hs* hs, const void* key, const void** out_key);
 
 //returns: the address the key was allocated at or the key that was 
 const void* jet_hs_add(jet_hs* hs, const void* key, size_t key_size);
@@ -46,119 +46,14 @@ bool jet_hs_remove(jet_hs* hs, const void* key);
 #include <string.h>
 #include <assert.h>
 
-static bool jet_hs_invalid(jet_hs* hs);
+static bool jet_hs_invalid(const jet_hs* hs);
 static bool jet_hs_slot_fill(jet_hs_slot* slot, const void* key, size_t key_size);
 static void jet_hs_slot_dispose_all(jet_hs_slot* slot, bool preserve_key);
 
-static size_t jet_hs_calculate_index(jet_hs* hs, const void* key);
+static size_t jet_hs_calculate_index(const jet_hs* hs, const void* key);
 static jet_hs_slot* jet_hs_get_available_slot(jet_hs* hs, size_t index);
-static jet_hs_slot* jet_hs_slot_at(jet_hs* hs, size_t index);
-static jet_hs_slot* jet_hs_slot_with_key(jet_hs* hs, const void* key);
-
-static bool jet_hs_invalid(jet_hs* hs)
-{
-    if(hs == NULL)
-    {
-        fprintf(stderr, "hashset pointer is null.\n");
-        return true;
-    }
-    if(hs->slots == NULL        || 
-            hs->capacity == 0   || 
-            hs->hash == NULL    || 
-            hs->equals == NULL  || 
-            hs->count >= hs->capacity)
-    {
-        fprintf(stderr, "hashset in invalid state, make sure to initialize.\n");
-        return true;
-    }
-    return false;
-}
-
-static size_t jet_hs_calculate_index(jet_hs* hs, const void* key)
-{
-    if(jet_hs_invalid(hs)) 
-        return 0;
-    if(key == NULL)
-    {
-        fprintf(stderr, "key is null.\n");
-        return 0;
-    }
-
-    uint64_t hash = hs->hash(key);
-    return hash % hs->capacity;
-}
-
-static jet_hs_slot* jet_hs_get_available_slot(jet_hs* hs, size_t index)
-{
-    if(jet_hs_invalid(hs))
-        return NULL;
-
-    jet_hs_slot* slot_i = jet_hs_slot_at(hs, index);
-    assert(slot_i != NULL); //root slot should never be null post-init.
-
-    while(slot_i->key != NULL && slot_i->next != NULL)
-        slot_i = slot_i->next;
-
-    if(slot_i->key == NULL)
-        return slot_i;
-    else
-    {
-        slot_i->next = (jet_hs_slot*)calloc(1, sizeof(jet_hs_slot));
-        return slot_i->next;
-    }
-}
-
-static jet_hs_slot* jet_hs_slot_at(jet_hs* hs, size_t index)
-{
-    if(jet_hs_invalid(hs))
-        return NULL;
-
-    if(index >= hs->capacity)
-    {
-        fprintf(stderr, "index %zu is out of bounds.\n", index);
-        return NULL;
-    }
-    return &hs->slots[index];
-}
-
-static bool jet_hs_slot_fill(jet_hs_slot* slot, const void* key, size_t key_size)
-{
-    if(slot == NULL || key == NULL)
-        return false;
-    slot->key = malloc(key_size);
-    memcpy((char*)slot->key, (const char*)key, key_size);
-    return true;
-}
-
-static void jet_hs_slot_dispose_all(jet_hs_slot* slot, bool preserve_key)
-{
-    if(slot == NULL) return;
-    if(slot->next != NULL)
-        jet_hs_slot_dispose_all(slot->next, preserve_key);
-    if(!preserve_key && slot->key)
-        free(slot->key);
-    free(slot->next);
-}
-
-static jet_hs_slot* jet_hs_slot_with_key(jet_hs* hs, const void* key)
-{
-    if(jet_hs_invalid(hs))
-        return NULL;
-    if(key == NULL)
-    {
-        fprintf(stderr, "arg key is null.");
-        return NULL;
-    }
-
-    jet_hs_slot* slot = jet_hs_slot_at(hs, jet_hs_calculate_index(hs, key));
-    while(slot != NULL)
-    {
-        if(slot->key != NULL && hs->equals(slot->key, key))
-            return slot;
-        slot = slot->next;
-    }
-    return NULL;
-}
+static jet_hs_slot* jet_hs_slot_at(const jet_hs* hs, size_t index);
+static jet_hs_slot* jet_hs_slot_with_key(const jet_hs* hs, const void* key);
 
 bool jet_hs_init(
         jet_hs* hs,
@@ -218,7 +113,7 @@ bool jet_hs_remove(jet_hs* hs, const void* key)
     return false;
 }
 
-bool jet_hs_contains(jet_hs* hs, const void* key, const void** out_key)
+bool jet_hs_contains(const jet_hs* hs, const void* key, const void** out_key)
 {
     jet_hs_slot* slot = jet_hs_slot_with_key(hs, key);
     if(slot != NULL) 
@@ -261,6 +156,112 @@ const void* jet_hs_add(jet_hs* hs, const void* key, size_t key_size)
 
     return (const void*)slot->key;
 }
+
+static bool jet_hs_invalid(const jet_hs* hs)
+{
+    if(hs == NULL)
+    {
+        fprintf(stderr, "hashset pointer is null.\n");
+        return true;
+    }
+    if(hs->slots == NULL        || 
+            hs->capacity == 0   || 
+            hs->hash == NULL    || 
+            hs->equals == NULL  || 
+            hs->count >= hs->capacity)
+    {
+        fprintf(stderr, "hashset in invalid state, make sure to initialize.\n");
+        return true;
+    }
+    return false;
+}
+
+static size_t jet_hs_calculate_index(const jet_hs* hs, const void* key)
+{
+    if(jet_hs_invalid(hs)) 
+        return 0;
+    if(key == NULL)
+    {
+        fprintf(stderr, "key is null.\n");
+        return 0;
+    }
+
+    uint64_t hash = hs->hash(key);
+    return hash % hs->capacity;
+}
+
+static jet_hs_slot* jet_hs_get_available_slot(jet_hs* hs, size_t index)
+{
+    if(jet_hs_invalid(hs))
+        return NULL;
+
+    jet_hs_slot* slot_i = jet_hs_slot_at(hs, index);
+    assert(slot_i != NULL); //root slot should never be null post-init.
+
+    while(slot_i->key != NULL && slot_i->next != NULL)
+        slot_i = slot_i->next;
+
+    if(slot_i->key == NULL)
+        return slot_i;
+    else
+    {
+        slot_i->next = (jet_hs_slot*)calloc(1, sizeof(jet_hs_slot));
+        return slot_i->next;
+    }
+}
+
+static jet_hs_slot* jet_hs_slot_at(const jet_hs* hs, size_t index)
+{
+    if(jet_hs_invalid(hs))
+        return NULL;
+
+    if(index >= hs->capacity)
+    {
+        fprintf(stderr, "index %zu is out of bounds.\n", index);
+        return NULL;
+    }
+    return &hs->slots[index];
+}
+
+static bool jet_hs_slot_fill(jet_hs_slot* slot, const void* key, size_t key_size)
+{
+    if(slot == NULL || key == NULL)
+        return false;
+    slot->key = malloc(key_size);
+    memcpy((char*)slot->key, (const char*)key, key_size);
+    return true;
+}
+
+static void jet_hs_slot_dispose_all(jet_hs_slot* slot, bool preserve_key)
+{
+    if(slot == NULL) return;
+    if(slot->next != NULL)
+        jet_hs_slot_dispose_all(slot->next, preserve_key);
+    if(!preserve_key && slot->key)
+        free(slot->key);
+    free(slot->next);
+}
+
+static jet_hs_slot* jet_hs_slot_with_key(const jet_hs* hs, const void* key)
+{
+    if(jet_hs_invalid(hs))
+        return NULL;
+    if(key == NULL)
+    {
+        fprintf(stderr, "arg key is null.");
+        return NULL;
+    }
+
+    jet_hs_slot* slot = jet_hs_slot_at(hs, jet_hs_calculate_index(hs, key));
+    while(slot != NULL)
+    {
+        if(slot->key != NULL && hs->equals(slot->key, key))
+            return slot;
+        slot = slot->next;
+    }
+    return NULL;
+}
+
 
 #endif
 
