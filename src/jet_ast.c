@@ -57,7 +57,7 @@ node_id jet_ast_register_node(jet_ast* ast, const jet_ast_node* node)
 bool jet_ast_push_nid(jet_ast* ast, node_id nid)
 {
     JET_ASSERT(ast != NULL);
-    const jet_ast_node* node = jet_ast_node_get(ast, nid);
+    const jet_ast_node* node = jet_ast_get_node_by_nid(ast, nid);
     if(node == NULL)
     {
         JET_LOG_ERROR("nid=%zu does not exist in registry.", nid);
@@ -79,7 +79,16 @@ bool jet_ast_push_nid(jet_ast* ast, node_id nid)
     return true;
 }
 
-const jet_ast_node* jet_ast_node_get(const jet_ast* ast, node_id nid)
+const jet_ast_node* jet_ast_get_node_at_index(const jet_ast* ast, size_t index)
+{
+    JET_ASSERT(ast != NULL);
+    const node_id* nid = jet_da_get((const jet_da*)&ast->top_nid_da, index);
+    if(nid == NULL)
+        return NULL;
+    return jet_ast_get_node_by_nid(ast, *nid);
+}
+
+const jet_ast_node* jet_ast_get_node_by_nid(const jet_ast* ast, node_id nid)
 {
     JET_ASSERT(ast != NULL);
 

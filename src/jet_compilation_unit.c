@@ -12,7 +12,8 @@
 #include <jet_error.h>
 #include <jet_ident.h>
 #include <jet_type.h>
-#include <jet_type_lookup.h>
+#include <jet_type_id_lookup.h>
+#include <jet_semantics.h>
 
 #ifdef _WIN32
 #include<windows.h>
@@ -39,7 +40,7 @@ bool jet_cu_init(jet_compilation_unit* cu, const char* filename)
     bool errors_init = jet_da_init(&cu->parser_err_da, JET_CU_ERROR_CAP, sizeof(jet_error));
     bool type_name_hs_init = jet_ident_hashset_init(&cu->type_name_hs, JET_CU_TYPE_NAME_CAP);
     bool typedef_da_init = jet_da_init(&cu->typedef_da, JET_CU_TYPEDEF_CAP, sizeof(jet_typedef));
-    bool type_id_hs_init = jet_type_hs_init(&cu->type_id_hs, JET_CU_TYPEDEF_CAP);
+    bool type_id_hs_init = jet_tid_hs_init(&cu->type_id_hs, JET_CU_TYPEDEF_CAP);
 
     cu->source = jet_io_read_text(filename, &cu->source_len);
     if(!cu->source 
@@ -100,21 +101,22 @@ bool jet_cu_run(jet_compilation_unit* cu)
     jet_lexer lexer;
     jet_parser parser;
 
-    bool lexer_init = false;
-    lexer_init = jet_lexer_init(&lexer, cu->filename, cu->source, &cu->tok_da);
+    bool lexer_init = jet_lexer_init(&lexer, cu->filename, cu->source, &cu->tok_da);
     if(!lexer_init || !jet_lexer_tokenize(&lexer)) 
     {
         JET_LOG_ERROR("lexer failed");
         goto fail;
     }
 
-    bool parser_init = false;
-    parser_init = jet_parser_init(&parser, cu);
+    bool parser_init = jet_parser_init(&parser, cu);
     if(!parser_init || !jet_parser_parse(&parser))
     {
         JET_LOG_ERROR("parser failed");
         goto fail;
     }
+    
+    jet_sema_resolve_typedefs(cu);
+
     jet_lexer_dispose(&lexer);
     jet_parser_dispose(&parser);
     return true;

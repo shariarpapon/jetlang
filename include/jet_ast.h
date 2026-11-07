@@ -17,7 +17,8 @@ void jet_ast_dispose(jet_ast* ast);
 node_id jet_ast_register_node(jet_ast* ast, const jet_ast_node* node);
 bool jet_ast_push_nid(jet_ast* ast, node_id nid);
 
-const jet_ast_node* jet_ast_node_get(const jet_ast* ast, node_id nid);
+const jet_ast_node* jet_ast_get_node_at_index(const jet_ast* ast, size_t index);
+const jet_ast_node* jet_ast_get_node_by_nid(const jet_ast* ast, node_id nid);
 const jet_da* jet_ast_get_top_nid_da(const jet_ast* ast);
 node_id jet_ast_get_prog_nid(const jet_ast* ast);
 
