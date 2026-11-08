@@ -73,18 +73,20 @@ bool jet_flagreg_has_flag(jet_flag_registry* fr, const char* f)
 
 const jet_flag_arg* jet_flagreg_get_arg(jet_flag_registry* fr, const char* flag_str, const char* arg_str)
 {
-    jet_flag* flag = jet_flagreg_get_flag(fr, flag_str);
-    if(flag == NULL) 
-        return NULL;
-    if(flag->args == NULL || flag->arg_count == 0)
-        return NULL;
-    for(size_t i = 0; i < flag->arg_count; i++)
+    for(size_t f = 0; f < fr->flag_count; f++)
     {
-        if(flag->args[i].name.str == NULL || flag->args[i].name.len != strlen(arg_str))
+        jet_flag flag = fr->flags[f];
+        if(flag.args == NULL || flag.arg_count == 0)
             continue;
-        if(strncmp(flag->args[i].name.str, arg_str, flag->args[i].name.len) == 0)
-            return &flag->args[i];
+        for(size_t i = 0; i < flag.arg_count; i++)
+        {
+            if(flag.args[i].name.str == NULL || flag.args[i].name.len != strlen(arg_str))
+                continue;
+            if(strncmp(flag.args[i].name.str, arg_str, flag.args[i].name.len) == 0)
+                return &flag.args[i];
+        }
     }
+
     return NULL;
 }
 
