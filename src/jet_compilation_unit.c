@@ -13,17 +13,16 @@
 #include <jet_ident.h>
 #include <jet_type.h>
 #include <jet_semantics.h>
-#include <jet_semantics_internals.h>
 
 #ifdef _WIN32
 #include<windows.h>
 #endif
 
-#define JET_CU_ARENA_CAP (1024 * 4)
-#define JET_CU_TOK_CAP (64)
+#define JET_CU_ARENA_CAP (1024 * 2)
+#define JET_CU_TOK_CAP (128)
 #define JET_CU_ERROR_CAP (16)
 #define JET_CU_TYPE_NAME_CAP (64)
-#define JET_CU_TYPEDEF_CAP (32)
+#define JET_CU_TYPE_DA_CAP (32)
 
 bool jet_cu_init(jet_compilation_unit* cu, const char* filename)
 {
@@ -39,8 +38,7 @@ bool jet_cu_init(jet_compilation_unit* cu, const char* filename)
     bool tok_da_init = jet_da_init(&cu->tok_da, JET_CU_TOK_CAP, sizeof(jet_token));
     bool errors_init = jet_da_init(&cu->parser_err_da, JET_CU_ERROR_CAP, sizeof(jet_error));
     bool type_name_hs_init = jet_ident_hashset_init(&cu->type_name_hs, JET_CU_TYPE_NAME_CAP);
-    bool typedef_da_init = jet_da_init(&cu->typedef_da, JET_CU_TYPEDEF_CAP, sizeof(jet_typedef));
-    bool type_id_hs_init = jet_sema_init_type_id_hs(&cu->type_id_hs, JET_CU_TYPEDEF_CAP);
+    bool type_da_init = jet_da_init(&cu->type_da, JET_CU_TYPE_DA_CAP, sizeof(jet_type));
 
     cu->source = jet_io_read_text(filename, &cu->source_len);
     if(!cu->source 
@@ -49,8 +47,7 @@ bool jet_cu_init(jet_compilation_unit* cu, const char* filename)
        || !ast_init 
        || !errors_init 
        || !type_name_hs_init 
-       || !typedef_da_init 
-       || !type_id_hs_init)
+       || !type_da_init)
     {
         goto fail;
     }
@@ -74,23 +71,22 @@ fail:
     if(errors_init) jet_da_dispose(&cu->parser_err_da);
     if(ast_init) jet_ast_dispose(&cu->ast);
     if(type_name_hs_init) jet_hs_dispose_full(&cu->type_name_hs);
-    if(typedef_da_init) jet_da_dispose(&cu->typedef_da);
-    if(type_id_hs_init) jet_hs_dispose_full(&cu->type_id_hs);
+    if(type_da_init) jet_da_dispose(&cu->type_da);
     return false;
 }
 
 void jet_cu_dispose(jet_compilation_unit* cu)
 {
     if(!cu) return;
-    if(cu->source) 
-        free((void*)cu->source);
     jet_hs_dispose_full(&cu->type_id_hs);
-    jet_da_dispose(&cu->typedef_da);
+    jet_da_dispose(&cu->type_da);
     jet_hs_dispose_full(&cu->type_name_hs);
     jet_da_dispose(&cu->parser_err_da);
     jet_ast_dispose(&cu->ast);
     jet_da_dispose(&cu->tok_da); 
     jet_arena_dispose(&cu->arena);
+    if(cu->source) 
+        free((void*)cu->source);
     memset(cu, 0, sizeof(*cu));
 }
 
@@ -106,8 +102,8 @@ bool jet_cu_run(jet_compilation_unit* cu)
     JET_ASSERT(jet_parser_init(&parser, cu));
     JET_ASSERT(jet_parser_parse(&parser));
     
-    JET_ASSERT(jet_sema_init());
-    JET_ASSERT(jet_sema_resolve_typedefs(cu));
+    JET_ASSERT(jet_sema_init(cu));
+    JET_ASSERT(jet_sema_resolve_types(cu));
 
     jet_lexer_dispose(&lexer);
     jet_parser_dispose(&parser);

@@ -44,7 +44,8 @@ const char* jet_error_kind_str(jet_error_kind kind)
 void jet_error_print_da(const jet_da* err_da)
 {
     if(err_da == NULL) return;
-    for(size_t i = 0; i < jet_da_count(err_da); i++)
+    size_t count = jet_da_count(err_da);
+    for(size_t i = 0; i < count; i++)
     {
         const jet_error* e = (const jet_error*)jet_da_get(err_da, i);
         jet_error_print(e);

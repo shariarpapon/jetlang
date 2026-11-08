@@ -1,6 +1,7 @@
-#include <jet_compilation_unit.h>
 #include <stdio.h>
 #include <stdbool.h>
+
+#include <jet_compilation_unit.h>
 #include <string.h>
 #include <jet_io.h>
 #include <jet_logger.h>
@@ -43,16 +44,18 @@ int main(int argc, char** argv)
     JET_ASSERT(filepath != NULL);
 
     printf("\n");
-    JET_LOG_INFO("all internal modules built. now compiling file '%s'", filepath);
+    JET_LOG_INFO("all internal modules built. now compiling file '%s'...", filepath);
     jet_compilation_unit cu;
     if(jet_compile(filepath, &cu))
         JET_LOG_INFO("input compiled successfully.");
     else 
         JET_LOG_ERROR("failed to compile input.");
-    printf("\n");
 
     if(jet_flagreg_has_arg(&fr, JET_FLAG_PRINT, JET_FLAG_PARSER_ERRORS))
+    {
+        printf("\n__parser errors [%zu]__\n\n", jet_da_count(&cu.parser_err_da));
         jet_error_print_da(&cu.parser_err_da);
+    }
     if(jet_flagreg_has_arg(&fr, JET_FLAG_PRINT, JET_FLAG_AST))
         jet_ast_print(&cu.ast);
     if(jet_flagreg_has_arg(&fr, JET_FLAG_PRINT, JET_FLAG_TOKENS))

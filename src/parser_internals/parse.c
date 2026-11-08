@@ -301,7 +301,7 @@ jet_result jet_parser_vdecl_parse(jet_parser* p)
         end_tok = jet_parser_peek_prev_tok(p);
 
     jet_span node_span = jet_parser_token_range_span(start_tok, end_tok); 
-    node_id init_value_nid = init_value_res.kind == JET_RESULT_ERROR ? INVALID_NID: init_value_res.as.nid;
+    node_id init_value_nid = init_value_res.kind == JET_RESULT_ERROR ? JET_INVALID_NID: init_value_res.as.nid;
     jet_ast_node node = jet_astn_vdecl(node_span, ref_name, tdecl_res.as.nid, init_value_nid); 
     return jet_parser_register_node(p, (const jet_ast_node*)&node);
 }
@@ -389,7 +389,7 @@ jet_result jet_parser_parse_fparam(jet_parser* p)
         }
     }
     jet_span node_span = jet_parser_token_range_span(start_tok, jet_parser_peek_prev_tok(p)); 
-    node_id init_value_nid = init_value_res.kind == JET_RESULT_ERROR ? INVALID_NID : init_value_res.as.nid;
+    node_id init_value_nid = init_value_res.kind == JET_RESULT_ERROR ? JET_INVALID_NID : init_value_res.as.nid;
     jet_ast_node node = jet_astn_vdecl(node_span, ref_name, tdecl_res.as.nid, init_value_nid); 
     return jet_parser_register_node(p, &node);
 }

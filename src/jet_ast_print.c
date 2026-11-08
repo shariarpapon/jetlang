@@ -192,7 +192,7 @@ static void jet_astp_print_node(jet_ast_printer* p, const jet_ast_node* n, size_
             break;
         case AST_IF:
             jet_astp_print_by_nid(p, n->as._if.cond_expr_nid, child_depth, false);
-            jet_astp_print_by_nid(p, n->as._if.block_nid, child_depth, n->as._if.elif_nid == INVALID_NID);
+            jet_astp_print_by_nid(p, n->as._if.block_nid, child_depth, n->as._if.elif_nid == JET_INVALID_NID);
             jet_astp_print_by_nid(p, n->as._if.elif_nid, child_depth, true);
             break;
         case AST_ELSE:
@@ -209,7 +209,7 @@ static void jet_astp_print_node(jet_ast_printer* p, const jet_ast_node* n, size_
             jet_astp_print_nid_da(p, "stmts", &n->as.block.stmt_nid_da, child_depth);
             break;
         case AST_VAR_DECL:  
-            jet_astp_print_by_nid(p, n->as.vdecl.tdecl_nid, child_depth, n->as.vdecl.init_value_nid == INVALID_NID);
+            jet_astp_print_by_nid(p, n->as.vdecl.tdecl_nid, child_depth, n->as.vdecl.init_value_nid == JET_INVALID_NID);
             jet_astp_print_by_nid(p, n->as.vdecl.init_value_nid, child_depth, true);
             break;
         case AST_FUNC_DECL:
@@ -340,7 +340,7 @@ static bool jet_astp_is_col_active(jet_ast_printer* p, size_t col)
 static void jet_astp_print_by_nid(jet_ast_printer* p, node_id nid, size_t depth, bool is_last)
 {
     JET_ASSERT(p != NULL);
-    if(nid == INVALID_NID) return;
+    if(nid == JET_INVALID_NID) return;
     const jet_ast_node* n = jet_ast_get_node_by_nid(p->ast, nid); 
     if(!n) return;
     jet_astp_print_node(p, n, depth, is_last);

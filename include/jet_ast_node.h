@@ -31,7 +31,7 @@ typedef enum jet_ast_node_type
   AST_BREAK,
 } jet_ast_node_type;
 
-#define INVALID_NID (0)
+#define JET_INVALID_NID (0)
 
 typedef size_t node_id;
 typedef struct jet_ast_node jet_ast_node;

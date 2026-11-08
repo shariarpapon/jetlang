@@ -9,15 +9,17 @@
 
 #include <jet_ast_node.h>
 
+#define JET_SEMA_TYPE_ID_HS_CAP (32)
+
 // Public Interface #############################
 
-bool jet_sema_init()
+bool jet_sema_init(jet_compilation_unit* cu)
 {
-    // add primitive types
-    return true;
+    if(!cu) return false;
+    return jet_sema_init_type_id_hs(&cu->type_id_hs, JET_SEMA_TYPE_ID_HS_CAP);
 }
 
-bool jet_sema_resolve_typedefs(jet_compilation_unit* cu)
+bool jet_sema_resolve_types(jet_compilation_unit* cu)
 {
     JET_ASSERT(cu != NULL);    
     const jet_da* top_nid_da = (const jet_da*)&cu->ast.top_nid_da;
@@ -29,9 +31,12 @@ bool jet_sema_resolve_typedefs(jet_compilation_unit* cu)
     for(size_t i = 0; i < top_count; i++)
     {
         const jet_ast_node* node = jet_ast_get_node_at_index(&cu->ast, i);
-        jet_typedef out_typedef= {0};
-        if(jet_sema_typedef_from_node(node, &out_typedef))
-            jet_sema_register_typedef(cu, out_typedef);
+        jet_type out_type= {0};
+        if(jet_sema_type_from_node(node, &out_type))
+        {
+            size_t tid = jet_sema_register_type(cu, out_type);
+            JET_ASSERT(jet_sema_add_type_id(cu, out_type.type_name, tid));
+        }
     }
 
     return true;
@@ -43,22 +48,5 @@ bool jet_sema_resolve_symbols(jet_compilation_unit* cu)
     return true;
 }
 
-
-
-// Semantics Internals ##############################
-
-
-// @Construction
-bool jet_sema_typedef_from_node(const jet_ast_node* node, jet_typedef* out)
-{
-    if(node == NULL || out == NULL)
-        return false;
-
-    switch(node->node_type)
-    {
-        default: 
-            return false;
-    }
-}
 
 

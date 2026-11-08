@@ -23,7 +23,7 @@ jet_result jet_parser_return_parse(jet_parser* p)
         return jet_parser_result_parsing_failed(AST_RETURN, jet_parser_peek_tok(p));
     const jet_token* start_tok = jet_parser_expect_tok(p, TOK_KWD_RETURN);
 
-    node_id value_expr_nid = INVALID_NID;
+    node_id value_expr_nid = JET_INVALID_NID;
     if(jet_parser_peekn_tok_type(p,0) != TOK_SEMI)
     {
         jet_result value_expr_res = jet_parser_parse_new_expr(p);
@@ -72,7 +72,7 @@ jet_result jet_parser_if_parse(jet_parser* p)
     }
     else has_alt_branch = false;
 
-    node_id elif_nid = INVALID_NID;
+    node_id elif_nid = JET_INVALID_NID;
     if(has_alt_branch)
     {
         JET_ASSERT(elif_res.kind == JET_RESULT_NID || elif_res.kind == JET_RESULT_ERROR);

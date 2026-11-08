@@ -10,6 +10,18 @@ typedef struct jet_type_entry
 static uint64_t jet_sema_type_entry_hash(const void* entry);
 static bool jet_sema_is_type_entry_equal(const void* entry_a, const void* entry_b);
 
+bool jet_sema_type_from_node(const jet_ast_node* node, jet_type* out)
+{
+    if(node == NULL || out == NULL)
+        return false;
+
+    switch(node->node_type)
+    {
+        default: 
+            return false;
+    }
+}
+
 bool jet_sema_init_type_id_hs(jet_hs* hs, size_t capacity)
 {
     if(hs == NULL || capacity == 0) 
@@ -17,28 +29,30 @@ bool jet_sema_init_type_id_hs(jet_hs* hs, size_t capacity)
     return jet_hs_init(hs, capacity, jet_sema_type_entry_hash, jet_sema_is_type_entry_equal);
 }
 
-bool jet_sema_add_type_id(jet_hs* hs, jet_ident type_name, size_t type_id)
+
+bool jet_sema_add_type_id(jet_compilation_unit* cu, jet_ident type_name, size_t type_id)
 {
-    if(jet_sema_has_type_name(hs, type_name))
+    JET_ASSERT(cu != NULL);
+    if(jet_sema_has_type_name(cu, type_name))
         return false;
 
     jet_type_entry key = {.type_name = type_name, .type_id = type_id};
-    return jet_hs_add(hs, (const void*)&key, sizeof(key)) != NULL;
+    return jet_hs_add(&cu->type_id_hs, (const void*)&key, sizeof(key)) != NULL;
 }
 
-bool jet_sema_has_type_name(const jet_hs* hs, jet_ident type_name)
+bool jet_sema_has_type_name(const jet_compilation_unit* cu, jet_ident type_name)
 {
-    JET_ASSERT(hs != NULL);
-    return jet_sema_get_type_id(hs, type_name) != JET_INVALID_TID;
+    JET_ASSERT(cu != NULL);
+    return jet_sema_get_type_id(cu, type_name) != JET_INVALID_TID;
 }
 
-size_t jet_sema_get_type_id(const jet_hs* hs, jet_ident type_name)
+size_t jet_sema_get_type_id(const jet_compilation_unit* cu, jet_ident type_name)
 {
-    JET_ASSERT(hs != NULL);
+    JET_ASSERT(cu != NULL);
     jet_type_entry temp = {0};
     temp.type_name = type_name; 
     const void* out = NULL;
-    if(jet_hs_contains(hs, (const void*)&temp, &out))
+    if(jet_hs_contains(&cu->type_id_hs, (const void*)&temp, &out))
     {
         temp = *((jet_type_entry*)out);
         return temp.type_id;
@@ -46,11 +60,11 @@ size_t jet_sema_get_type_id(const jet_hs* hs, jet_ident type_name)
     return JET_INVALID_TID;
 }
 
-size_t jet_sema_register_typedef(jet_compilation_unit* cu, jet_typedef def)
+size_t jet_sema_register_type(jet_compilation_unit* cu, jet_type def)
 {
     JET_ASSERT(cu != NULL);
-    JET_ASSERT(jet_da_append(&cu->typedef_da, &def));
-    return jet_da_count(&cu->typedef_da);
+    JET_ASSERT(jet_da_append(&cu->type_da, &def));
+    return jet_da_count(&cu->type_da);
 }
 
 size_t jet_sema_tid_from_index(size_t index)
@@ -78,3 +92,4 @@ static bool jet_sema_is_type_entry_equal(const void* entry_a, const void* entry_
     const jet_type_entry* b = entry_b;
     return jet_ident_value_equals(&a->type_name, &b->type_name);
 }
+

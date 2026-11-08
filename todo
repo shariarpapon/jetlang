@@ -1,1 +1,9 @@
--- wokring on adding if/else ast_nodes
+TODO
+
+- finish semantics phase 1:
+    -- main goal is to get a mapping of type_name -> type_id -> type 
+    * populate type_id_hs <key: type_name, value: type_id>
+    * populate typedef_da <index: type_id - 1>
+    
+
+

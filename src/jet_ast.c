@@ -10,7 +10,7 @@ bool jet_ast_init(jet_ast* ast)
 {
     JET_ASSERT(ast != NULL);
     memset(ast, 0, sizeof(*ast)); 
-    ast->prog_nid = INVALID_NID;
+    ast->prog_nid = JET_INVALID_NID;
     ast->node_count = 0;
     if(!jet_da_init(&ast->node_registry, 32, sizeof(jet_ast_node)) )
     {
@@ -48,7 +48,7 @@ node_id jet_ast_register_node(jet_ast* ast, const jet_ast_node* node)
     if(!jet_da_append(&ast->node_registry, (const void*)node)) {
         JET_LOG_ERROR(" failed to register node, unable to append.\n");
         abort();
-        return INVALID_NID;
+        return JET_INVALID_NID;
     }
     ast->node_count++;
     return ast->node_count;
@@ -65,7 +65,7 @@ bool jet_ast_push_nid(jet_ast* ast, node_id nid)
     }
     if(node->node_type == AST_PROG)
     {
-        if(ast->prog_nid == INVALID_NID)
+        if(ast->prog_nid == JET_INVALID_NID)
             ast->prog_nid = nid;
         else
         {
@@ -92,7 +92,7 @@ const jet_ast_node* jet_ast_get_node_by_nid(const jet_ast* ast, node_id nid)
 {
     JET_ASSERT(ast != NULL);
 
-    if(nid == INVALID_NID)
+    if(nid == JET_INVALID_NID)
     {
         JET_LOG_WARNING("attempting to get node with invalid-id (0)");
         return NULL;

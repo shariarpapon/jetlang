@@ -14,11 +14,11 @@ typedef enum jet_type_kind
     JET_TYPE_STR,
 } jet_type_kind;
 
-typedef struct jet_typedef
+typedef struct jet_type
 {
-    jet_ident name;
-    bool is_primitive;
+    jet_ident type_name;
+    jet_type_kind kind;
     size_t size_bytes;
-} jet_typedef;
+} jet_type;
 
 const char* jet_type_kind_str(jet_type_kind kind);
