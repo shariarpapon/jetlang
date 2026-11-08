@@ -16,8 +16,8 @@ typedef enum jet_type_kind
 
 typedef struct jet_type
 {
-    jet_ident type_name;
     jet_type_kind kind;
+    jet_ident type_name;
     size_t size_bytes;
 } jet_type;
 
