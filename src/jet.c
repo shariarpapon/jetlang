@@ -22,7 +22,7 @@
 #define JET_FLAG_PARSER_ERRORS ("pe")
 
 static const char* jet_get_filepath();
-static bool jet_compile(const char* filepath, jet_compilation_unit* cu);
+static bool jet_compile(jet_compilation_unit* cu);
 
 int main(int argc, char** argv)
 {
@@ -44,12 +44,20 @@ int main(int argc, char** argv)
     JET_ASSERT(filepath != NULL);
 
     printf("\n");
-    JET_LOG_INFO("all internal modules built. now compiling file '%s'...", filepath);
+    JET_LOG_INFO("all internal modules built.");
+    
     jet_compilation_unit cu;
-    if(jet_compile(filepath, &cu))
+    JET_ASSERT(jet_cu_init(&cu, filepath));
+    
+    JET_LOG_INFO("now compiling \"%s\"...", filepath);
+
+    if(jet_compile(&cu))
         JET_LOG_INFO("input compiled successfully.");
     else 
+    {
         JET_LOG_ERROR("failed to compile input.");
+        return 1;
+    }
 
     if(jet_flagreg_has_arg(&fr, JET_FLAG_PRINT, JET_FLAG_PARSER_ERRORS))
     {
@@ -65,10 +73,8 @@ int main(int argc, char** argv)
     jet_flagreg_dispose(&fr);
 }
 
-static bool jet_compile(const char* filepath, jet_compilation_unit* cu)
+static bool jet_compile(jet_compilation_unit* cu)
 {
     if(!cu) return false;
-    if(!jet_cu_init(cu, filepath)) 
-        return false;
     return jet_cu_run(cu);
 }
