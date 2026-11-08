@@ -11,7 +11,8 @@ endif
 CC = gcc
 C_SRC_PATHS := src/*.c \
 			   utils/*.c \
-			   src/parser_internals/*.c
+			   src/parser_internals/*.c \
+			   src/semantics_internals/*.c
 
 C_SRC := $(wildcard $(C_SRC_PATHS))
 

@@ -12,8 +12,8 @@
 #include <jet_error.h>
 #include <jet_ident.h>
 #include <jet_type.h>
-#include <jet_type_id_lookup.h>
 #include <jet_semantics.h>
+#include <jet_semantics_internals.h>
 
 #ifdef _WIN32
 #include<windows.h>
@@ -40,7 +40,7 @@ bool jet_cu_init(jet_compilation_unit* cu, const char* filename)
     bool errors_init = jet_da_init(&cu->parser_err_da, JET_CU_ERROR_CAP, sizeof(jet_error));
     bool type_name_hs_init = jet_ident_hashset_init(&cu->type_name_hs, JET_CU_TYPE_NAME_CAP);
     bool typedef_da_init = jet_da_init(&cu->typedef_da, JET_CU_TYPEDEF_CAP, sizeof(jet_typedef));
-    bool type_id_hs_init = jet_tid_hs_init(&cu->type_id_hs, JET_CU_TYPEDEF_CAP);
+    bool type_id_hs_init = jet_sema_init_type_id_hs(&cu->type_id_hs, JET_CU_TYPEDEF_CAP);
 
     cu->source = jet_io_read_text(filename, &cu->source_len);
     if(!cu->source 

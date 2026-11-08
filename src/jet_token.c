@@ -48,7 +48,7 @@ const char* jet_token_type_str(jet_token_type type)
 {
     switch(type)
     {
-        default:            return "unknown_str_conv";
+        default:            return "## token_type_no_str_conv ##";
         case TOK_INV:       return "TOK_INV";
         case TOK_EOF:       return "TOK_EOF";
         

@@ -31,7 +31,7 @@ bool jet_sema_resolve_typedefs(jet_compilation_unit* cu)
         const jet_ast_node* node = jet_ast_get_node_at_index(&cu->ast, i);
         jet_typedef out_typedef= {0};
         if(jet_sema_typedef_from_node(node, &out_typedef))
-            jet_sema_add_typedef(cu, out_typedef);
+            jet_sema_register_typedef(cu, out_typedef);
     }
 
     return true;
@@ -60,17 +60,5 @@ bool jet_sema_typedef_from_node(const jet_ast_node* node, jet_typedef* out)
             return false;
     }
 }
-
-// @Utils
-bool jet_sema_add_typedef(jet_compilation_unit* cu, jet_typedef def)
-{
-    JET_ASSERT(cu != NULL);
-    return jet_da_append(&cu->typedef_da, (const void*)&def);
-}
-
-
-
-
-
 
 
