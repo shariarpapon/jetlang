@@ -13,7 +13,7 @@
 #define ESCAPE_CHAR '\\'
 #define TAB_WIDTH (4)
 
-#define INIT_TOK_CAP 32
+#define JET_LEXER_INIT_TOK_CAP (64)
 
 typedef struct jet_tok_def 
 {
@@ -109,22 +109,27 @@ static char jet_lexer_peek(jet_lexer* lexer);
 static char jet_lexer_peek_next(jet_lexer* lexer);
 
 //lexer should be zero initialized, otherwise memory leak may occure if called with already initialized lexer.
-bool jet_lexer_init(jet_lexer* lexer, const char* filename, const char* input, jet_da* token_da)
+bool jet_lexer_init(jet_lexer* lexer, jet_compilation_unit* cu)
 {
-    JET_ASSERT(lexer != NULL);
-    if(!input || !token_da)
-    {
-        JET_LOG_ERROR("cannot init, invalid param/s.");
+    if(lexer == NULL || cu == NULL) 
         return false;
-    }
+
     memset(lexer, 0, sizeof(*lexer)); 
-    lexer->filename = filename;
-    lexer->input = input;
-    lexer->input_len = strlen(input);
+    lexer->filename = cu->filename;
     lexer->cursor = 0;
     lexer->cur_line = 1;
     lexer->cur_col = 1;
-    lexer->token_da = token_da;
+
+    cu->source = jet_io_read_text(cu->filename, &cu->source_len);
+    if(cu->source == NULL)
+        return false;
+    lexer->input = cu->source;
+    lexer->input_len = cu->source_len;
+
+    if(!jet_da_init(&cu->tok_da, JET_LEXER_INIT_TOK_CAP, sizeof(jet_token)))
+        return false;
+    lexer->token_da = &cu->tok_da;
+
     return true;
 }
 

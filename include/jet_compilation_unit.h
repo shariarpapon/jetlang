@@ -7,13 +7,19 @@
 typedef struct jet_compilation_unit
 {
     const char* filename;
+    jet_arena arena;
+
+    //lexer data
     const char* source;
     size_t source_len;
-    jet_arena arena;
     jet_da tok_da;
+
+    //parser data
     jet_ast ast;
     jet_da parser_err_da;
     jet_hs type_name_hs;
+
+    //semantics data
     jet_da type_da;
     jet_hs type_id_hs;
 } jet_compilation_unit;

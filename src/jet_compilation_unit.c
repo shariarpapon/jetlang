@@ -19,10 +19,6 @@
 #endif
 
 #define JET_CU_ARENA_CAP (1024 * 2)
-#define JET_CU_TOK_CAP (128)
-#define JET_CU_ERROR_CAP (16)
-#define JET_CU_TYPE_NAME_CAP (64)
-#define JET_CU_TYPE_DA_CAP (32)
 
 bool jet_cu_init(jet_compilation_unit* cu, const char* filename)
 {
@@ -30,27 +26,10 @@ bool jet_cu_init(jet_compilation_unit* cu, const char* filename)
         return false;
 
     memset(cu, 0, sizeof(*cu));
-    cu->filename = filename;
-    cu->source_len = 0; 
     
-    bool arena_init = jet_arena_init(&cu->arena, JET_CU_ARENA_CAP);
-    bool ast_init = jet_ast_init(&cu->ast);
-    bool tok_da_init = jet_da_init(&cu->tok_da, JET_CU_TOK_CAP, sizeof(jet_token));
-    bool errors_init = jet_da_init(&cu->parser_err_da, JET_CU_ERROR_CAP, sizeof(jet_error));
-    bool type_name_hs_init = jet_ident_hashset_init(&cu->type_name_hs, JET_CU_TYPE_NAME_CAP);
-    bool type_da_init = jet_da_init(&cu->type_da, JET_CU_TYPE_DA_CAP, sizeof(jet_type));
-
-    cu->source = jet_io_read_text(filename, &cu->source_len);
-    if(!cu->source 
-       || !arena_init 
-       || !tok_da_init 
-       || !ast_init 
-       || !errors_init 
-       || !type_name_hs_init 
-       || !type_da_init)
-    {
-        goto fail;
-    }
+    cu->filename = filename;
+    if(!jet_arena_init(&cu->arena, JET_CU_ARENA_CAP))
+        return false;
 
     //intialize ansi for windows 
 #ifdef _WIN32
@@ -63,16 +42,6 @@ bool jet_cu_init(jet_compilation_unit* cu, const char* filename)
 #endif
 
     return true;
-
-fail:
-    if(cu->source) free((void*)cu->source);
-    if(arena_init) jet_arena_dispose(&cu->arena);
-    if(tok_da_init) jet_da_dispose(&cu->tok_da);
-    if(errors_init) jet_da_dispose(&cu->parser_err_da);
-    if(ast_init) jet_ast_dispose(&cu->ast);
-    if(type_name_hs_init) jet_hs_dispose_full(&cu->type_name_hs);
-    if(type_da_init) jet_da_dispose(&cu->type_da);
-    return false;
 }
 
 void jet_cu_dispose(jet_compilation_unit* cu)
@@ -95,7 +64,7 @@ bool jet_cu_run(jet_compilation_unit* cu)
     JET_ASSERT(cu != NULL);    
 
     jet_lexer lexer;
-    JET_ASSERT(jet_lexer_init(&lexer, cu->filename, cu->source, &cu->tok_da));
+    JET_ASSERT(jet_lexer_init(&lexer, cu));
     JET_ASSERT(jet_lexer_tokenize(&lexer));
 
     jet_parser parser;
