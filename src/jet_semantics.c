@@ -18,8 +18,14 @@ bool jet_sema_init(jet_compilation_unit* cu)
 {
     if(!cu) return false;
     
-    return jet_sema_init_type_id_hs(&cu->type_id_hs, JET_SEMA_TYPE_ID_HS_CAP) && 
-           jet_da_init(&cu->type_da, JET_SEMA_TYPE_DA_CAP, sizeof(jet_type));
+    if(!jet_sema_init_type_id_hs(&cu->type_id_hs, JET_SEMA_TYPE_ID_HS_CAP) ||
+       !jet_da_init(&cu->type_da, JET_SEMA_TYPE_DA_CAP, sizeof(jet_type)) )
+    {
+        return false;
+    }
+    if(!jet_sema_register_primitive_types(cu))
+        return false;
+    return true;
 }
 
 bool jet_sema_resolve_types(jet_compilation_unit* cu)
@@ -37,8 +43,7 @@ bool jet_sema_resolve_types(jet_compilation_unit* cu)
         jet_type out_type= {0};
         if(jet_sema_type_from_node(node, &out_type))
         {
-            size_t tid = jet_sema_register_type(cu, out_type);
-            JET_ASSERT(jet_sema_add_type_id(cu, out_type.type_name, tid));
+            JET_ASSERT(jet_sema_register_type(cu, out_type));
         }
     }
 
