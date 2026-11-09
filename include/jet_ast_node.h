@@ -17,7 +17,7 @@ typedef enum jet_ast_node_type
   AST_LIT,
   AST_BLOCK,
   AST_VAR_DECL,
-  AST_TYPE_DECL,
+  AST_TYPE_SPEC,
   AST_TYPE_DEF,
   AST_FUNC_DECL,
   AST_FUNC_DEF,
@@ -69,22 +69,22 @@ typedef struct jet_ast_node_block
 typedef struct jet_ast_node_vdecl
 {    
   jet_ident ref_name;
-  node_id tdecl_nid;
+  node_id tspec_nid;
   node_id init_value_nid;
 } jet_ast_node_vdecl;
 
 typedef struct jet_ast_node_fdecl
 {
     jet_ident ref_name;
-    node_id ret_tdecl_nid;
+    node_id ret_tspec_nid;
     jet_da param_nid_da; 
 } jet_ast_node_fdecl;
 
-typedef struct jet_ast_node_tdecl 
+typedef struct jet_ast_node_tspec 
 {
   jet_ident type_name;
   jet_type_kind tkind;
-} jet_ast_node_tdecl;
+} jet_ast_node_tspec;
 
 typedef struct jet_ast_node_tdef
 {
@@ -153,7 +153,7 @@ struct jet_ast_node
         jet_ast_node_return _return;
 
         jet_ast_node_vdecl vdecl;
-        jet_ast_node_tdecl tdecl;
+        jet_ast_node_tspec tspec;
         jet_ast_node_fdecl fdecl;
         jet_ast_node_tdef tdef;
 
@@ -182,9 +182,9 @@ jet_ast_node jet_astn_prog(jet_span span, node_id block_nid);
 jet_ast_node jet_astn_mem(jet_span span, size_t alloc_size);
 jet_ast_node jet_astn_lit(jet_span span, jet_type_kind tkind, const void* value);
 jet_ast_node jet_astn_block(jet_span span, const jet_da* stmt_nid_da);
-jet_ast_node jet_astn_vdecl(jet_span span, const jet_ident ref_name, node_id tdecl_nid, node_id init_value_nid);
-jet_ast_node jet_astn_fdecl(jet_span span, const jet_ident ref_name, node_id ret_tdecl_nid, const jet_da* param_nid_da);
-jet_ast_node jet_astn_tdecl(jet_span span, const jet_ident type_name, jet_type_kind tkind);
+jet_ast_node jet_astn_vdecl(jet_span span, const jet_ident ref_name, node_id tspec_nid, node_id init_value_nid);
+jet_ast_node jet_astn_fdecl(jet_span span, const jet_ident ref_name, node_id ret_tspec_nid, const jet_da* param_nid_da);
+jet_ast_node jet_astn_tspec(jet_span span, const jet_ident type_name, jet_type_kind tkind);
 jet_ast_node jet_astn_tdef(jet_span span, const jet_ident type_name, node_id block_nid);
 jet_ast_node jet_astn_fdef(jet_span span, node_id fdecl_nid, node_id block_nid);
 jet_ast_node jet_astn_call(jet_span span, node_id callee_nid, const jet_da* arg_nid_da);

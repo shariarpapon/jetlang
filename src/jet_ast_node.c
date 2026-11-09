@@ -56,7 +56,7 @@ const char* jet_ast_node_type_str(jet_ast_node_type node_type)
         case AST_LIT: return "AST_LIT";
         case AST_BLOCK: return "AST_BLOCK";
         case AST_VAR_DECL: return "AST_VAR_DECL";
-        case AST_TYPE_DECL: return "AST_TYPE_DECL";
+        case AST_TYPE_SPEC: return "AST_TYPE_SPEC";
         case AST_TYPE_DEF: return "AST_TYPE_DEF";
         case AST_FUNC_DECL: return "AST_FUNC_DECL";
         case AST_FUNC_DEF: return "AST_FUNC_DEF";
@@ -124,22 +124,22 @@ jet_ast_node jet_astn_block(jet_span span, const jet_da* stmt_nid_da)
     return node;
 }
 
-jet_ast_node jet_astn_vdecl(jet_span span, const jet_ident ref_name, node_id tdecl_nid, node_id init_value_nid)
+jet_ast_node jet_astn_vdecl(jet_span span, const jet_ident ref_name, node_id tspec_nid, node_id init_value_nid)
 {
     jet_ast_node node = jet_astn_base(AST_VAR_DECL, span);
     node.as.vdecl = (jet_ast_node_vdecl){
-        .tdecl_nid = tdecl_nid, 
+        .tspec_nid = tspec_nid, 
         .ref_name = ref_name, 
         .init_value_nid = init_value_nid 
     };
     return node;
 }
 
-jet_ast_node jet_astn_tdecl(jet_span span, const jet_ident type_name, jet_type_kind tkind)
+jet_ast_node jet_astn_tspec(jet_span span, const jet_ident type_name, jet_type_kind tkind)
 {
-    jet_ast_node node = jet_astn_base(AST_TYPE_DECL, span);
-    node.as.tdecl = 
-    (jet_ast_node_tdecl){
+    jet_ast_node node = jet_astn_base(AST_TYPE_SPEC, span);
+    node.as.tspec = 
+    (jet_ast_node_tspec){
         .tkind = tkind,
         .type_name = type_name,
     };
@@ -153,10 +153,10 @@ jet_ast_node jet_astn_tdef(jet_span span, const jet_ident type_name, node_id blo
     return node;
 }
 
-jet_ast_node jet_astn_fdecl(jet_span span, const jet_ident ref_name, node_id ret_tdecl_nid, const jet_da* param_nid_da)
+jet_ast_node jet_astn_fdecl(jet_span span, const jet_ident ref_name, node_id ret_tspec_nid, const jet_da* param_nid_da)
 {
     jet_ast_node node = jet_astn_base(AST_FUNC_DECL, span);
-    jet_ast_node_fdecl fdecl = {.ref_name = ref_name, .ret_tdecl_nid = ret_tdecl_nid};
+    jet_ast_node_fdecl fdecl = {.ref_name = ref_name, .ret_tspec_nid = ret_tspec_nid};
     JET_ASSERT(jet_da_clone(&fdecl.param_nid_da, param_nid_da)); 
     node.as.fdecl = fdecl;
     return node;

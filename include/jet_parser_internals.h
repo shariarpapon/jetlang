@@ -40,7 +40,7 @@ jet_token_type jet_parser_peekn_tok_type(jet_parser* p, size_t n);
 bool jet_parser_is_vdecl_head(jet_parser* p);
 bool jet_parser_is_func_head(jet_parser* p);
 bool jet_parser_is_prog_head(jet_parser* p);
-bool jet_parser_is_tdecl(jet_parser* p);
+bool jet_parser_is_tspec(jet_parser* p);
 bool jet_parser_is_tdef(jet_parser* p);
 bool jet_parser_is_unop_head(jet_parser* p);
 bool jet_parser_is_call_head(jet_parser* p);
@@ -75,7 +75,7 @@ jet_da jet_parser_parse_expr_seq(jet_parser* p, jet_token_type delim, jet_token_
 
 jet_result jet_parser_parse_fparam(jet_parser* p);
 jet_result jet_parser_vdecl_parse(jet_parser* p);
-jet_result jet_parser_tdecl_parse(jet_parser* p);
+jet_result jet_parser_tspec_parse(jet_parser* p);
 jet_result jet_parser_func_parse(jet_parser* p);
 jet_result jet_parser_tdef_parse(jet_parser* p);
 jet_result jet_parser_prog_parse(jet_parser* p);
