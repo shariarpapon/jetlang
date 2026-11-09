@@ -9,6 +9,7 @@
 #include <jet_token_print.h>
 #include <jet_error_print.h>
 #include <jet_cli_flags.h>
+#include <jet_type_print.h>
 
 #define JET_FILEPATH_SIZE (512)
 
@@ -17,9 +18,10 @@
 
 //DEBUG
 #define JET_FLAG_PRINT ("p")
-#define JET_FLAG_TOKENS ("t")
+#define JET_FLAG_TOKENS ("tk")
 #define JET_FLAG_AST ("a")
 #define JET_FLAG_PARSER_ERRORS ("pe")
+#define JET_FLAG_TYPES ("tp")
 
 static const char* jet_get_filepath();
 static bool jet_compile(jet_compilation_unit* cu);
@@ -68,6 +70,11 @@ int main(int argc, char** argv)
         jet_ast_print(&cu.ast);
     if(jet_flagreg_has_arg(&fr, JET_FLAG_PRINT, JET_FLAG_TOKENS))
         jet_token_table_print_da(&cu.tok_da);
+    if(jet_flagreg_has_arg(&fr, JET_FLAG_PRINT, JET_FLAG_TYPES))
+    {
+        printf("\n__registered types[%zu]__\n\n", jet_da_count(&cu.type_da));
+        jet_type_print_da(&cu.type_da);
+    }
 
     jet_cu_dispose(&cu);
     jet_flagreg_dispose(&fr);
