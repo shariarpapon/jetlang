@@ -38,6 +38,8 @@ const char* jet_error_kind_str(jet_error_kind kind)
              return "JET_ERR_EXPECTED_EXPR";
         case JET_ERR_PRIMARY_EXPR_PARSING_FAILED:
              return "JET_ERR_PRIMARY_EXPR_PARSING_FAILED";
+        case JET_ERR_NO_VALID_PARSING_SEQ:
+             return "JET_ERR_NO_VALID_PARSING_SEQ";
     }
 }
 
@@ -93,6 +95,11 @@ static bool jet_error_resolve_str(const jet_error* e, char* out_buf, size_t buf_
             JET_ASSERT(tok_str != NULL);
             jet_sb_appendf(&sb, "invalid token encountered '%s'", tok_str);
             free((void*)tok_str);
+            break;
+        }
+        case JET_ERR_NO_VALID_PARSING_SEQ:
+        {
+            jet_sb_append_cstr(&sb, "unable to find any valid token sequence to parse");
             break;
         }
     }

@@ -1,6 +1,27 @@
 #include <jet_parser_internals.h>
 #include <jet_logger.h>
 
+bool jet_parser_is_expr_head(jet_parser* p)
+{
+    JET_ASSERT(p != NULL);
+    switch(jet_parser_peekn_tok_type(p, 0))
+    {
+        default: 
+            return false;
+        case TOK_IDENT:
+        case TOK_LPAR:
+        case TOK_LIT_INT:
+        case TOK_LIT_FLOAT:
+        case TOK_LIT_STR:
+        case TOK_LIT_CHAR:
+        case TOK_KWD_TRUE:
+        case TOK_KWD_FALSE:
+        case TOK_NOT:
+        case TOK_MINUS:
+            return true;
+    }
+}
+
 bool jet_parser_is_break_head(jet_parser* p)
 {
     JET_ASSERT(p != NULL);

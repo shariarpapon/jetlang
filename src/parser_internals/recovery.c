@@ -29,25 +29,14 @@ void jet_parser_push_err(jet_parser* p, const jet_error* err)
 
 bool jet_parser_sync_toplevel(jet_parser* p)
 {
-    while(jet_parser_peekn_tok_type(p, 0) != TOK_EOF)
-    {
-        switch(jet_parser_peekn_tok_type(p, 0))
-        {
-            default:
-                jet_parser_consume_tok(p);
-                break;
+    JET_ASSERT(p != NULL);
 
-            case TOK_KWD_TYPE:
-            case TOK_KWD_PROG:
-            case TOK_KWD_NEEDS:
-            case TOK_KWD_CHAR:
-            case TOK_KWD_VOID:
-            case TOK_KWD_INT:
-            case TOK_KWD_FLOAT:
-            case TOK_KWD_STR:
-            case TOK_KWD_BOOL:
-                return true;
-        }
+    while(jet_parser_peekn_tok_type(p, 0) != TOK_EOF)
+    { 
+        if(jet_parser_is_prog_head(p) || jet_parser_is_func_head(p) || jet_parser_is_tdef(p))
+            return true;
+        else 
+            jet_parser_consume_tok(p);
     }
     return false;
 }

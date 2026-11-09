@@ -37,6 +37,9 @@ const jet_token* jet_parser_expect_tok_keep(jet_parser* p, jet_token_type tok_ty
 jet_token_type jet_parser_peekn_tok_type(jet_parser* p, size_t n);
 
 //### grammar
+
+// toplevel
+bool jet_parser_is_expr_head(jet_parser* p);
 bool jet_parser_is_vdecl_head(jet_parser* p);
 bool jet_parser_is_func_head(jet_parser* p);
 bool jet_parser_is_prog_head(jet_parser* p);

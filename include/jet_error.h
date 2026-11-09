@@ -23,6 +23,7 @@ enum jet_error_kind
     JET_ERR_PARSING_FAILED,
     JET_ERR_EXPECTED_EXPR,
     JET_ERR_PRIMARY_EXPR_PARSING_FAILED,
+    JET_ERR_NO_VALID_PARSING_SEQ,
 };
 
 struct jet_error_invalid_token

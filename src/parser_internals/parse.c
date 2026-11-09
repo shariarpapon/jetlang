@@ -32,8 +32,13 @@ jet_result jet_parser_parse_toplevel(jet_parser* p)
         return jet_parser_vdecl_parse(p); 
     else if(jet_parser_is_func_head(p))
         return jet_parser_func_parse(p);
-    else 
+    else if(jet_parser_is_expr_head(p)) 
         return jet_parser_parse_expr_stmt(p);
+    else
+    {
+        jet_error err = jet_err(JET_ERR_NO_VALID_PARSING_SEQ, start_tok->span);
+        return jet_result_error(&err);
+    }
 }
 
 jet_result jet_parser_parse_scoped_stmt(jet_parser* p)
