@@ -29,6 +29,10 @@ jet_result jet_parser_parse_expr(jet_parser* p, size_t min_prec)
 {
     JET_ASSERT(p != NULL);
     const jet_token* start_tok = jet_parser_peek_tok(p);
+
+    if(start_tok->type == TOK_INV)
+        jet_parser_handle_inv_tok(p);
+
     jet_result primary_res = jet_parser_parse_primary_term(p);
     JET_ASSERT(primary_res.kind == JET_RESULT_NID || primary_res.kind == JET_RESULT_ERROR);
     if(primary_res.kind == JET_RESULT_ERROR)
@@ -44,6 +48,11 @@ jet_result jet_parser_parse_expr(jet_parser* p, size_t min_prec)
     while(true)
     {
         operator_tok = jet_parser_peek_tok(p);
+        if(operator_tok->type == TOK_INV)
+        {
+            jet_parser_handle_inv_tok(p);
+            continue;
+        }
         operator_prec = jet_parser_get_op_prec(operator_tok->type);
         if(operator_prec == PREC_NONE || operator_prec < min_prec) 
             break;
@@ -70,6 +79,9 @@ static jet_result jet_parser_parse_primary_term(jet_parser* p)
         default:
             jet_span err_span = jet_parser_token_range_span(start_tok, start_tok);
             res.as.error = jet_err(JET_ERR_PRIMARY_EXPR_PARSING_FAILED, err_span);
+            break;
+        case TOK_INV:
+            jet_parser_handle_inv_tok(p);
             break;
         case TOK_IDENT:
         case TOK_LIT_INT:

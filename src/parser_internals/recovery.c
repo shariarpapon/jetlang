@@ -7,6 +7,18 @@ jet_result jet_parser_result_parsing_failed(jet_ast_node_type node_type, const j
     return jet_result_error(&err);
 }
 
+void jet_parser_handle_inv_tok(jet_parser* p)
+{
+    JET_ASSERT(p != NULL);
+
+    while(jet_parser_peekn_tok_type(p, 0) == TOK_INV)
+    {
+        jet_error err = jet_err_invalid_token(jet_parser_peek_tok(p));
+        jet_parser_push_err(p, &err);
+        jet_parser_consume_tok(p);
+    }
+}
+
 void jet_parser_push_err(jet_parser* p, const jet_error* err)
 {
     JET_ASSERT(p != NULL);

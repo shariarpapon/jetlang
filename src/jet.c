@@ -63,7 +63,7 @@ int main(int argc, char** argv)
 
     if(jet_flagreg_has_arg(&fr, JET_FLAG_PRINT, JET_FLAG_PARSER_ERRORS))
     {
-        printf("\n__parser errors [%zu]__\n\n", jet_da_count(&cu.parser_err_da));
+        printf("\n__parser errors [%zu]__\n", jet_da_count(&cu.parser_err_da));
         jet_error_print_da(&cu.parser_err_da);
     }
     if(jet_flagreg_has_arg(&fr, JET_FLAG_PRINT, JET_FLAG_AST))
@@ -72,7 +72,7 @@ int main(int argc, char** argv)
         jet_token_table_print_da(&cu.tok_da);
     if(jet_flagreg_has_arg(&fr, JET_FLAG_PRINT, JET_FLAG_TYPES))
     {
-        printf("\n__registered types[%zu]__\n\n", jet_da_count(&cu.type_da));
+        printf("\n__registered types [%zu]__\n", jet_da_count(&cu.type_da));
         jet_type_print_da(&cu.type_da);
     }
 

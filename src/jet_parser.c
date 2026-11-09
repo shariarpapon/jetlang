@@ -56,6 +56,11 @@ bool jet_parser_parse(jet_parser* p)
     {
         t = jet_parser_peekn_tok_type(p, 0); 
         if(t == TOK_EOF) break; 
+        if(t == TOK_INV) 
+        {
+            jet_parser_handle_inv_tok(p);
+            continue;
+        }
         jet_result result = jet_parser_parse_toplevel(p); 
         JET_ASSERT(result.kind == JET_RESULT_NID || result.kind == JET_RESULT_ERROR);
         if(result.kind == JET_RESULT_NID)

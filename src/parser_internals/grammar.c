@@ -50,7 +50,7 @@ bool jet_parser_is_prog_head(jet_parser* p)
 
 bool jet_parser_is_tdef(jet_parser* p)
 {
-    jet_token_type seq[] = { TOK_KWD_TYPE, TOK_IDENT, TOK_LBRC };
+    jet_token_type seq[] = { TOK_KWD_TYPE, TOK_IDENT, TOK_LBRC};
     return jet_parser_is_sequence_match(p, seq, ARRAY_LEN(seq));
 }
 

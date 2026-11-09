@@ -96,6 +96,7 @@ jet_result jet_parser_register_node(jet_parser* p, const jet_ast_node* node);
 //### recovery
 jet_result jet_parser_result_parsing_failed(jet_ast_node_type node_type, const jet_token* tok);
 void jet_parser_push_err(jet_parser* p, const jet_error* err);
+void jet_parser_handle_inv_tok(jet_parser* p);
 
 bool jet_parser_sync_toplevel(jet_parser* p);
 bool jet_parser_sync_block(jet_parser* p);

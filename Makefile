@@ -24,11 +24,15 @@ C_COMPILE = $(CC) $(C_FLAGS) $(C_SRC) $(C_INCLUDES) -o $(C_BIN)
 JET_DEF_FLAGS = -f,code.jt -p,pe
 JET_EXEC = $(RUN) $(JET_DEF_FLAGS)
 
-.PHONY: all rebuild rb clean
+.PHONY: all rebuild rb clean testbuild tb
 
 all:
 	$(C_COMPILE)
 	$(JET_EXEC) 
+
+testbuild tb:
+	$(C_COMPILE)
+	$(JET_EXEC) -p,tp
 
 rebuild rb:
 	$(MAKE) clean

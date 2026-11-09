@@ -65,14 +65,20 @@ bool jet_cu_run(jet_compilation_unit* cu)
 
     jet_lexer lexer;
     JET_ASSERT(jet_lexer_init(&lexer, cu));
+    JET_LOG_INFO("lexer initialized");
     JET_ASSERT(jet_lexer_tokenize(&lexer));
+    JET_LOG_INFO("lexer finished");
 
     jet_parser parser;
     JET_ASSERT(jet_parser_init(&parser, cu));
+    JET_LOG_INFO("parser initialized");
     JET_ASSERT(jet_parser_parse(&parser));
+    JET_LOG_INFO("parser finished");
     
     JET_ASSERT(jet_sema_init(cu));
-    JET_ASSERT(jet_sema_resolve_types(cu));
+    JET_LOG_INFO("semantics initialized");
+    JET_ASSERT(jet_sema_resolve_types(cu)); 
+    JET_LOG_INFO("semantics finished");
 
     jet_lexer_dispose(&lexer);
     jet_parser_dispose(&parser);

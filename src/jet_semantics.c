@@ -10,13 +10,16 @@
 #include <jet_ast_node.h>
 
 #define JET_SEMA_TYPE_ID_HS_CAP (32)
+#define JET_SEMA_TYPE_DA_CAP (32)
 
 // Public Interface #############################
 
 bool jet_sema_init(jet_compilation_unit* cu)
 {
     if(!cu) return false;
-    return jet_sema_init_type_id_hs(&cu->type_id_hs, JET_SEMA_TYPE_ID_HS_CAP);
+    
+    return jet_sema_init_type_id_hs(&cu->type_id_hs, JET_SEMA_TYPE_ID_HS_CAP) && 
+           jet_da_init(&cu->type_da, JET_SEMA_TYPE_DA_CAP, sizeof(jet_type));
 }
 
 bool jet_sema_resolve_types(jet_compilation_unit* cu)

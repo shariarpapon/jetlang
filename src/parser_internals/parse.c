@@ -20,6 +20,7 @@ jet_result jet_parser_parse_toplevel(jet_parser* p)
     }
     else if(t == TOK_INV)
     {
+        jet_parser_handle_inv_tok(p);
         jet_error err = jet_err_invalid_token(start_tok);
         return jet_result_error(&err);
     }
@@ -49,6 +50,7 @@ jet_result jet_parser_parse_scoped_stmt(jet_parser* p)
     }
     else if(t == TOK_INV)
     {
+        jet_parser_consume_tok(p);
         jet_error err = jet_err_invalid_token(start_tok);
         return jet_result_error(&err);
     }
@@ -98,6 +100,7 @@ jet_result jet_parser_block_parse(jet_parser* p)
     jet_token_type t = TOK_EOF;
     const jet_token* token;
     bool unexp_eof = false;
+
     while(true)
     {
         token = jet_parser_peek_tok(p);

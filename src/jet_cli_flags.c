@@ -198,7 +198,7 @@ const jet_flag_arg* jet_flagreg_get_argi(jet_flag_registry* fr, const char* flag
         if(strncmp(flag.name.str, flag_name, flag.name.len) == 0)
         {
             if(index >= flag.arg_count || flag.args == NULL) 
-                return NULL;
+                continue;
             return &flag.args[index];
         }
     }

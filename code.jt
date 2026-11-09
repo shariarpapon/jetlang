@@ -1,4 +1,4 @@
-type Vector2 
+type Vector2
 {
     int x;
     int y;

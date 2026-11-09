@@ -19,6 +19,9 @@ bool jet_sema_type_from_node(const jet_ast_node* node, jet_type* out)
     {
         default: 
             return false;
+        case AST_TYPE_DEF:
+            *out = (jet_type){.kind = JET_TYPE_CUSTOM, .type_name = node->as.tdef.type_name};
+            return true;
     }
 }
 
@@ -63,7 +66,7 @@ size_t jet_sema_get_type_id(const jet_compilation_unit* cu, jet_ident type_name)
 size_t jet_sema_register_type(jet_compilation_unit* cu, jet_type def)
 {
     JET_ASSERT(cu != NULL);
-    JET_ASSERT(jet_da_append(&cu->type_da, &def));
+    JET_ASSERT(jet_da_append(&cu->type_da, (const void*)&def));
     return jet_da_count(&cu->type_da);
 }
 
