@@ -10,28 +10,12 @@ typedef struct jet_type_entry
 static uint64_t jet_sema_type_entry_hash(const void* entry);
 static bool jet_sema_is_type_entry_equal(const void* entry_a, const void* entry_b);
 
-bool jet_sema_type_from_node(const jet_ast_node* node, jet_type* out)
-{
-    if(node == NULL || out == NULL)
-        return false;
-
-    switch(node->node_type)
-    {
-        default: 
-            return false;
-        case AST_TYPE_DEF:
-            *out = (jet_type){.kind = JET_TYPE_CUSTOM, .type_name = node->as.tdef.type_name};
-            return true;
-    }
-}
-
 bool jet_sema_init_type_id_hs(jet_hs* hs, size_t capacity)
 {
     if(hs == NULL || capacity == 0) 
         return false;
     return jet_hs_init(hs, capacity, jet_sema_type_entry_hash, jet_sema_is_type_entry_equal);
 }
-
 
 bool jet_sema_add_type_id(jet_compilation_unit* cu, jet_ident type_name, size_t type_id)
 {
