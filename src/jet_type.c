@@ -23,7 +23,7 @@ const char* jet_type_kind_str(jet_type_kind kind)
 }
 
 
-jet_type jet_type_bool()
+jet_type jet_type_prim_bool()
 {
     jet_type_kind kind = JET_TYPE_BOOL;
     const char* str = "bool";
@@ -37,7 +37,7 @@ jet_type jet_type_bool()
     };
 }
 
-jet_type jet_type_int()
+jet_type jet_type_prim_int()
 {
     jet_type_kind kind = JET_TYPE_INT;
     const char* str = "int";
@@ -51,7 +51,7 @@ jet_type jet_type_int()
     }; 
 }
 
-jet_type jet_type_float()
+jet_type jet_type_prim_float()
 {
     jet_type_kind kind = JET_TYPE_FLOAT;
     const char* str = "float";
@@ -66,7 +66,7 @@ jet_type jet_type_float()
 
 }
 
-jet_type jet_type_str()
+jet_type jet_type_prim_str()
 { 
     jet_type_kind kind = JET_TYPE_STR;
     const char* str = "str";
@@ -79,7 +79,7 @@ jet_type jet_type_str()
         .size_bytes=size
     };
 }
-jet_type jet_type_char()
+jet_type jet_type_prim_char()
 {
     jet_type_kind kind = JET_TYPE_CHAR;
     const char* str = "char";

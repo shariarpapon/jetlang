@@ -10,8 +10,8 @@
 #define JET_TYPE_PRINT_MAX_DETAIL_BUF_SIZE (128)
 #define JET_TYPE_PRINT_DETAIL_SB_INIT_CAP (32)
 #define JET_TYPE_PRINT_SB_INIT_CAP (256)
-#define JET_TYPE_PRINT_COL_SPACE (20)
-#define JET_TYPE_PRINT_FMT ("%-zu  %-*s\n")
+#define JET_TYPE_PRINT_SUFFIX_SPACE (20)
+#define JET_TYPE_PRINT_FMT ("%-zu    %-*s%s\n")
 
 void jet_type_print_da(const jet_da* da)
 {
@@ -34,7 +34,22 @@ void jet_type_print_da(const jet_da* da)
     {
         type = (const jet_type*)jet_da_get(da, i);
         if(jet_type_resolve_str(type, buf, sizeof(buf)))
-            jet_sb_appendf(&sb, JET_TYPE_PRINT_FMT, i, JET_TYPE_PRINT_COL_SPACE, buf);
+        {
+            const char* kind_spec;
+            switch(type->kind)
+            {
+                default:
+                    kind_spec = "P";
+                    break;
+                case JET_TYPE_INVALID:
+                    kind_spec = "I *";
+                    break;
+                case JET_TYPE_CUSTOM:
+                    kind_spec = "U";
+                    break;
+            }
+            jet_sb_appendf(&sb, JET_TYPE_PRINT_FMT, i, JET_TYPE_PRINT_SUFFIX_SPACE, buf, kind_spec);
+        }
         else
             jet_sb_appendf(&sb, "%.*s _could not resolve detailed str rep_\n", (int)type->type_name.len, type->type_name.str);
     }

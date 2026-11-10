@@ -1,6 +1,10 @@
 #include <stdlib.h>
 #include <string.h>
+
 #include <jet_semantics_internals.h>
+#include <jet_logger.h>
+
+static size_t jet_sema_calc_tdef_byte_size(const jet_ast_node* node);
 
 bool jet_sema_type_from_node(const jet_ast_node* node, jet_type* out)
 {
@@ -12,30 +16,24 @@ bool jet_sema_type_from_node(const jet_ast_node* node, jet_type* out)
         default: 
             return false;
         case AST_TYPE_DEF:
-            *out = (jet_type){.kind = JET_TYPE_CUSTOM, .type_name = node->as.tdef.type_name};
+            size_t type_size = jet_sema_calc_tdef_byte_size(node);
+            *out = (jet_type){.kind = JET_TYPE_CUSTOM, .type_name = node->as.tdef.type_name, .size_bytes=type_size};
             return true;
     }
 }
-
 
 jet_type* jet_sema_get_primitive_types(size_t* out_len)
 {
     if(out_len == NULL)
         return NULL;
 
-    jet_ident bool_name = {.str="bool",sizeof("bool")};
-    jet_ident int_name = {.str="int", sizeof("int")};
-    jet_ident float_name = {.str="float", sizeof("float")};
-    jet_ident str_name = {.str="str", sizeof("str")};
-    jet_ident char_name = {.str="char", sizeof("char")};
-
     jet_type types[] = 
     { 
-        {.kind = JET_TYPE_BOOL,  .type_name = bool_name, .size_bytes=1},
-        {.kind = JET_TYPE_INT,   .type_name = int_name,  .size_bytes=4},
-        {.kind = JET_TYPE_FLOAT, .type_name = float_name,.size_bytes=4},
-        {.kind = JET_TYPE_STR,   .type_name = str_name,  .size_bytes=1},
-        {.kind = JET_TYPE_CHAR,  .type_name = char_name, .size_bytes=1},
+        jet_type_prim_bool(),
+        jet_type_prim_int(),
+        jet_type_prim_float(),
+        jet_type_prim_str(),
+        jet_type_prim_char()
     };
     
     size_t size = sizeof(types);
@@ -46,5 +44,14 @@ jet_type* jet_sema_get_primitive_types(size_t* out_len)
     *out_len  = size / sizeof(types[0]);
     return out_types;
 }
+
+static size_t jet_sema_calc_tdef_byte_size(const jet_ast_node* node)
+{
+    JET_ASSERT(node != NULL);
+    JET_ASSERT(node->node_type == AST_TYPE_DEF);
+    jet_ast_node_tdef tdef = node->as.tdef;
+    return 0;
+}
+
 
 
