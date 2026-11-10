@@ -22,3 +22,10 @@ typedef struct jet_type
 } jet_type;
 
 const char* jet_type_kind_str(jet_type_kind kind);
+
+
+jet_type jet_type_bool();
+jet_type jet_type_int();
+jet_type jet_type_float();
+jet_type jet_type_str();
+jet_type jet_type_char();

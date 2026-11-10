@@ -1,4 +1,6 @@
+#include <string.h>
 #include <jet_type.h>
+#include <jet_ident.h>
 #include <jet_logger.h>
 
 const char* jet_type_kind_str(jet_type_kind kind)
@@ -18,4 +20,75 @@ const char* jet_type_kind_str(jet_type_kind kind)
         case JET_TYPE_CHAR: return "JET_TYPE_CHAR";
         case JET_TYPE_STR: return "JET_TYPE_STR";
     }
+}
+
+
+jet_type jet_type_bool()
+{
+    jet_type_kind kind = JET_TYPE_BOOL;
+    const char* str = "bool";
+    size_t size = 1;
+    jet_ident name = {.str=str,.len=strlen(str)};
+    return (jet_type) 
+    {
+        .kind=kind, 
+        .type_name=name, 
+        .size_bytes=size
+    };
+}
+
+jet_type jet_type_int()
+{
+    jet_type_kind kind = JET_TYPE_INT;
+    const char* str = "int";
+    size_t size = 4;
+    jet_ident name = {.str=str,.len=strlen(str)};
+    return (jet_type)
+    {
+        .kind=kind, 
+        .type_name=name, 
+        .size_bytes=size
+    }; 
+}
+
+jet_type jet_type_float()
+{
+    jet_type_kind kind = JET_TYPE_FLOAT;
+    const char* str = "float";
+    size_t size = 4;
+    jet_ident name = {.str=str,.len=strlen(str)};
+    return (jet_type)
+    {
+        .kind=kind, 
+        .type_name=name, 
+        .size_bytes=size
+    };
+
+}
+
+jet_type jet_type_str()
+{ 
+    jet_type_kind kind = JET_TYPE_STR;
+    const char* str = "str";
+    size_t size = 1;
+    jet_ident name = {.str=str,.len=strlen(str)};
+    return (jet_type)
+    { 
+        .kind=kind, 
+        .type_name=name, 
+        .size_bytes=size
+    };
+}
+jet_type jet_type_char()
+{
+    jet_type_kind kind = JET_TYPE_CHAR;
+    const char* str = "char";
+    size_t size = 1;
+    jet_ident name = {.str=str,.len=strlen(str)};
+    return (jet_type)
+    {
+        .kind=kind, 
+        .type_name=name, 
+        .size_bytes=size
+    };
 }
