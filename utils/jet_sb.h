@@ -5,6 +5,9 @@
 #include <stdarg.h>
 #include <stdbool.h>
 
+//len excludes null terminator
+//invariant: buf[len] = '\0'
+//cap always ensures space for '\0'
 typedef struct jet_sb 
 {
      char* buf;
