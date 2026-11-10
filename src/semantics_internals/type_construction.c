@@ -31,11 +31,11 @@ jet_type* jet_sema_get_primitive_types(size_t* out_len)
 
     jet_type types[] = 
     { 
-        {.kind = JET_TYPE_BOOL, .type_name = bool_name, .size_bytes=1},
-        {.kind = JET_TYPE_INT, .type_name = int_name, .size_bytes=4},
-        {.kind = JET_TYPE_FLOAT, .type_name = float_name, .size_bytes=4},
-        {.kind = JET_TYPE_STR, .type_name = str_name, .size_bytes=1},
-        {.kind = JET_TYPE_CHAR, .type_name = char_name, .size_bytes=1},
+        {.kind = JET_TYPE_BOOL,  .type_name = bool_name, .size_bytes=1},
+        {.kind = JET_TYPE_INT,   .type_name = int_name,  .size_bytes=4},
+        {.kind = JET_TYPE_FLOAT, .type_name = float_name,.size_bytes=4},
+        {.kind = JET_TYPE_STR,   .type_name = str_name,  .size_bytes=1},
+        {.kind = JET_TYPE_CHAR,  .type_name = char_name, .size_bytes=1},
     };
     
     size_t size = sizeof(types);
