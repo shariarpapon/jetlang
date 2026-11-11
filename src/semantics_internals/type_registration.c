@@ -10,6 +10,25 @@ typedef struct jet_type_entry
 static uint64_t jet_sema_type_entry_hash(const void* entry);
 static bool jet_sema_is_type_entry_equal(const void* entry_a, const void* entry_b);
 
+bool jet_sema_register_custom_types(jet_compilation_unit* cu)
+{
+    JET_ASSERT(cu != NULL);    
+    const jet_da* top_nid_da = (const jet_da*)&cu->ast.top_nid_da;
+    size_t top_count = jet_da_count(top_nid_da);
+
+    if(top_count == 0) 
+        return true;
+
+    for(size_t i = 0; i < top_count; i++)
+    {
+        const jet_ast_node* node = jet_ast_get_top_node_at_index(&cu->ast, i);
+        jet_type out_type= {0};
+        if(jet_sema_type_from_node(node, &out_type))
+            JET_ASSERT(jet_sema_register_type(cu, out_type));
+    }
+    return true;
+}
+
 bool jet_sema_register_primitive_types(jet_compilation_unit* cu)
 {
     JET_ASSERT(cu != NULL);

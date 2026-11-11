@@ -12,6 +12,7 @@
 #define JET_SEMA_TYPE_ID_HS_CAP (32)
 #define JET_SEMA_TYPE_DA_CAP (32)
 
+
 // Public Interface #############################
 
 bool jet_sema_init(jet_compilation_unit* cu)
@@ -30,23 +31,9 @@ bool jet_sema_init(jet_compilation_unit* cu)
 
 bool jet_sema_resolve_types(jet_compilation_unit* cu)
 {
-    JET_ASSERT(cu != NULL);    
-    const jet_da* top_nid_da = (const jet_da*)&cu->ast.top_nid_da;
-    size_t top_count = jet_da_count(top_nid_da);
-
-    if(top_count == 0) 
-        return true;
-
-    for(size_t i = 0; i < top_count; i++)
-    {
-        const jet_ast_node* node = jet_ast_get_node_at_index(&cu->ast, i);
-        jet_type out_type= {0};
-        if(jet_sema_type_from_node(node, &out_type))
-        {
-            JET_ASSERT(jet_sema_register_type(cu, out_type));
-        }
-    }
-
+    JET_ASSERT(cu != NULL);
+    if(!jet_sema_register_custom_types(cu))
+        return false;
     return true;
 }
 
@@ -62,9 +49,8 @@ const jet_type* jet_sema_get_type_by_tid(const jet_compilation_unit* cu, size_t 
     if(tid == JET_INVALID_TID)
         return NULL;
     size_t index = jet_sema_tid_to_index(tid);
-    const jet_type* type = jet_da_get(&cu->type_da, index);
+    const jet_type* type = (const jet_type*)jet_da_get(&cu->type_da, index);
     return type;
-
 }
 
 const jet_type* jet_sema_get_type_by_name(const jet_compilation_unit* cu, jet_ident type_name)
@@ -75,6 +61,7 @@ const jet_type* jet_sema_get_type_by_name(const jet_compilation_unit* cu, jet_id
     size_t tid = jet_sema_get_type_id(cu, type_name);
     return jet_sema_get_type_by_tid(cu, tid);
 }
+
 
 
 

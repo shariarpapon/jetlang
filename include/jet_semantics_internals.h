@@ -18,4 +18,5 @@ bool jet_sema_has_type_name(const jet_compilation_unit* cu, jet_ident type_name)
 size_t jet_sema_get_type_id(const jet_compilation_unit* cu, jet_ident type_name);
 bool jet_sema_register_primitive_types(jet_compilation_unit* cu);
 jet_type* jet_sema_get_primitive_types(size_t* out_len); 
+bool jet_sema_register_custom_types(jet_compilation_unit* cu);
 

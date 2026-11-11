@@ -79,7 +79,8 @@ bool jet_ast_push_nid(jet_ast* ast, node_id nid)
     return true;
 }
 
-const jet_ast_node* jet_ast_get_node_at_index(const jet_ast* ast, size_t index)
+//returns the node corresponding to the nid = top_nid_da[index]
+const jet_ast_node* jet_ast_get_top_node_at_index(const jet_ast* ast, size_t index)
 {
     JET_ASSERT(ast != NULL);
     const node_id* nid = jet_da_get((const jet_da*)&ast->top_nid_da, index);
