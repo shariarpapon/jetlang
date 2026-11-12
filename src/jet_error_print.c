@@ -41,6 +41,10 @@ const char* jet_error_kind_str(jet_error_kind kind)
              return "JET_ERR_PRIMARY_EXPR_PARSING_FAILED";
         case JET_ERR_NO_VALID_PARSING_SEQ:
              return "JET_ERR_NO_VALID_PARSING_SEQ";
+        case JET_ERR_NODE_NOT_ALLOWED:
+             return "JET_ERR_NODE_NOT_ALLOWED";
+        case JET_ERR_TYPE_REDEF:
+             return "JET_ERR_TYPE_REDEF";
     }
 }
 
@@ -103,6 +107,19 @@ static bool jet_error_resolve_str(const jet_error* e, char* out_buf, size_t buf_
         case JET_ERR_NO_VALID_PARSING_SEQ:
         {
             jet_sb_append_cstr(&sb, "unable to find any valid token sequence to parse");
+            break;
+        }
+        case  JET_ERR_NODE_NOT_ALLOWED:
+        {
+            jet_error_node_error node_err = e->as.node_error;
+            const char* type_str = jet_ast_node_type_str(node_err.node_type);
+            jet_sb_appendf(&sb, "'%s' is not allowed here.", type_str);
+            break;
+        }
+        case JET_ERR_TYPE_REDEF:
+        {  
+            jet_ident type_name = e->as.type_redef.type_name;
+            jet_sb_appendf(&sb, "redefinition of type <%.*s>", (int)type_name.len, type_name.str);
             break;
         }
     }
