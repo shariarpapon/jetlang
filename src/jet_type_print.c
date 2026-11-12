@@ -28,6 +28,7 @@ void jet_type_print_da(const jet_da* da)
         JET_LOG_ERROR("could not print type da, failed to init sb.");
         return;
     }
+    printf("\n__registered types [%zu]__\n", count);
     const jet_type* type = NULL;
     char buf[JET_TYPE_PRINT_MAX_DETAIL_BUF_SIZE];
     for(size_t i = 0; i < count; i++)

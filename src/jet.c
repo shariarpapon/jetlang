@@ -22,6 +22,7 @@
 #define JET_FLAG_AST ("a")
 #define JET_FLAG_PARSER_ERRORS ("pe")
 #define JET_FLAG_TYPES ("tp")
+#define JET_FLAG_SEMANTIC_ERRORS ("se")
 
 static const char* jet_get_filepath();
 static bool jet_compile(jet_compilation_unit* cu);
@@ -61,20 +62,17 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    if(jet_flagreg_has_arg(&fr, JET_FLAG_PRINT, JET_FLAG_PARSER_ERRORS))
-    {
-        printf("\n__parser errors [%zu]__\n", jet_da_count(&cu.parser_err_da));
-        jet_error_print_da(&cu.parser_err_da);
-    }
     if(jet_flagreg_has_arg(&fr, JET_FLAG_PRINT, JET_FLAG_AST))
         jet_ast_print(&cu.ast);
     if(jet_flagreg_has_arg(&fr, JET_FLAG_PRINT, JET_FLAG_TOKENS))
         jet_token_table_print_da(&cu.tok_da);
     if(jet_flagreg_has_arg(&fr, JET_FLAG_PRINT, JET_FLAG_TYPES))
-    {
-        printf("\n__registered types [%zu]__\n", jet_da_count(&cu.type_da));
         jet_type_print_da(&cu.type_da);
-    }
+    if(jet_flagreg_has_arg(&fr, JET_FLAG_PRINT, JET_FLAG_PARSER_ERRORS))
+        jet_error_print_da("parser errors", &cu.parser_err_da);
+    if(jet_flagreg_has_arg(&fr, JET_FLAG_PRINT, JET_FLAG_SEMANTIC_ERRORS))
+        jet_error_print_da("semantic errors", &cu.sema_err_da);
+
 
     jet_cu_dispose(&cu);
     jet_flagreg_dispose(&fr);

@@ -21,7 +21,7 @@ C_FLAGS = -std=c11
 
 C_COMPILE = $(CC) $(C_FLAGS) $(C_SRC) $(C_INCLUDES) -o $(C_BIN)  
 
-JET_DEF_FLAGS = -f,code.jt -p,pe
+JET_DEF_FLAGS = -f,code.jt -p,pe,se
 JET_EXEC = $(RUN) $(JET_DEF_FLAGS)
 
 .PHONY: all rebuild rb clean testbuild tb

@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdio.h>
 
 #include <jet_error_print.h>
 #include <jet_logger.h>
@@ -43,10 +44,12 @@ const char* jet_error_kind_str(jet_error_kind kind)
     }
 }
 
-void jet_error_print_da(const jet_da* err_da)
+void jet_error_print_da(const char* title, const jet_da* err_da)
 {
     if(err_da == NULL) return;
     size_t count = jet_da_count(err_da);
+    
+    printf("\n__%s [%zu]__\n", title, count);
     for(size_t i = 0; i < count; i++)
     {
         const jet_error* e = (const jet_error*)jet_da_get(err_da, i);
