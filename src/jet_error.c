@@ -39,3 +39,19 @@ jet_error jet_err_parsing_failed(jet_ast_node_type node_type, const jet_token* c
     err.as.parsing_failed = (jet_error_parsing_failed){.node_type = node_type};
     return err;
 }
+
+jet_error jet_err_node_error(jet_error_kind kind, const jet_ast_node* node)
+{
+    JET_ASSERT(node != NULL);
+    jet_error err = jet_err(kind, node->span);
+    err.as.node_error = (jet_error_node_error){.node_type = node->node_type};
+    return err;
+}
+
+jet_error jet_err_type_redef(const jet_ast_node* tdef_node)
+{
+    JET_ASSERT(tdef_node != NULL);
+    jet_error err = jet_err(JET_ERR_TYPE_REDEF, tdef_node->span);
+    err.as.type_redef = (jet_error_type_redef){.type_name = tdef_node->as.tdef.type_name};
+    return err;
+}

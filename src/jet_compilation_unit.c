@@ -54,6 +54,7 @@ void jet_cu_dispose(jet_compilation_unit* cu)
     jet_ast_dispose(&cu->ast);
     jet_da_dispose(&cu->tok_da); 
     jet_arena_dispose(&cu->arena);
+    jet_da_dispose(&cu->sema_err_da);
     if(cu->source) 
         free((void*)cu->source);
     memset(cu, 0, sizeof(*cu));

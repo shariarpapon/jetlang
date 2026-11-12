@@ -22,6 +22,7 @@ typedef struct jet_compilation_unit
     //semantics data
     jet_da type_da;
     jet_hs type_id_hs;
+    jet_da sema_err_da;
 } jet_compilation_unit;
 
 bool jet_cu_init(jet_compilation_unit* cu, const char* filename);

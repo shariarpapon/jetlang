@@ -11,6 +11,7 @@
 
 #define JET_SEMA_TYPE_ID_HS_CAP (32)
 #define JET_SEMA_TYPE_DA_CAP (32)
+#define JET_SEMA_INIT_ERR_DA_CAP (32)
 
 
 // Public Interface #############################
@@ -20,20 +21,19 @@ bool jet_sema_init(jet_compilation_unit* cu)
     if(!cu) return false;
     
     if(!jet_sema_init_type_id_hs(&cu->type_id_hs, JET_SEMA_TYPE_ID_HS_CAP) ||
-       !jet_da_init(&cu->type_da, JET_SEMA_TYPE_DA_CAP, sizeof(jet_type)) )
+       !jet_da_init(&cu->type_da, JET_SEMA_TYPE_DA_CAP, sizeof(jet_type))  ||
+       !jet_da_init(&cu->sema_err_da, JET_SEMA_INIT_ERR_DA_CAP, sizeof(jet_error)) )
     {
         return false;
     }
-    if(!jet_sema_register_primitive_types(cu))
-        return false;
+    jet_sema_register_primitive_types(cu);
     return true;
 }
 
 bool jet_sema_resolve_types(jet_compilation_unit* cu)
 {
     JET_ASSERT(cu != NULL);
-    if(!jet_sema_register_custom_types(cu))
-        return false;
+    jet_sema_register_custom_types(cu);
     return true;
 }
 
