@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <jet_ident.h>
+#include <jet_da.h>
 
 //NOTE: _name_str must be a string literal
 #define JET_STATIC_CONSUTRCT_TYPE(_kind, _name_str, _size_bytes) \
@@ -24,6 +25,7 @@ typedef struct jet_type
     jet_type_kind kind;
     jet_ident type_name;
     size_t size_bytes;
+    jet_da field_symbol_da; 
 } jet_type; 
 
 extern const jet_type jet_type_primitives[];

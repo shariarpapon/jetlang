@@ -6,11 +6,9 @@ typedef enum jet_symbol_kind jet_symbol_kind;
 
 enum jet_symbol_kind
 {
-    JET_SYMBOL_VAR,
-    JET_SYMBOL_PARAM,
-    JET_SYMBOL_FUNC,
-    JET_SYMBOL_TYPE,
     JET_SYMBOL_FIELD,
+    JET_SYMBOL_VAR,
+    JET_SYMBOL_FUNC
 }; 
 
 struct jet_symbol
@@ -20,9 +18,7 @@ struct jet_symbol
     size_t type_id;
 };
 
-
-
-
+jet_symbol jet_symbol_base(jet_symbol_kind kind, jet_ident name, size_t type_id);
 
 
 
