@@ -10,6 +10,7 @@ enum jet_symbol_kind
     JET_SYMBOL_PARAM,
     JET_SYMBOL_FUNC,
     JET_SYMBOL_TYPE,
+    JET_SYMBOL_FIELD,
 }; 
 
 struct jet_symbol

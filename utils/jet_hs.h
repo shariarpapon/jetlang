@@ -34,6 +34,7 @@ bool jet_hs_init(
 void jet_hs_dispose_full(jet_hs* hs);
 void jet_hs_dispose_preserve_keys(jet_hs* hs);
 bool jet_hs_contains(const jet_hs* hs, const void* key, const void** out_key);
+size_t jet_hs_count(const jet_hs* hs);
 
 //returns: the address the key was allocated at or the key that was 
 const void* jet_hs_add(jet_hs* hs, const void* key, size_t key_size);
@@ -62,7 +63,8 @@ bool jet_hs_init(
         bool (*equals) (const void*, const void*)
         )
 {
-    if(hs == NULL) return false;
+    if(hs == NULL || hash == NULL || equals == NULL) 
+        return false;
 
     if(capacity == 0) 
     {
@@ -81,22 +83,22 @@ bool jet_hs_init(
 
 void jet_hs_dispose_full(jet_hs* hs)
 {
-    if(jet_hs_invalid(hs))
-        return;
+    if(hs == NULL) return;
     jet_hs_slot* temp = hs->slots;
     for(size_t i = 0; i < hs->capacity; i++, temp++)
         jet_hs_slot_dispose_all(temp, false);
     free(hs->slots);
+    memset(hs, 0, sizeof(*hs));
 }
 
 void jet_hs_dispose_preserve_keys(jet_hs* hs)
 {
-    if(jet_hs_invalid(hs)) 
-        return;
+    if(hs == NULL) return;
     jet_hs_slot* temp = hs->slots;
     for(size_t i = 0; i < hs->capacity; i++, temp++)
         jet_hs_slot_dispose_all(temp, true);
     free(hs->slots);
+    memset(hs, 0, sizeof(*hs));
 }
 
 bool jet_hs_remove(jet_hs* hs, const void* key)
@@ -108,6 +110,7 @@ bool jet_hs_remove(jet_hs* hs, const void* key)
     {
         free(slot->key);
         slot->key = NULL;
+        hs->count--;
         return true;
     }
     return false;
@@ -123,6 +126,16 @@ bool jet_hs_contains(const jet_hs* hs, const void* key, const void** out_key)
         return true;
     }
     return false;
+}
+
+size_t jet_hs_count(const jet_hs* hs)
+{
+    if(hs == NULL) 
+    {
+        fprintf(stderr, "attempting to get count of NULL hs, returning 0 but this operation is invalid.\n");
+        return 0;
+    }
+    return hs->count;
 }
 
 const void* jet_hs_add(jet_hs* hs, const void* key, size_t key_size)
@@ -148,12 +161,12 @@ const void* jet_hs_add(jet_hs* hs, const void* key, size_t key_size)
         return NULL;
     }
 
-    if(jet_hs_slot_fill(slot, key, key_size) == false)
+    if(!jet_hs_slot_fill(slot, key, key_size))
     {
         fprintf(stderr, "failed to add key to slot.\n");
         return NULL;
     }
-
+    hs->count++;
     return (const void*)slot->key;
 }
 
@@ -167,8 +180,7 @@ static bool jet_hs_invalid(const jet_hs* hs)
     if(hs->slots == NULL        || 
             hs->capacity == 0   || 
             hs->hash == NULL    || 
-            hs->equals == NULL  || 
-            hs->count >= hs->capacity)
+            hs->equals == NULL)
     {
         fprintf(stderr, "hashset in invalid state, make sure to initialize.\n");
         return true;
@@ -206,6 +218,8 @@ static jet_hs_slot* jet_hs_get_available_slot(jet_hs* hs, size_t index)
     else
     {
         slot_i->next = (jet_hs_slot*)calloc(1, sizeof(jet_hs_slot));
+        if(slot_i->next == NULL)
+            return NULL;
         return slot_i->next;
     }
 }
@@ -228,6 +242,8 @@ static bool jet_hs_slot_fill(jet_hs_slot* slot, const void* key, size_t key_size
     if(slot == NULL || key == NULL)
         return false;
     slot->key = malloc(key_size);
+    if(slot->key == NULL)
+        return false;
     memcpy((char*)slot->key, (const char*)key, key_size);
     return true;
 }

@@ -4,6 +4,8 @@ type Vector2
     int y;
 }
 
+void foo(){}
+
 Vector2 vec2_add(Vector2 a, Vector2 b)
 {
     Vector2 c;

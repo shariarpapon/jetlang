@@ -8,12 +8,14 @@ void jet_parser_add_primitive_type_names(jet_parser* p)
 {
     JET_ASSERT(p != NULL);
     JET_ASSERT(p->type_name_hs != NULL);
+    JET_ASSERT(jet_type_primitives != NULL);
 
-    const char* names[] = {"int", "float", "str", "char", "bool"};
-    for(size_t i = 0; i < ARRAY_LEN(names); i++)
+    const jet_ident* stored;
+    jet_type prim_type;
+    for(size_t i = 0; i < jet_type_primitive_count; i++)
     {
-        jet_ident type_name = jet_ident_init(names[i], strlen(names[i]));
-        const jet_ident* stored = jet_parser_register_type_name(p, type_name);
+        prim_type = jet_type_primitives[i];
+        stored = jet_parser_register_type_name(p, prim_type.type_name);
         JET_ASSERT(stored != NULL);
     }
 }
@@ -37,6 +39,7 @@ jet_type_kind jet_parser_type_kind_from_token(const jet_token* tok)
     {
         default:             return JET_TYPE_INVALID;
         case TOK_IDENT:      return JET_TYPE_CUSTOM;
+        case TOK_KWD_VOID:   return JET_TYPE_VOID;
         case TOK_KWD_BOOL:   return JET_TYPE_BOOL;
         case TOK_KWD_INT:    return JET_TYPE_INT;
         case TOK_KWD_FLOAT:  return JET_TYPE_FLOAT;

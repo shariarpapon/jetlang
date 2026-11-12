@@ -46,12 +46,9 @@ void jet_sema_register_custom_types(jet_compilation_unit* cu)
 void jet_sema_register_primitive_types(jet_compilation_unit* cu)
 {
     JET_ASSERT(cu != NULL);
-    size_t len;
-    jet_type* prim_types = jet_sema_get_primitive_types(&len);
-    JET_ASSERT(prim_types != NULL);
-    for(size_t i = 0; i < len; i++)
-        jet_sema_register_type(cu, prim_types[i]);
-    free(prim_types);
+    JET_ASSERT(jet_type_primitives != NULL);
+    for(size_t i = 0; i < jet_type_primitive_count; i++)
+        jet_sema_register_type(cu, jet_type_primitives[i]);
 }
 
 bool jet_sema_init_type_id_hs(jet_hs* hs, size_t capacity)

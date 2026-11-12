@@ -16,29 +16,6 @@ bool jet_sema_type_from_node(const jet_ast_node* node, jet_type* out)
     return true;
 }
 
-jet_type* jet_sema_get_primitive_types(size_t* out_len)
-{
-    if(out_len == NULL)
-        return NULL;
-
-    jet_type types[] = 
-    { 
-        jet_type_prim_bool(),
-        jet_type_prim_int(),
-        jet_type_prim_float(),
-        jet_type_prim_str(),
-        jet_type_prim_char()
-    };
-    
-    size_t size = sizeof(types);
-    jet_type* out_types = malloc(size);
-    if(out_types == NULL)
-        return NULL;
-    memcpy(out_types, types, size);
-    *out_len  = size / sizeof(types[0]);
-    return out_types;
-}
-
 bool jet_sema_can_node_construct_type(const jet_ast_node* node)
 {
     JET_ASSERT(node != NULL);

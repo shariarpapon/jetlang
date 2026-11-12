@@ -446,6 +446,7 @@ jet_da jet_parser_parse_by_delim(jet_parser* p,
 jet_da jet_parser_parse_call_args(jet_parser* p)
 {
     JET_ASSERT(p != NULL);
+    jet_parser_expect_tok(p, TOK_LPAR);
     return jet_parser_parse_expr_seq(p, TOK_COMMA, TOK_RPAR);
 }
 
@@ -464,7 +465,6 @@ jet_result jet_parser_call_parse(jet_parser* p, node_id callee)
     jet_result call_res;
     while(jet_parser_peekn_tok_type(p, 0) == TOK_LPAR)
     {
-        jet_parser_expect_tok(p, TOK_LPAR);
         args_da = jet_parser_parse_call_args(p);
         end_tok = jet_parser_peek_prev_tok(p);
         span = jet_parser_token_range_span(start_tok, end_tok);

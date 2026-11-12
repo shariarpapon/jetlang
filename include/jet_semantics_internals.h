@@ -16,7 +16,6 @@ size_t jet_sema_tid_to_index(size_t tid);
 bool jet_sema_add_type_id(jet_compilation_unit* cu, jet_ident type_name, size_t type_id);
 bool jet_sema_has_type_name(const jet_compilation_unit* cu, jet_ident type_name);
 size_t jet_sema_get_type_id(const jet_compilation_unit* cu, jet_ident type_name);
-jet_type* jet_sema_get_primitive_types(size_t* out_len); 
 void jet_sema_register_type(jet_compilation_unit* cu, jet_type def);
 void jet_sema_register_primitive_types(jet_compilation_unit* cu);
 void jet_sema_register_custom_types(jet_compilation_unit* cu);
