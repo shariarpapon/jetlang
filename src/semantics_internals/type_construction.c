@@ -10,7 +10,7 @@ bool jet_sema_type_from_node(const jet_ast_node* node, jet_type* out)
 {
     JET_ASSERT(node != NULL);
     JET_ASSERT(out != NULL);
-    if(node->node_type != AST_TYPE_DEF)
+    if(!jet_sema_can_node_construct_type(node))
         return false;
     *out = (jet_type){.kind = JET_TYPE_CUSTOM, .type_name = node->as.tdef.type_name};
     return true;

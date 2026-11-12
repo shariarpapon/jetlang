@@ -13,7 +13,3 @@ Vector2 vec2_add(Vector2 a, Vector2 b)
 }
 
 
-
-
-
-
