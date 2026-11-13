@@ -96,7 +96,7 @@ size_t jet_sema_index_to_tid(size_t index)
 
 size_t jet_sema_tid_to_index(size_t tid)
 {
-    JET_ASSERT(tid > 0);
+    JET_ASSERT(tid != JET_INVALID_TID);
     return tid - 1;
 }
 
