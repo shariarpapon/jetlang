@@ -1,4 +1,6 @@
 #include <string.h>
+#include <stdio.h>
+
 #include <jet_symbol_print.h>
 #include <jet_sb.h>
 #include <jet_logger.h>
@@ -6,6 +8,7 @@
 
 #define JET_SYM_PRINT_DA_SB_CAP (128)
 #define JET_SYM_PRINT_SB_CAP (64)
+#define JET_SYM_COL_BUF_LEN (256)
 
 // col_space = 10
 // sym_kind ___ sym_name ___ type_id
@@ -38,6 +41,17 @@ void  jet_symbol_print_da(const jet_da* sym_da, const char* title)
     size_t count = jet_da_count(sym_da);
     jet_sb_appendf(&sb, "%s [%zu]\n", title, count);
     jet_sb_appendf(&sb, JET_SYM_PRINT_HEADER_FMT, "kind", "name", "type_id");
+
+    char buf[JET_SYM_COL_BUF_LEN];
+    for(size_t i = 0; i < count; i++)
+    {
+        const jet_symbol* sym = (const jet_symbol*)jet_da_get(sym_da, i);
+        if(jet_symbol_print_resolve_str(sym, buf, sizeof(buf)))
+            jet_sb_append_cstr(&sb, buf);
+        else 
+            jet_sb_append_cstr(&sb, "## could not resolve symbol str ##");
+    }
+    printf("%s", jet_sb_view(&sb));
     jet_sb_dispose(&sb);
 }
 
