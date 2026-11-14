@@ -4,6 +4,7 @@
 
 typedef struct jet_scope 
 {
+    size_t parent_scope_id;
     jet_da sym_da;
 } jet_scope;
 

@@ -6,9 +6,8 @@ typedef enum jet_symbol_kind jet_symbol_kind;
 
 enum jet_symbol_kind
 {
-    JET_SYMBOL_FIELD,
-    JET_SYMBOL_VAR,
-    JET_SYMBOL_FUNC
+    JET_SYM_VAR,
+    JET_SYM_FUNC
 }; 
 
 struct jet_symbol
