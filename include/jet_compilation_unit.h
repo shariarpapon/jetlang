@@ -23,6 +23,12 @@ typedef struct jet_compilation_unit
     jet_da type_da;
     jet_hs type_id_hs;
     jet_da sema_err_da;
+
+    jet_da scope_da;
+    jet_da global_sym_da;
+    jet_hs global_symid_hs;
+
+
 } jet_compilation_unit;
 
 bool jet_cu_init(jet_compilation_unit* cu, const char* filename);
