@@ -13,7 +13,7 @@
 // col_space = 10
 // sym_kind ___ sym_name ___ type_id
 #define JET_SYM_PRINT_HEADER_FMT ("%-12s %-12s %s\n")
-#define JET_SYM_PRINT_COL_FMT ("%-12s %-12.*s %zu\n")
+#define JET_SYM_PRINT_COL_FMT ("%-12s %-12.*s %zu")
 
 static bool jet_symbol_print_resolve_str(const jet_symbol* sym, char buf[], size_t buf_len);
 
@@ -50,6 +50,7 @@ void  jet_symbol_print_da(const jet_da* sym_da, const char* title)
             jet_sb_append_cstr(&sb, buf);
         else 
             jet_sb_append_cstr(&sb, "## could not resolve symbol str ##");
+        jet_sb_append_cstr(&sb, "\n");
     }
     printf("%s", jet_sb_view(&sb));
     jet_sb_dispose(&sb);
