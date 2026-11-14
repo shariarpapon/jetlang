@@ -16,6 +16,9 @@ bool jet_sema_add_type_id(jet_compilation_unit* cu, jet_ident type_name, size_t 
 bool jet_sema_has_type_name(const jet_compilation_unit* cu, jet_ident type_name);
 bool jet_sema_can_node_construct_type(const jet_ast_node* node);
 bool jet_sema_type_from_node(const jet_ast_node* node, jet_type* out);
+const jet_type* jet_sema_get_type_by_name(const jet_compilation_unit* cu, jet_ident type_name);
+const jet_type* jet_sema_get_type_by_tid(const jet_compilation_unit* cu, size_t tid);
+
 
 // semantic passes
 void jet_sema_register_type(jet_compilation_unit* cu, jet_type def);
@@ -35,6 +38,7 @@ size_t jet_sema_scopeid_to_index(size_t scopeid);
 
 // err
 void jet_sema_push_err(jet_compilation_unit* cu, const jet_error* err);
+
 
 
 
