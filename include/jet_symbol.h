@@ -18,7 +18,7 @@ struct jet_symbol
     size_t type_id;
 };
 
-jet_symbol jet_symbol_base(jet_symbol_kind kind, jet_ident name, size_t type_id);
+jet_symbol jet_symbol_init_base(jet_symbol_kind kind, jet_ident name, size_t type_id);
 
 
 

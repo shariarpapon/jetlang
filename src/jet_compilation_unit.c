@@ -13,6 +13,7 @@
 #include <jet_ident.h>
 #include <jet_type.h>
 #include <jet_semantics.h>
+#include <jet_scope.h>
 
 #ifdef _WIN32
 #include<windows.h>
@@ -47,16 +48,29 @@ bool jet_cu_init(jet_compilation_unit* cu, const char* filename)
 void jet_cu_dispose(jet_compilation_unit* cu)
 {
     if(!cu) return;
-    jet_hs_dispose_full(&cu->type_id_hs);
-    jet_da_dispose(&cu->type_da);
+    
+    jet_arena_dispose(&cu->arena);
+
+    // lexer 
+    jet_da_dispose(&cu->tok_da); 
+    if(cu->source) 
+        free((void*)cu->source);
+
+    // parser
     jet_hs_dispose_full(&cu->type_name_hs);
     jet_da_dispose(&cu->parser_err_da);
     jet_ast_dispose(&cu->ast);
-    jet_da_dispose(&cu->tok_da); 
-    jet_arena_dispose(&cu->arena);
+    
+    // semantics
+    jet_hs_dispose_full(&cu->type_id_hs);
+    jet_da_dispose(&cu->type_da);
     jet_da_dispose(&cu->sema_err_da);
-    if(cu->source) 
-        free((void*)cu->source);
+    for(size_t i = 0 ; i < jet_da_count(&cu->scope_da); i++)
+        jet_scope_dispose((jet_scope*)jet_da_get(&cu->scope_da, i));
+    jet_da_dispose(&cu->scope_da);
+    jet_da_dispose(&cu->global_sym_da);
+    jet_hs_dispose_full(&cu->global_symid_hs);
+
     memset(cu, 0, sizeof(*cu));
 }
 
