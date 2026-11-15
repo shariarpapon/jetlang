@@ -1,8 +1,3 @@
 TODO
 
--# primitive construction complete
-
-- need decide how custom type size will be calculated from tdef node.
-    -- might need to collect tdef fields/members data first and decide how to store the data.
-
 
