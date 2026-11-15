@@ -1,7 +1,7 @@
 type Vector2
 {
     int x;
-    int y;
+#    int y;
 }
 
 void foo(){}
@@ -9,7 +9,7 @@ void foo(){}
 Vector2 vec2_add(Vector2 a, Vector2 b)
 {
     Vector2 c;
-    c.x = a.x + b.x;
+     @ c.x = a.x + b.x;
     c.y = a.y + b.y;
     return c;
 }

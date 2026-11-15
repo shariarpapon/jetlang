@@ -12,6 +12,9 @@
 #include <jet_type_print.h>
 #include <jet_symbol_print.h>
 
+
+#include <string.h>
+
 #define JET_FILEPATH_SIZE (512)
 
 //PROGRAM
