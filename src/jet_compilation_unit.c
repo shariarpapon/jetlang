@@ -20,6 +20,8 @@
 #endif
 
 #define JET_CU_ARENA_CAP (1024 * 2)
+    
+static bool ansi_initialized = true;
 
 bool jet_cu_init(jet_compilation_unit* cu, const char* filename)
 {
@@ -34,6 +36,7 @@ bool jet_cu_init(jet_compilation_unit* cu, const char* filename)
 
     //intialize ansi for windows 
 #ifdef _WIN32
+
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
     DWORD dwMode = 0;
     GetConsoleMode(hOut, &dwMode);
