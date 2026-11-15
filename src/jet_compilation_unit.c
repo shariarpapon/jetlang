@@ -70,7 +70,6 @@ void jet_cu_dispose(jet_compilation_unit* cu)
     jet_da_dispose(&cu->scope_da);
     jet_da_dispose(&cu->global_sym_da);
     jet_hs_dispose_full(&cu->global_symid_hs);
-
     memset(cu, 0, sizeof(*cu));
 }
 
@@ -93,6 +92,7 @@ bool jet_cu_run(jet_compilation_unit* cu)
     JET_ASSERT(jet_sema_init(cu));
     JET_LOG_INFO("semantics initialized");
     JET_ASSERT(jet_sema_resolve_types(cu)); 
+    JET_ASSERT(jet_sema_resolve_global_symbols(cu));
     JET_LOG_INFO("semantics finished");
 
     jet_lexer_dispose(&lexer);

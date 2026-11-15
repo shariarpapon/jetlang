@@ -27,6 +27,8 @@ const char* jet_error_kind_str(jet_error_kind kind)
             return "## no_str_rep_for_err_kind ##";
         case JET_ERR_UNKNOWN:
              return "JET_ERR_UNKNOWN";
+
+        // parser
         case JET_ERR_UNEXPECTED_EOF:
              return "JET_ERR_UNEXPECTED_EOF";
         case JET_ERR_UNEXPECTED_TOKEN:
@@ -43,10 +45,16 @@ const char* jet_error_kind_str(jet_error_kind kind)
              return "JET_ERR_PRIMARY_EXPR_PARSING_FAILED";
         case JET_ERR_NO_VALID_PARSING_SEQ:
              return "JET_ERR_NO_VALID_PARSING_SEQ";
+            
+        // semantics
         case JET_ERR_NODE_NOT_ALLOWED:
              return "JET_ERR_NODE_NOT_ALLOWED";
         case JET_ERR_TYPE_REDEF:
              return "JET_ERR_TYPE_REDEF";
+        case JET_ERR_TYPE_UNDEFINED:
+             return "JET_ERR_TYPE_UNDEFINED";
+        case JET_ERR_DUP_SYM_NAME:
+             return "JET_ERR_DUP_SYM_NAMAE";
     }
 }
 
@@ -122,6 +130,19 @@ static bool jet_error_resolve_str(const jet_error* e, char* out_buf, size_t buf_
         {  
             jet_ident type_name = e->as.type_redef.type_name;
             jet_sb_appendf(&sb, "redefinition of type <%.*s>", (int)type_name.len, type_name.str);
+            break;
+        }
+        case JET_ERR_TYPE_UNDEFINED:
+        {
+            jet_ident type_name = e->as.type_undef.type_name;
+            jet_sb_appendf(&sb, "undefined type <%.*s>", (int)type_name.len, type_name.str);
+            break;
+        }
+        case JET_ERR_DUP_SYM_NAME:
+        {
+            jet_ident sym_name = e->as.dup_sym_name.sym_name;
+            jet_sb_appendf(&sb, "duplicate symbol name <%.*s>", (int)sym_name.len, sym_name.str);
+
             break;
         }
     }

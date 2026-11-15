@@ -55,3 +55,20 @@ jet_error jet_err_type_redef(const jet_ast_node* tdef_node)
     err.as.type_redef = (jet_error_type_redef){.type_name = tdef_node->as.tdef.type_name};
     return err;
 }
+
+jet_error jet_err_type_undef(const jet_ast_node* tspec_node)
+{
+    JET_ASSERT(tspec_node != NULL);
+    jet_error err = jet_err(JET_ERR_TYPE_UNDEFINED, tspec_node->span);
+    err.as.type_undef = (jet_error_type_undef){.type_name = tspec_node->as.tspec.type_name};
+    return err;
+}
+
+jet_error jet_err_dup_sym_name(const jet_ast_node* node, jet_ident name)
+{
+    JET_ASSERT(node != NULL);
+    JET_ASSERT(name.str != NULL && name.len != 0);
+    jet_error err = jet_err(JET_ERR_DUP_SYM_NAME, node->span);
+    err.as.dup_sym_name = (jet_error_dup_sym_name){.sym_name = name};
+    return err;
+}

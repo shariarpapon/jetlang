@@ -12,6 +12,7 @@
 #define JET_INVALID_SYMID (0)
 
 // types
+void jet_sema_register_type(jet_compilation_unit* cu, jet_type def);
 size_t jet_sema_get_type_id(const jet_compilation_unit* cu, jet_ident type_name);
 bool jet_sema_add_type_id(jet_compilation_unit* cu, jet_ident type_name, size_t type_id);
 bool jet_sema_has_type_name(const jet_compilation_unit* cu, jet_ident type_name);
@@ -21,12 +22,13 @@ jet_type* jet_sema_get_type_by_name(const jet_compilation_unit* cu, jet_ident ty
 jet_type* jet_sema_get_type_by_tid(const jet_compilation_unit* cu, size_t tid);
 
 // symbols
+bool jet_sema_has_gsym_name(const jet_compilation_unit* cu, jet_ident name);
 size_t jet_sema_get_gsymid_by_name(const jet_compilation_unit* cu, jet_ident name);
 jet_symbol* jet_sema_get_gsym_by_name(const jet_compilation_unit* cu, jet_ident name);
 jet_symbol* jet_sema_get_gsym_by_id(const jet_compilation_unit* cu, size_t symid);
+void jet_sema_register_gsym(jet_compilation_unit* cu, const jet_symbol* sym);
 
 // semantic passes
-void jet_sema_register_type(jet_compilation_unit* cu, jet_type def);
 void jet_sema_register_primitive_types(jet_compilation_unit* cu);
 void jet_sema_register_custom_types(jet_compilation_unit* cu);
 void jet_sema_register_global_symbols(jet_compilation_unit* cu);
@@ -43,7 +45,8 @@ size_t jet_sema_scopeid_to_index(size_t scopeid);
 
 // err
 void jet_sema_push_err(jet_compilation_unit* cu, const jet_error* err);
-
+void jet_sema_err_undefined_type(jet_compilation_unit* cu, const jet_ast_node* tspec);
+void jet_sema_err_dup_sym_name(jet_compilation_unit* cu, const jet_ast_node* node, jet_ident name);
 
 
 

@@ -387,9 +387,12 @@ void jet_ast_print(const jet_ast* ast)
 
     ANSI_PRINTF(ANSI_BLUE2, "\nentry\n");
 
-    const jet_ast_node* prog = jet_ast_get_node_by_nid(ast, ast->prog_nid);
-    jet_astp_print_node(&p, prog, 0, true);
-    jet_astp_reset(&p);
+    if(ast->prog_nid != JET_INVALID_NID)
+    {
+        const jet_ast_node* prog = jet_ast_get_node_by_nid(ast, ast->prog_nid);
+        jet_astp_print_node(&p, prog, 0, true);
+        jet_astp_reset(&p);
+    }
 
     ANSI_PRINTF(ANSI_GREY1, "\n=====================================\n");
 

@@ -17,6 +17,8 @@ typedef struct jet_error_invalid_token jet_error_invalid_token;
 // @semantics
 typedef struct jet_error_node_error jet_error_node_error;
 typedef struct jet_error_type_redef jet_error_type_redef;
+typedef struct jet_error_type_undef jet_error_type_undef;
+typedef struct jet_error_dup_sym_name jet_error_dup_sym_name;
 
 enum jet_error_kind
 {
@@ -35,6 +37,8 @@ enum jet_error_kind
     // @semantics
     JET_ERR_NODE_NOT_ALLOWED,
     JET_ERR_TYPE_REDEF,
+    JET_ERR_TYPE_UNDEFINED,
+    JET_ERR_DUP_SYM_NAME,
 };
 
 struct jet_error_invalid_token
@@ -68,6 +72,16 @@ struct jet_error_type_redef
     jet_ident type_name;
 };
 
+struct jet_error_type_undef
+{
+    jet_ident type_name;
+};
+
+struct jet_error_dup_sym_name
+{
+    jet_ident sym_name;
+};
+
 struct jet_error
 {
     jet_error_kind kind;
@@ -80,6 +94,8 @@ struct jet_error
         jet_error_invalid_token invalid_token;
         jet_error_node_error node_error; 
         jet_error_type_redef type_redef;
+        jet_error_type_undef type_undef;
+        jet_error_dup_sym_name dup_sym_name;
     } as;
 };
 
@@ -94,6 +110,7 @@ jet_error jet_err_parsing_failed(jet_ast_node_type node_type, const jet_token* c
 // @semantics
 jet_error jet_err_node_error(jet_error_kind kind, const jet_ast_node* node);
 jet_error jet_err_type_redef(const jet_ast_node* tdef_node);
-
+jet_error jet_err_type_undef(const jet_ast_node* tspec_node);
+jet_error jet_err_dup_sym_name(const jet_ast_node* node, jet_ident name);
 
 

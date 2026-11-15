@@ -42,9 +42,10 @@ bool jet_sema_resolve_types(jet_compilation_unit* cu)
     return true;
 }
 
-bool jet_sema_resolve_symbols(jet_compilation_unit* cu)
+bool jet_sema_resolve_global_symbols(jet_compilation_unit* cu)
 {
     JET_ASSERT(cu != NULL);
+    jet_sema_register_global_symbols(cu);
     return true;
 }
 
