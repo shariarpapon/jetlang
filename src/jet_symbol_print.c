@@ -12,8 +12,9 @@
 
 // col_space = 10
 // sym_kind ___ sym_name ___ type_id
-#define JET_SYM_PRINT_HEADER_FMT ("%-12s %-12s %s\n")
-#define JET_SYM_PRINT_COL_FMT ("%-12s %-12.*s %zu")
+#define JET_SYM_PRINT_LINE_SEP "\n====================================\n"
+#define JET_SYM_PRINT_HEADER_FMT "%-12s %-12s %s"
+#define JET_SYM_PRINT_COL_FMT "%-12s %-12.*s %zu"
 
 static bool jet_symbol_print_resolve_str(const jet_symbol* sym, char buf[], size_t buf_len);
 
@@ -30,7 +31,7 @@ const char* jet_symbol_kind_str(jet_symbol_kind kind)
     }
 }
 
-void  jet_symbol_print_da(const jet_da* sym_da, const char* title)
+void  jet_symbol_print_da(const char* title, const jet_da* sym_da)
 {
     if(!sym_da) return;
 
@@ -39,8 +40,8 @@ void  jet_symbol_print_da(const jet_da* sym_da, const char* title)
     if(!title)
         title = "symbol da";
     size_t count = jet_da_count(sym_da);
-    jet_sb_appendf(&sb, "%s [%zu]\n", title, count);
-    jet_sb_appendf(&sb, JET_SYM_PRINT_HEADER_FMT, "kind", "name", "type_id");
+    jet_sb_appendf(&sb, JET_SYM_PRINT_LINE_SEP "%s [%zu]\n", title, count);
+    jet_sb_appendf(&sb,JET_SYM_PRINT_HEADER_FMT JET_SYM_PRINT_LINE_SEP, "kind", "name", "type_id");
 
     char buf[JET_SYM_COL_BUF_LEN];
     for(size_t i = 0; i < count; i++)

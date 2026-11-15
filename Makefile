@@ -32,7 +32,7 @@ all:
 
 testbuild tb:
 	$(C_COMPILE)
-	$(JET_EXEC) -p,tp
+	$(JET_EXEC) -p,tp,gsym
 
 rebuild rb:
 	$(MAKE) clean

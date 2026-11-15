@@ -6,6 +6,8 @@
 #include <jet_sb.h>
 
 #define JET_ERR_PRINT_BUF_SIZE (1024)
+#define JET_ERR_PRINT_HEADER_FMT "%-12s %-12s %-12s %-12s"
+#define JET_ERR_PRINT_LINE_SEP "\n===============================\n"
 
 static bool jet_error_resolve_str(const jet_error* e, char* out_buf, size_t buf_size);
 
@@ -53,7 +55,7 @@ void jet_error_print_da(const char* title, const jet_da* err_da)
     if(err_da == NULL) return;
     size_t count = jet_da_count(err_da);
     
-    printf("\n__%s [%zu]__\n", title, count);
+    printf(JET_ERR_PRINT_LINE_SEP "%s [%zu]" JET_ERR_PRINT_LINE_SEP, title, count);
     for(size_t i = 0; i < count; i++)
     {
         const jet_error* e = (const jet_error*)jet_da_get(err_da, i);

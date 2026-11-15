@@ -10,6 +10,7 @@
 #include <jet_error_print.h>
 #include <jet_cli_flags.h>
 #include <jet_type_print.h>
+#include <jet_symbol_print.h>
 
 #define JET_FILEPATH_SIZE (512)
 
@@ -23,6 +24,7 @@
 #define JET_FLAG_PARSER_ERRORS ("pe")
 #define JET_FLAG_TYPES ("tp")
 #define JET_FLAG_SEMANTIC_ERRORS ("se")
+#define JET_FLAG_GLOBAL_SYMBOLS ("gsym")
 
 static const char* jet_get_filepath();
 static bool jet_compile(jet_compilation_unit* cu);
@@ -66,8 +68,12 @@ int main(int argc, char** argv)
         jet_ast_print(&cu.ast);
     if(jet_flagreg_has_arg(&fr, JET_FLAG_PRINT, JET_FLAG_TOKENS))
         jet_token_table_print_da(&cu.tok_da);
+
     if(jet_flagreg_has_arg(&fr, JET_FLAG_PRINT, JET_FLAG_TYPES))
         jet_type_print_da(&cu.type_da);
+    if(jet_flagreg_has_arg(&fr, JET_FLAG_PRINT, JET_FLAG_GLOBAL_SYMBOLS))
+        jet_symbol_print_da("global symbols", &cu.global_sym_da);
+
     if(jet_flagreg_has_arg(&fr, JET_FLAG_PRINT, JET_FLAG_PARSER_ERRORS))
         jet_error_print_da("parser errors", &cu.parser_err_da);
     if(jet_flagreg_has_arg(&fr, JET_FLAG_PRINT, JET_FLAG_SEMANTIC_ERRORS))

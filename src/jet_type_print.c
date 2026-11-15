@@ -10,8 +10,10 @@
 #define JET_TYPE_PRINT_MAX_DETAIL_BUF_SIZE (128)
 #define JET_TYPE_PRINT_DETAIL_SB_INIT_CAP (32)
 #define JET_TYPE_PRINT_SB_INIT_CAP (256)
-#define JET_TYPE_PRINT_SUFFIX_SPACE (20)
-#define JET_TYPE_PRINT_FMT ("%-zu    %-*s%s\n")
+#define JET_TYPE_PRINT_FMT "%-12.*s %-14zu %-10s\n"
+#define JET_TYPE_PRINT_HEADER_FMT "%-12s %-14s %-10s"
+
+#define JET_TYPE_PRINT_LINE_SEP "\n=====================================\n"
 
 void jet_type_print_da(const jet_da* da)
 {
@@ -28,29 +30,15 @@ void jet_type_print_da(const jet_da* da)
         JET_LOG_ERROR("could not print type da, failed to init sb.");
         return;
     }
-    printf("\n__registered types [%zu]__\n", count);
+    printf(JET_TYPE_PRINT_LINE_SEP "registered types [%zu]\n", count);
+    printf(JET_TYPE_PRINT_HEADER_FMT JET_TYPE_PRINT_LINE_SEP,"type_name", "size (bytes)", "def_src");
     const jet_type* type = NULL;
     char buf[JET_TYPE_PRINT_MAX_DETAIL_BUF_SIZE];
     for(size_t i = 0; i < count; i++)
     {
         type = (const jet_type*)jet_da_get(da, i);
         if(jet_type_resolve_str(type, buf, sizeof(buf)))
-        {
-            const char* kind_spec;
-            switch(type->kind)
-            {
-                default:
-                    kind_spec = "P";
-                    break;
-                case JET_TYPE_INVALID:
-                    kind_spec = "I *";
-                    break;
-                case JET_TYPE_CUSTOM:
-                    kind_spec = "U";
-                    break;
-            }
-            jet_sb_appendf(&sb, JET_TYPE_PRINT_FMT, i, JET_TYPE_PRINT_SUFFIX_SPACE, buf, kind_spec);
-        }
+            jet_sb_appendf(&sb, "%s",  buf);
         else
             jet_sb_appendf(&sb, "%.*s _could not resolve detailed str rep_\n", (int)type->type_name.len, type->type_name.str);
     }
@@ -68,11 +56,23 @@ bool jet_type_resolve_str(const jet_type* type, char* buf, size_t buf_len)
     {
         JET_LOG_ERROR("could not resolve type str rep, failed to init sb.");
         return false;
-    }
-    
+    } 
     bool success = true;
+    const char* kind_spec;
+    switch(type->kind)
+    {
+        default:
+            kind_spec = "P";
+            break;
+        case JET_TYPE_INVALID:
+            kind_spec = "I *";
+            break;
+        case JET_TYPE_CUSTOM:
+            kind_spec = "U";
+            break;
+    }
     jet_ident name = type->type_name;
-    jet_sb_appendf(&sb, "%-*.*s (%zu byt)", 10, (int)name.len, name.str, type->size_bytes);
+    jet_sb_appendf(&sb, JET_TYPE_PRINT_FMT, (int)name.len, name.str, type->size_bytes, kind_spec);
     size_t full_len = jet_sb_len(&sb) + 1;
     if(full_len > buf_len)
     {
