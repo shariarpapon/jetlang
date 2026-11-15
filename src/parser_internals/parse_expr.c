@@ -77,12 +77,16 @@ static jet_result jet_parser_parse_primary_term(jet_parser* p)
     switch(start_tok->type)
     {
         default:
+        {
             jet_span err_span = jet_parser_token_range_span(start_tok, start_tok);
             res.as.error = jet_err(JET_ERR_PRIMARY_EXPR_PARSING_FAILED, err_span);
             break;
+        }
         case TOK_INV:
+        {
             jet_parser_handle_inv_tok(p);
             break;
+        }
         case TOK_IDENT:
         case TOK_LIT_INT:
         case TOK_LIT_FLOAT:
@@ -90,20 +94,26 @@ static jet_result jet_parser_parse_primary_term(jet_parser* p)
         case TOK_LIT_CHAR:
         case TOK_KWD_TRUE:
         case TOK_KWD_FALSE:
+        {
             res = jet_parser_lit_parse(p);
             break;
+        }
         case TOK_LPAR:
+        {
             jet_parser_consume_tok(p);
             res = jet_parser_parse_new_expr(p);
             JET_ASSERT(res.kind == JET_RESULT_NID || res.kind == JET_RESULT_ERROR);
             if(res.kind == JET_RESULT_NID)
                 jet_parser_expect_tok(p, TOK_RPAR);
             break;
+        }
         case TOK_MINUS:
         case TOK_NOT:
+        {
             res = jet_parser_unop_parse(p);
             JET_ASSERT(res.kind == JET_RESULT_NID || res.kind == JET_RESULT_ERROR);
             break;
+        }
     }    
     if(res.kind == JET_RESULT_ERROR) 
         return res;
