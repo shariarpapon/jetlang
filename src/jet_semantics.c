@@ -31,24 +31,21 @@ bool jet_sema_init(jet_compilation_unit* cu)
        || !jet_ident_id_kv_hs_init(&cu->global_symid_hs, JET_SEMA_INIT_SYM_CAP)
       ) return false;
 
+    return true;
+}
+
+bool jet_sema_analyze(jet_compilation_unit* cu)
+{
+    JET_ASSERT(cu != NULL);
+
     jet_sema_register_primitive_types(cu);
-    return true;
-}
-
-bool jet_sema_resolve_types(jet_compilation_unit* cu)
-{
-    JET_ASSERT(cu != NULL);
     jet_sema_register_custom_types(cu);
-    return true;
-}
+    JET_LOG_INFO("types registered");
 
-bool jet_sema_resolve_global_symbols(jet_compilation_unit* cu)
-{
-    JET_ASSERT(cu != NULL);
     jet_sema_register_global_symbols(cu);
+    JET_LOG_INFO("global symbols registered");
     return true;
 }
-
 
 
 

@@ -94,8 +94,7 @@ bool jet_cu_run(jet_compilation_unit* cu)
     
     JET_ASSERT(jet_sema_init(cu));
     JET_LOG_INFO("semantics initialized");
-    JET_ASSERT(jet_sema_resolve_types(cu)); 
-    JET_ASSERT(jet_sema_resolve_global_symbols(cu));
+    JET_ASSERT(jet_sema_analyze(cu));
     JET_LOG_INFO("semantics finished");
 
     jet_lexer_dispose(&lexer);
