@@ -1,3 +1,13 @@
 TODO
 
+-- impl the following in: semantic_internals/*c (what c file to implc them in to-be-decided.
+
+
+to impl:
+    void jet_sema_resolve_type_data(jet_compilation_unit* cu);
+    void jet_sema_register_funcs(jet_compilation_unit* cu);
+    bool jet_sema_generate_scope_symbols(jet_compilation_unit* cu, const jet_ast_node* block, jet_da* out_da); 
+
+
+
 

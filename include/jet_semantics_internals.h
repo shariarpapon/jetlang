@@ -33,6 +33,10 @@ void jet_sema_register_primitive_types(jet_compilation_unit* cu);
 void jet_sema_register_custom_types(jet_compilation_unit* cu);
 void jet_sema_register_global_symbols(jet_compilation_unit* cu);
 
+void jet_sema_resolve_type_data(jet_compilation_unit* cu);
+void jet_sema_register_funcs(jet_compilation_unit* cu);
+bool jet_sema_generate_scope_symbols(jet_compilation_unit* cu, const jet_ast_node* block, jet_da* out_da); 
+
 // id-index conversion
 size_t jet_sema_index_to_tid(size_t index);
 size_t jet_sema_tid_to_index(size_t tid);
