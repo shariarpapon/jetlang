@@ -3,6 +3,8 @@
 #include <jet_logger.h>
 #include <jet_ast_node.h>
 
+#define JET_SEMA_INIT_SCOPE_SYM_CAP (8)
+
 void jet_sema_register_global_symbols(jet_compilation_unit* cu)
 {
     JET_ASSERT(cu != NULL);
@@ -87,14 +89,43 @@ jet_symbol* jet_sema_get_gsym_by_name(const jet_compilation_unit* cu, jet_ident 
     return jet_sema_get_gsym_by_id(cu, symid);
 }
 
-bool jet_sema_generate_scope_symbols(jet_compilation_unit* cu, size_t nid, jet_da* out_da)
+//takes the uninitialized jet_da
+void jet_sema_generate_scope_symbols(jet_compilation_unit* cu, size_t nid, jet_da* out_da)
 {
     JET_ASSERT(cu != NULL);
     JET_ASSERT(out_da != NULL);
+    JET_ASSERT(nid != JET_INVALID_NID);
     
     const jet_ast_node* block_node = jet_ast_get_node_by_nid(&cu->ast, nid);
     JET_ASSERT(block_node != NULL);
     JET_ASSERT(block_node->node_type == AST_BLOCK);
+
+    JET_ASSERT(jet_da_init(out_da, JET_SEMA_INIT_SCOPE_SYM_CAP, sizeof(jet_symbol)));
+    const jet_da* stmt_nid_da = &block_node->as.block.stmt_nid_da;
+    size_t stmt_count = jet_da_count(stmt_nid_da);
+    jet_symbol sym = {0};
+    for(size_t i = 0; i < stmt_count; i++)
+    {
+        if(jet_sema_construct_scope_symbol_from_node(cu, nid, &sym))
+            JET_ASSERT(jet_da_append(out_da, &sym));
+    }
+}
+
+bool jet_sema_construct_scope_symbol_from_node(jet_compilation_unit* cu, size_t nid, jet_symbol* out_sym)
+{
+    JET_ASSERT(cu != NULL);
+    JET_ASSERT(out_sym != NULL);
+    JET_ASSERT(nid != JET_INVALID_NID);
+
+    const jet_ast_node* node = jet_ast_get_node_by_nid(&cu->ast, nid);
+    JET_ASSERT(node != NULL);
+    switch(node->node_type)
+    {
+        default: 
+            return false;
+        case AST_VAR_DECL:
+            return jet_sema_construct_var_symbol(cu, nid, out_sym);
+    }
 }
 
 bool jet_sema_construct_global_symbol_from_node(jet_compilation_unit* cu, size_t nid, jet_symbol* out_sym)
@@ -103,6 +134,7 @@ bool jet_sema_construct_global_symbol_from_node(jet_compilation_unit* cu, size_t
     JET_ASSERT(out_sym != NULL);
     JET_ASSERT(nid != JET_INVALID_NID);
     const jet_ast_node* node = jet_ast_get_node_by_nid(&cu->ast, nid);
+    JET_ASSERT(node != NULL);
     switch(node->node_type)
     {
         default: 

@@ -31,6 +31,13 @@ size_t jet_sema_get_gsymid_by_name(const jet_compilation_unit* cu, jet_ident nam
 jet_symbol* jet_sema_get_gsym_by_name(const jet_compilation_unit* cu, jet_ident name);
 jet_symbol* jet_sema_get_gsym_by_id(const jet_compilation_unit* cu, size_t symid);
 void jet_sema_register_gsym(jet_compilation_unit* cu, const jet_symbol* sym);
+void jet_sema_generate_scope_symbols(jet_compilation_unit* cu, size_t nid, jet_da* out_da); 
+//returns true if a symbol can be constructed from given node and false otherwise. valid input is asserted.
+bool jet_sema_construct_global_symbol_from_node(jet_compilation_unit* cu, size_t nid, jet_symbol* out_sym);
+bool jet_sema_construct_scope_symbol_from_node(jet_compilation_unit* cu, size_t nid, jet_symbol* out_sym);
+bool jet_sema_construct_var_symbol(jet_compilation_unit* cu, size_t nid, jet_symbol* out_sym);
+bool jet_sema_construct_func_decl_symbol(jet_compilation_unit* cu, size_t nid, jet_symbol* out_sym);
+bool jet_sema_construct_func_def_symbol(jet_compilation_unit* cu, size_t nid, jet_symbol* out_sym);
 
 // semantic passes
 void jet_sema_register_primitive_types(jet_compilation_unit* cu);
@@ -58,14 +65,6 @@ void jet_sema_err_dup_sym_name(jet_compilation_unit* cu, const jet_ast_node* nod
 void jet_sema_resolve_type_data(jet_compilation_unit* cu);
 void jet_sema_register_funcs(jet_compilation_unit* cu);
 
-bool jet_sema_construct_global_symbol_from_node(jet_compilation_unit* cu, size_t nid, jet_symbol* out_sym);
-bool jet_sema_generate_scope_symbols(jet_compilation_unit* cu, size_t nid, jet_da* out_da); 
-
-//returns true if a symbol can be constructed from given node and false otherwise. valid input is asserted.
-bool jet_sema_construct_var_symbol(jet_compilation_unit* cu, size_t nid, jet_symbol* out_sym);
-
-bool jet_sema_construct_func_decl_symbol(jet_compilation_unit* cu, size_t nid, jet_symbol* out_sym);
-bool jet_sema_construct_func_def_symbol(jet_compilation_unit* cu, size_t nid, jet_symbol* out_sym);
 
 
 

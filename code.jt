@@ -6,7 +6,6 @@ type Vector2
 
 int num = 1;
 
-int test(bool a);
 
 void foo(){}
 
