@@ -24,7 +24,6 @@ jet_type* jet_sema_get_type_by_tid(const jet_compilation_unit* cu, size_t tid);
 //returns true if a valid type id is found (id != JET_INVALID_TID)
 bool jet_sema_tspec_node_to_type_id(jet_compilation_unit* cu, const jet_ast_node* tspec_node, size_t* out_id);
 
-
 // symbols
 bool jet_sema_has_gsym_name(const jet_compilation_unit* cu, jet_ident name);
 size_t jet_sema_get_gsymid_by_name(const jet_compilation_unit* cu, jet_ident name);
@@ -58,8 +57,6 @@ size_t jet_sema_scopeid_to_index(size_t scopeid);
 void jet_sema_push_err(jet_compilation_unit* cu, const jet_error* err);
 void jet_sema_err_undefined_type(jet_compilation_unit* cu, const jet_ast_node* tspec);
 void jet_sema_err_dup_sym_name(jet_compilation_unit* cu, const jet_ast_node* node, jet_ident name);
-
-
 
 // ---- currently implementing ---- 
 void jet_sema_resolve_type_data(jet_compilation_unit* cu);
