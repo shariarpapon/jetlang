@@ -39,7 +39,7 @@ bool jet_sema_init(jet_semantics* sema, jet_compilation_unit* cu)
     sema->type_id_hs = &cu->type_id_hs;
     sema->global_symid_hs = &cu->global_symid_hs;
 
-    if(!jet_da_init(&sema->type_nid_da, JET_SEMA_INIT_TYPE_CAP, sizeof(size_t)))
+    if(!jet_da_init(&sema->custom_type_nid_da, JET_SEMA_INIT_TYPE_CAP, sizeof(size_t)))
         return false;
 
     return true;
@@ -48,7 +48,7 @@ bool jet_sema_init(jet_semantics* sema, jet_compilation_unit* cu)
 void jet_sema_dispose(jet_semantics* sema)
 {
     if(!sema) return;
-    jet_da_dispose(&sema->type_nid_da);
+    jet_da_dispose(&sema->custom_type_nid_da);
 }
 
 bool jet_sema_analyze(jet_semantics* sema)

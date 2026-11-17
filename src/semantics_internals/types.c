@@ -2,6 +2,13 @@
 #include <jet_ast_node.h>
 #include <jet_logger.h>
 
+static void jet_sema_type_nid_da_append(jet_semantics* sema, size_t type_nid)
+{
+    JET_ASSERT(sema != NULL);
+    JET_ASSERT(type_nid != JET_INVALID_NID);
+    JET_ASSERT(jet_da_append(&sema->custom_type_nid_da, (const void*)&type_nid));
+}
+
 void jet_sema_resolve_type_data(jet_semantics* sema)
 {
     JET_ASSERT(sema != NULL);
@@ -23,9 +30,14 @@ void jet_sema_register_custom_types(jet_semantics* sema)
     size_t top_count = jet_da_count(top_nid_da);
     if(top_count == 0) 
         return;
+    size_t nid;
+    const jet_ast_node* node;
     for(size_t i = 0; i < top_count; i++)
     {
-        const jet_ast_node* node = jet_ast_get_top_node_at_index(sema->ast, i);
+        nid = jet_ast_get_top_nid_at_index(sema->ast, i);
+        node = jet_ast_get_node_by_nid(sema->ast, nid);
+        JET_ASSERT(node != NULL);
+
         if(!jet_sema_can_node_construct_type(node))
             continue;
         if(jet_sema_has_type_name(sema, node->as.tdef.type_name))
@@ -37,6 +49,9 @@ void jet_sema_register_custom_types(jet_semantics* sema)
         jet_type out_type = {0};
         JET_ASSERT(jet_sema_type_from_node(node, &out_type));
         jet_sema_register_type(sema, out_type);
+
+        //add custom type_nid to buffer for later eval
+        jet_sema_type_nid_da_append(sema, nid);
     }
 }
 

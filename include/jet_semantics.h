@@ -12,7 +12,7 @@ typedef struct jet_semantics
     jet_hs* type_id_hs;
     jet_hs* global_symid_hs;
 
-    jet_da type_nid_da;
+    jet_da custom_type_nid_da;
 } jet_semantics;
 
 bool jet_sema_init(jet_semantics* sema, jet_compilation_unit* cu);
