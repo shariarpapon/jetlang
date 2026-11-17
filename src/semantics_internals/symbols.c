@@ -110,8 +110,42 @@ bool jet_sema_construct_global_symbol_from_node(jet_compilation_unit* cu, size_t
         case AST_VAR_DECL:
             return jet_sema_construct_var_symbol(cu, nid, out_sym);
         case AST_FUNC_DEF:
-            return jet_sema_construct_func_symbol(cu, nid, out_sym);
+            return jet_sema_construct_func_def_symbol(cu, nid, out_sym);
+        case AST_FUNC_DECL:
+            return jet_sema_construct_func_decl_symbol(cu, nid, out_sym);
     }
+}
+
+bool jet_sema_construct_func_decl_symbol(jet_compilation_unit* cu, size_t nid, jet_symbol* out_sym)
+{
+    JET_ASSERT(cu != NULL);
+    JET_ASSERT(out_sym != NULL);
+    JET_ASSERT(nid != JET_INVALID_NID);
+    const jet_ast_node* node = jet_ast_get_node_by_nid(&cu->ast, nid);
+    JET_ASSERT(node != NULL);
+
+    if(node->node_type != AST_FUNC_DECL)
+        return false;
+    
+    const jet_ast_node* tspec_node = jet_ast_get_node_by_nid(&cu->ast, node->as.fdecl.ret_tspec_nid);
+    JET_ASSERT(tspec_node != NULL);
+
+    size_t type_id;
+    if(!jet_sema_tspec_node_to_type_id(cu, tspec_node, &type_id))
+        return false;
+    *out_sym = jet_symbol_init_base(JET_SYM_FUNC, node->as.fdecl.ref_name, type_id, nid);
+    return true;
+}
+
+bool jet_sema_construct_func_def_symbol(jet_compilation_unit* cu, size_t nid, jet_symbol* out_sym)
+{
+    JET_ASSERT(cu != NULL);
+    JET_ASSERT(out_sym != NULL);
+    JET_ASSERT(nid != JET_INVALID_NID);
+    const jet_ast_node* node = jet_ast_get_node_by_nid(&cu->ast, nid);
+    if(node->node_type != AST_FUNC_DEF)
+        return false;
+    return jet_sema_construct_func_decl_symbol(cu, node->as.fdef.fdecl_nid, out_sym);
 }
 
 bool jet_sema_construct_var_symbol(jet_compilation_unit* cu, size_t nid, jet_symbol* out_sym)
@@ -120,14 +154,13 @@ bool jet_sema_construct_var_symbol(jet_compilation_unit* cu, size_t nid, jet_sym
     JET_ASSERT(out_sym != NULL);
     JET_ASSERT(nid != JET_INVALID_NID);
 
-    const jet_ast* ast = &cu->ast;
-    const jet_ast_node* node = jet_ast_get_node_by_nid(ast, nid);
+    const jet_ast_node* node = jet_ast_get_node_by_nid(&cu->ast, nid);
     JET_ASSERT(node != NULL);
 
     if(node->node_type != AST_VAR_DECL)
         return false;
 
-    const jet_ast_node* tspec_node = jet_ast_get_node_by_nid(ast, node->as.vdecl.tspec_nid);
+    const jet_ast_node* tspec_node = jet_ast_get_node_by_nid(&cu->ast, node->as.vdecl.tspec_nid);
     JET_ASSERT(tspec_node != NULL);
 
     size_t type_id;
@@ -137,30 +170,5 @@ bool jet_sema_construct_var_symbol(jet_compilation_unit* cu, size_t nid, jet_sym
     *out_sym = jet_symbol_init_base(JET_SYM_VAR, node->as.vdecl.ref_name, type_id, nid);;
     return true;
 
-}
-
-bool jet_sema_construct_func_symbol(jet_compilation_unit* cu, size_t nid, jet_symbol* out_sym)
-{
-    JET_ASSERT(cu != NULL);
-    JET_ASSERT(out_sym != NULL);
-    JET_ASSERT(nid != JET_INVALID_NID);
-    
-    const jet_ast* ast = &cu->ast;
-    const jet_ast_node* node = jet_ast_get_node_by_nid(ast, nid);
-
-    if(node->node_type != AST_FUNC_DEF)
-        return false;
-
-    const jet_ast_node* fdecl_node = jet_ast_get_node_by_nid(ast, node->as.fdef.fdecl_nid);
-    JET_ASSERT(fdecl_node != NULL);
-
-    const jet_ast_node* tspec_node = jet_ast_get_node_by_nid(ast, fdecl_node->as.fdecl.ret_tspec_nid);
-    JET_ASSERT(tspec_node != NULL);
-
-    size_t type_id;
-    if(!jet_sema_tspec_node_to_type_id(cu, tspec_node, &type_id))
-        return false;
-    *out_sym = jet_symbol_init_base(JET_SYM_FUNC, fdecl_node->as.fdecl.ref_name, type_id, nid);
-    return true;
 }
 

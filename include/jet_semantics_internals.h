@@ -61,11 +61,11 @@ void jet_sema_register_funcs(jet_compilation_unit* cu);
 bool jet_sema_construct_global_symbol_from_node(jet_compilation_unit* cu, size_t nid, jet_symbol* out_sym);
 bool jet_sema_generate_scope_symbols(jet_compilation_unit* cu, size_t nid, jet_da* out_da); 
 
-//returns true if a VAR symbol can be constructed from given node and false otherwise. valid input is asserted.
+//returns true if a symbol can be constructed from given node and false otherwise. valid input is asserted.
 bool jet_sema_construct_var_symbol(jet_compilation_unit* cu, size_t nid, jet_symbol* out_sym);
 
-//returns true if a FUNC symbol can be constructed from given node and false otherwise. valid input is asserted.
-bool jet_sema_construct_func_symbol(jet_compilation_unit* cu, size_t nid, jet_symbol* out_sym);
+bool jet_sema_construct_func_decl_symbol(jet_compilation_unit* cu, size_t nid, jet_symbol* out_sym);
+bool jet_sema_construct_func_def_symbol(jet_compilation_unit* cu, size_t nid, jet_symbol* out_sym);
 
 
 
