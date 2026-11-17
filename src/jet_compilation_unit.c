@@ -92,13 +92,15 @@ bool jet_cu_run(jet_compilation_unit* cu)
     JET_ASSERT(jet_parser_parse(&parser));
     JET_LOG_INFO("parser finished");
     
-    JET_ASSERT(jet_sema_init(cu));
+    jet_semantics sema;
+    JET_ASSERT(jet_sema_init(&sema, cu));
     JET_LOG_INFO("semantics initialized");
-    JET_ASSERT(jet_sema_analyze(cu));
+    JET_ASSERT(jet_sema_analyze(&sema));
     JET_LOG_INFO("semantics finished");
 
-    jet_lexer_dispose(&lexer);
+    jet_sema_dispose(&sema);
     jet_parser_dispose(&parser);
+    jet_lexer_dispose(&lexer);
     return true;
 }
 
