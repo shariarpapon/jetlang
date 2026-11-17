@@ -22,6 +22,8 @@ const jet_ast_node* jet_ast_get_node_by_nid(const jet_ast* ast, node_id nid);
 const jet_da* jet_ast_get_top_nid_da(const jet_ast* ast);
 node_id jet_ast_get_prog_nid(const jet_ast* ast);
 
+size_t jet_ast_get_top_nid_at_index(const jet_ast* ast, size_t index);
+
 
 
 

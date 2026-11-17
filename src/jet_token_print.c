@@ -23,8 +23,10 @@ void jet_token_table_print_da(const jet_da* tokens)
         return;
     }
     
-    printf("token darray [%zu]:\n", len);
+    printf("\n=========================================================\n");
+    printf("tokens [%zu]:\n", len);
     printf(TOK_TB_HEADER_FMT, "index", "type", "line", "col", "value");        
+    printf("=========================================================\n");
    
     for(size_t i = 0; i < len; i++)
     {  

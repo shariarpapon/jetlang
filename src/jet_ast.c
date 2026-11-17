@@ -60,7 +60,7 @@ bool jet_ast_push_nid(jet_ast* ast, node_id nid)
     const jet_ast_node* node = jet_ast_get_node_by_nid(ast, nid);
     if(node == NULL)
     {
-        JET_LOG_ERROR("nid=%zu does not exist in registry.", nid);
+        JET_LOG_ERROR("node with nid=%zu does not exist in registry.", nid);
         return false;
     }
     if(node->node_type == AST_PROG)
@@ -125,6 +125,16 @@ node_id jet_ast_get_prog_nid(const jet_ast* ast)
 {
     JET_ASSERT(ast != NULL);
     return ast->prog_nid;
+}
+
+size_t jet_ast_get_top_nid_at_index(const jet_ast* ast, size_t index)
+{
+    if(index >= jet_da_count(&ast->top_nid_da))
+    {
+        JET_LOG_ERROR("top_nid_da index %zu is out of bounds.", index);
+        return JET_INVALID_NID;
+    }
+    return *((size_t*)jet_da_get(&ast->top_nid_da, index));
 }
 
 

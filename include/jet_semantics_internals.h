@@ -21,6 +21,10 @@ bool jet_sema_type_from_node(const jet_ast_node* node, jet_type* out);
 jet_type* jet_sema_get_type_by_name(const jet_compilation_unit* cu, jet_ident type_name);
 jet_type* jet_sema_get_type_by_tid(const jet_compilation_unit* cu, size_t tid);
 
+//returns true if a valid type id is found (id != JET_INVALID_TID)
+bool jet_sema_tspec_node_to_type_id(jet_compilation_unit* cu, const jet_ast_node* tspec_node, size_t* out_id);
+
+
 // symbols
 bool jet_sema_has_gsym_name(const jet_compilation_unit* cu, jet_ident name);
 size_t jet_sema_get_gsymid_by_name(const jet_compilation_unit* cu, jet_ident name);
@@ -51,10 +55,17 @@ void jet_sema_err_dup_sym_name(jet_compilation_unit* cu, const jet_ast_node* nod
 
 
 // ---- currently implementing ---- 
-bool jet_sema_construct_global_symbol_from_node(jet_compilation_unit* cu, const jet_ast_node* node, jet_symbol* out_sym);
 void jet_sema_resolve_type_data(jet_compilation_unit* cu);
 void jet_sema_register_funcs(jet_compilation_unit* cu);
-bool jet_sema_generate_scope_symbols(jet_compilation_unit* cu, const jet_ast_node* block_node, jet_da* out_da); 
+
+bool jet_sema_construct_global_symbol_from_node(jet_compilation_unit* cu, size_t nid, jet_symbol* out_sym);
+bool jet_sema_generate_scope_symbols(jet_compilation_unit* cu, size_t nid, jet_da* out_da); 
+
+//returns true if a VAR symbol can be constructed from given node and false otherwise. valid input is asserted.
+bool jet_sema_construct_var_symbol(jet_compilation_unit* cu, size_t nid, jet_symbol* out_sym);
+
+//returns true if a FUNC symbol can be constructed from given node and false otherwise. valid input is asserted.
+bool jet_sema_construct_func_symbol(jet_compilation_unit* cu, size_t nid, jet_symbol* out_sym);
 
 
 

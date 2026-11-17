@@ -16,9 +16,10 @@ struct jet_symbol
     jet_ident name;
     size_t type_id;
     size_t record_id;
+    size_t node_id;
 };
 
-jet_symbol jet_symbol_init_base(jet_symbol_kind kind, jet_ident name, size_t type_id);
+jet_symbol jet_symbol_init_base(jet_symbol_kind kind, jet_ident name, size_t type_id, size_t node_id);
 
 
 
