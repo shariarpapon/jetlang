@@ -13,8 +13,8 @@
 // col_space = 10
 // sym_kind ___ sym_name ___ type_id
 #define JET_SYM_PRINT_LINE_SEP "\n====================================\n"
-#define JET_SYM_PRINT_HEADER_FMT "%-6s %-5s %-5s %s"
-#define JET_SYM_PRINT_COL_FMT "%-6s %-5zu %-5zu %.*s"
+#define JET_SYM_PRINT_HEADER_FMT "%-8s %-7s %-7s %s"
+#define JET_SYM_PRINT_COL_FMT "%-8s %-7zu %-7zu %.*s"
 
 static bool jet_symbol_print_resolve_str(const jet_symbol* sym, char buf[], size_t buf_len);
 

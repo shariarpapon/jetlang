@@ -3,7 +3,7 @@ int y;
 int z;
 int r;
 
-type Vector2c
+type Vector2
 {
     int x;
     int y;
