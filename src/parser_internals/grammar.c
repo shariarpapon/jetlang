@@ -75,17 +75,27 @@ bool jet_parser_is_tdef(jet_parser* p)
     return jet_parser_is_sequence_match(p, seq, ARRAY_LEN(seq));
 }
 
-bool jet_parser_is_tspec(jet_parser* p)
+bool jet_parser_is_tspec_head(jet_parser* p)
 {
     JET_ASSERT(p != NULL);
     const jet_token* tok = jet_parser_peek_tok(p);
-    return jet_parser_is_defined_type(p, tok, NULL);
+    switch(tok->type)
+    {
+        case TOK_KWD_BOOL:
+        case TOK_KWD_INT:
+        case TOK_KWD_FLOAT:
+        case TOK_KWD_STR:
+        case TOK_KWD_CHAR:
+            return true;
+        case TOK_IDENT:
+            return jet_parser_peekn_tok_type(p, 1) == TOK_IDENT;
+    }
 }
 
 bool jet_parser_is_vdecl_head(jet_parser* p)
 {
     JET_ASSERT(p != NULL);
-    return  jet_parser_is_tspec(p) &&
+    return  jet_parser_is_tspec_head(p) &&
             jet_parser_peekn_tok_type(p, 1) == TOK_IDENT && 
            (jet_parser_peekn_tok_type(p, 2) == TOK_ASG || 
             jet_parser_peekn_tok_type(p, 2) == TOK_SEMI);
@@ -95,7 +105,7 @@ bool jet_parser_is_func_head(jet_parser* p)
 {
     JET_ASSERT(p != NULL);
     
-    return jet_parser_is_tspec(p) &&
+    return jet_parser_is_tspec_head(p) &&
            jet_parser_peekn_tok_type(p, 1) == TOK_IDENT &&
            jet_parser_peekn_tok_type(p, 2) == TOK_LPAR;
 }

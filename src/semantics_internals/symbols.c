@@ -102,11 +102,12 @@ void jet_sema_generate_scope_symbols(jet_semantics* sema, size_t nid, jet_da* ou
 
     JET_ASSERT(jet_da_init(out_da, JET_SEMA_INIT_SCOPE_SYM_CAP, sizeof(jet_symbol)));
     const jet_da* stmt_nid_da = &block_node->as.block.stmt_nid_da;
-    size_t stmt_count = jet_da_count(stmt_nid_da);
+    size_t stmt_nid;
     jet_symbol sym = {0};
-    for(size_t i = 0; i < stmt_count; i++)
+    for(size_t i = 0; i < jet_da_count(stmt_nid_da); i++)
     {
-        if(jet_sema_construct_scope_symbol_from_node(sema, nid, &sym))
+        stmt_nid = *((const size_t*)jet_da_get(stmt_nid_da, i));
+        if(jet_sema_construct_scope_symbol_from_node(sema, stmt_nid, &sym))
             JET_ASSERT(jet_da_append(out_da, &sym));
     }
 }
@@ -119,6 +120,7 @@ bool jet_sema_construct_scope_symbol_from_node(jet_semantics* sema, size_t nid, 
 
     const jet_ast_node* node = jet_ast_get_node_by_nid(sema->ast, nid);
     JET_ASSERT(node != NULL);
+
     switch(node->node_type)
     {
         default: 

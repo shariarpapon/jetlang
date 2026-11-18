@@ -257,8 +257,8 @@ jet_result jet_parser_tdef_parse(jet_parser* p)
 jet_result jet_parser_tspec_parse(jet_parser* p)
 {
     JET_ASSERT(p != NULL); 
-    if(!jet_parser_is_tspec(p))
-        goto fail;
+    if(!jet_parser_is_tspec_head(p))
+       goto fail;
     
     const jet_token* tok = jet_parser_consume_tok(p);
     jet_type_kind tkind = jet_parser_type_kind_from_token(tok);

@@ -43,7 +43,7 @@ bool jet_parser_is_expr_head(jet_parser* p);
 bool jet_parser_is_vdecl_head(jet_parser* p);
 bool jet_parser_is_func_head(jet_parser* p);
 bool jet_parser_is_prog_head(jet_parser* p);
-bool jet_parser_is_tspec(jet_parser* p);
+bool jet_parser_is_tspec_head(jet_parser* p);
 bool jet_parser_is_tdef(jet_parser* p);
 bool jet_parser_is_unop_head(jet_parser* p);
 bool jet_parser_is_call_head(jet_parser* p);

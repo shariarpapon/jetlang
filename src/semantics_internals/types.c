@@ -12,6 +12,20 @@ static void jet_sema_type_nid_da_append(jet_semantics* sema, size_t type_nid)
 void jet_sema_resolve_type_data(jet_semantics* sema)
 {
     JET_ASSERT(sema != NULL);
+    size_t nid;
+    const jet_ast_node* node;
+    jet_type* type;
+    size_t custom_type_count = jet_da_count(&sema->custom_type_nid_da);
+    for(size_t i = 0; i < custom_type_count; i++)
+    {
+        nid = *((const size_t*)jet_da_get(&sema->custom_type_nid_da, i));
+        node = jet_ast_get_node_by_nid(sema->ast, nid);
+        JET_ASSERT(node != NULL);
+        JET_ASSERT(node->node_type == AST_TYPE_DEF);
+        type = jet_sema_get_type_by_name(sema, node->as.tdef.type_name);
+        JET_ASSERT(type != NULL);
+        jet_sema_generate_scope_symbols(sema, node->as.tdef.block_nid, &type->field_symbol_da);
+    }
 }
 
 void jet_sema_register_type(jet_semantics* sema, jet_type type)
