@@ -64,6 +64,10 @@ bool jet_sema_analyze(jet_semantics* sema)
 
     jet_sema_resolve_type_data(sema);
     JET_LOG_INFO("types resolved");
+
+    jet_sema_register_funcs(sema);
+    JET_LOG_INFO("funcs registered");
+
     return true;
 }
 

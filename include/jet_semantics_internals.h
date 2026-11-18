@@ -42,6 +42,7 @@ bool jet_sema_construct_func_def_symbol(jet_semantics* sema, size_t nid, jet_sym
 void jet_sema_register_primitive_types(jet_semantics* sema);
 void jet_sema_register_custom_types(jet_semantics* sema);
 void jet_sema_register_global_symbols(jet_semantics* sema);
+void jet_sema_resolve_type_data(jet_semantics* sema);
 
 // id-index conversion
 size_t jet_sema_index_to_tid(size_t index);
@@ -59,7 +60,6 @@ void jet_sema_err_undefined_type(jet_semantics* sema, const jet_ast_node* tspec)
 void jet_sema_err_dup_sym_name(jet_semantics* sema, const jet_ast_node* node, jet_ident name);
 
 // ---- currently implementing ---- 
-void jet_sema_resolve_type_data(jet_semantics* sema);
 void jet_sema_register_funcs(jet_semantics* sema);
 
 
