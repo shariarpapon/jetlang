@@ -246,11 +246,8 @@ jet_result jet_parser_tdef_parse(jet_parser* p)
     const jet_token* end_tok = jet_parser_peek_prev_tok(p);
 
     const jet_ident type_name = jet_parser_ident_from_tok(ident_tok);
-    jet_parser_register_type_name(p, type_name);
-
     jet_span span = jet_parser_token_range_span(start_tok, end_tok);    
     jet_ast_node node = jet_astn_tdef(span, type_name, block_result.as.nid);
-
     return jet_parser_register_node(p, (const jet_ast_node*)&node);
 }
 

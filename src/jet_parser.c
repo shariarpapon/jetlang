@@ -6,8 +6,6 @@
 #include <jet_logger.h>
 
 #define JET_PARSER_INIT_ERR_CAP (64)
-#define JET_PARSER_INIT_TYPE_NAME_CAP (32)
-
 #define ARRAY_LEN(a) (sizeof(a) / sizeof((a)[0]))
 
 bool jet_parser_init(jet_parser* p, jet_compilation_unit* cu)
@@ -28,13 +26,6 @@ bool jet_parser_init(jet_parser* p, jet_compilation_unit* cu)
     if(!jet_da_init(&cu->parser_err_da, JET_PARSER_INIT_ERR_CAP, sizeof(jet_error)))
         return false;
     p->err_da = &cu->parser_err_da;
-
-    if(!jet_ident_hashset_init(&cu->type_name_hs, JET_PARSER_INIT_TYPE_NAME_CAP))
-        return false;
-    p->type_name_hs = &cu->type_name_hs;
-
-    //parser should be valid initialized state by this point
-    jet_parser_add_primitive_type_names(p);
     return true;
 }
 

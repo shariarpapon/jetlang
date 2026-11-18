@@ -17,7 +17,6 @@ typedef struct jet_compilation_unit
     //parser data
     jet_ast ast;
     jet_da parser_err_da;
-    jet_hs type_name_hs;
 
     //semantics data
     jet_da type_da;

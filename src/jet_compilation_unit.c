@@ -60,7 +60,6 @@ void jet_cu_dispose(jet_compilation_unit* cu)
         free((void*)cu->source);
 
     // parser
-    jet_hs_dispose_full(&cu->type_name_hs);
     jet_da_dispose(&cu->parser_err_da);
     jet_ast_dispose(&cu->ast);
     

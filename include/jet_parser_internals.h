@@ -55,10 +55,6 @@ bool jet_parser_is_return_head(jet_parser* p);
 bool jet_parser_is_break_head(jet_parser* p);
 
 //### types
-const jet_ident* jet_parser_register_type_name(jet_parser* p, jet_ident type_name);
-bool jet_parser_is_defined_type(jet_parser* p, const jet_token* tok, const jet_ident** out_ident);
-bool  jet_parser_get_type_name(jet_parser* p, const jet_token* tok, jet_ident* out_ident);
-void jet_parser_add_primitive_type_names(jet_parser* p);
 jet_type_kind jet_parser_type_kind_from_token(const jet_token* tok);
 
 //### parse
