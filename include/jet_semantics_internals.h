@@ -7,6 +7,7 @@
 #include <jet_error.h>
 #include <jet_symbol.h>
 #include <jet_func.h>
+#include <jet_scope.h>
 
 #define JET_INVALID_TID (0)
 #define JET_INVALID_SCOPEID (0)
@@ -32,13 +33,17 @@ size_t jet_sema_get_gsymid_by_name(const jet_semantics* sema, jet_ident name);
 jet_symbol* jet_sema_get_gsym_by_name(const jet_semantics* sema, jet_ident name);
 jet_symbol* jet_sema_get_gsym_by_id(const jet_semantics* sema, size_t symid);
 void jet_sema_register_gsym(jet_semantics* sema, const jet_symbol* sym);
-void jet_sema_generate_scope_symbols(jet_semantics* sema, size_t nid, jet_da* out_da); 
 //returns true if a symbol can be constructed from given node and false otherwise. valid input is asserted.
 bool jet_sema_construct_global_symbol_from_node(jet_semantics* sema, size_t nid, jet_symbol* out_sym);
-bool jet_sema_construct_scope_symbol_from_node(jet_semantics* sema, size_t nid, jet_symbol* out_sym);
 bool jet_sema_construct_var_symbol(jet_semantics* sema, size_t nid, jet_symbol* out_sym);
 bool jet_sema_construct_func_decl_symbol(jet_semantics* sema, size_t nid, jet_symbol* out_sym);
 bool jet_sema_construct_func_def_symbol(jet_semantics* sema, size_t nid, jet_symbol* out_sym);
+
+//scopes
+bool jet_sema_generate_scope_symbols(jet_semantics* sema, size_t nid, jet_da* out_da); 
+bool jet_sema_construct_scope_symbol_from_node(jet_semantics* sema, size_t nid, jet_symbol* out_sym);
+bool jet_sema_construct_scope_from_node(jet_semantics* sema, size_t nid, size_t parent_scope_id, jet_scope* out_scope);
+size_t jet_sema_register_node_scopes(jet_semantics* sema, size_t nid);
 
 // semantic passes
 void jet_sema_register_primitive_types(jet_semantics* sema);
@@ -64,9 +69,6 @@ void jet_sema_err_dup_sym_name(jet_semantics* sema, const jet_ast_node* node, je
 // ---- currently implementing ---- 
 void jet_sema_register_funcs(jet_semantics* sema);
 bool jet_sema_construct_func_from_node(jet_semantics* sema, size_t nid, jet_func* out_func);
-
-
-
 
 
 

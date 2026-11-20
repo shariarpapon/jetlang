@@ -3,8 +3,6 @@
 #include <jet_logger.h>
 #include <jet_ast_node.h>
 
-#define JET_SEMA_INIT_SCOPE_SYM_CAP (8)
-
 void jet_sema_register_global_symbols(jet_semantics* sema)
 {
     JET_ASSERT(sema != NULL);
@@ -89,46 +87,6 @@ jet_symbol* jet_sema_get_gsym_by_name(const jet_semantics* sema, jet_ident name)
     return jet_sema_get_gsym_by_id(sema, symid);
 }
 
-//takes the uninitialized jet_da
-void jet_sema_generate_scope_symbols(jet_semantics* sema, size_t nid, jet_da* out_da)
-{
-    JET_ASSERT(sema != NULL);
-    JET_ASSERT(out_da != NULL);
-    JET_ASSERT(nid != JET_INVALID_NID);
-    
-    const jet_ast_node* block_node = jet_ast_get_node_by_nid(sema->ast, nid);
-    JET_ASSERT(block_node != NULL);
-    JET_ASSERT(block_node->node_type == AST_BLOCK);
-
-    JET_ASSERT(jet_da_init(out_da, JET_SEMA_INIT_SCOPE_SYM_CAP, sizeof(jet_symbol)));
-    const jet_da* stmt_nid_da = &block_node->as.block.stmt_nid_da;
-    size_t stmt_nid;
-    jet_symbol sym = {0};
-    for(size_t i = 0; i < jet_da_count(stmt_nid_da); i++)
-    {
-        stmt_nid = *((const size_t*)jet_da_get(stmt_nid_da, i));
-        if(jet_sema_construct_scope_symbol_from_node(sema, stmt_nid, &sym))
-            JET_ASSERT(jet_da_append(out_da, &sym));
-    }
-}
-
-bool jet_sema_construct_scope_symbol_from_node(jet_semantics* sema, size_t nid, jet_symbol* out_sym)
-{
-    JET_ASSERT(sema != NULL);
-    JET_ASSERT(out_sym != NULL);
-    JET_ASSERT(nid != JET_INVALID_NID);
-
-    const jet_ast_node* node = jet_ast_get_node_by_nid(sema->ast, nid);
-    JET_ASSERT(node != NULL);
-
-    switch(node->node_type)
-    {
-        default: 
-            return false;
-        case AST_VAR_DECL:
-            return jet_sema_construct_var_symbol(sema, nid, out_sym);
-    }
-}
 
 bool jet_sema_construct_global_symbol_from_node(jet_semantics* sema, size_t nid, jet_symbol* out_sym)
 {
