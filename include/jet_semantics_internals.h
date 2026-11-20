@@ -6,10 +6,12 @@
 #include <jet_ident.h>
 #include <jet_error.h>
 #include <jet_symbol.h>
+#include <jet_func.h>
 
 #define JET_INVALID_TID (0)
 #define JET_INVALID_SCOPEID (0)
 #define JET_INVALID_SYMID (0)
+#define JET_INVALID_FID (0)
 
 // types
 void jet_sema_register_type(jet_semantics* sema, jet_type def);
@@ -61,6 +63,7 @@ void jet_sema_err_dup_sym_name(jet_semantics* sema, const jet_ast_node* node, je
 
 // ---- currently implementing ---- 
 void jet_sema_register_funcs(jet_semantics* sema);
+bool jet_sema_construct_func_from_node(jet_semantics* sema, size_t nid, jet_func* out_func);
 
 
 

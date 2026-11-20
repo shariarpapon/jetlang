@@ -15,10 +15,7 @@ void jet_sema_register_funcs(jet_semantics* sema)
     }
 }
 
-
-
-
-
-
-
-
+bool jet_sema_construct_func_from_node(jet_semantics* sema, size_t nid, jet_func* out_func)
+{
+    
+}
