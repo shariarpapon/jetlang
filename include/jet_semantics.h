@@ -11,6 +11,7 @@ typedef struct jet_semantics
     jet_da* sema_err_da;
     jet_hs* type_id_hs;
     jet_hs* global_symid_hs;
+    jet_da* func_da;
 
     jet_da custom_type_nid_da;
 } jet_semantics;

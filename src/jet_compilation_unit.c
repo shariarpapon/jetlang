@@ -14,6 +14,7 @@
 #include <jet_type.h>
 #include <jet_semantics.h>
 #include <jet_scope.h>
+#include <jet_func.h>
 
 #ifdef _WIN32
 #include<windows.h>
@@ -67,11 +68,18 @@ void jet_cu_dispose(jet_compilation_unit* cu)
     jet_hs_dispose_full(&cu->type_id_hs);
     jet_da_dispose(&cu->type_da);
     jet_da_dispose(&cu->sema_err_da);
+
     for(size_t i = 0 ; i < jet_da_count(&cu->scope_da); i++)
         jet_scope_dispose((jet_scope*)jet_da_get(&cu->scope_da, i));
     jet_da_dispose(&cu->scope_da);
+
     jet_da_dispose(&cu->global_sym_da);
     jet_hs_dispose_full(&cu->global_symid_hs);
+
+    for(size_t i = 0; i < jet_da_count(&cu->func_da); i++)
+        jet_func_dispose((jet_func*)jet_da_get(&cu->func_da, i));
+    jet_da_dispose(&cu->func_da);
+
     memset(cu, 0, sizeof(*cu));
 }
 

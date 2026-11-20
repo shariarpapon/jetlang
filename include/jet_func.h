@@ -15,9 +15,10 @@ typedef struct jet_func
 } jet_func;
 
 
-jet_func_signature jet_func_signature_init_base(size_t ret_type_id);
-jet_func jet_func_init_base(size_t ret_type_id);
+jet_func jet_func_init_base();
 void jet_func_dispose(jet_func* func);
-void jet_func_signature_dispose(jet_func_signature* sig);
 
+
+jet_func_signature jet_func_sig_init_base();
+void jet_func_sig_dispose(jet_func_signature* sig);
  
