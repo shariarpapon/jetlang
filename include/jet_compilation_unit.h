@@ -24,10 +24,12 @@ typedef struct jet_compilation_unit
     jet_da sema_err_da;
 
     jet_da scope_da;
+    jet_hs scope_id_hs;
+
     jet_da global_sym_da;
     jet_hs global_symid_hs;
 
-     jet_da func_da;
+    jet_da func_da;
 
 } jet_compilation_unit;
 

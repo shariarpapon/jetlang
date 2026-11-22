@@ -40,6 +40,11 @@ bool jet_sema_construct_func_decl_symbol(jet_semantics* sema, size_t nid, jet_sy
 bool jet_sema_construct_func_def_symbol(jet_semantics* sema, size_t nid, jet_symbol* out_sym);
 
 //scopes
+bool jet_sema_scope_id_hs_init(jet_hs* hs, size_t capacity);
+bool jet_sema_scope_id_hs_has_key(jet_hs* hs, size_t nid);
+void jet_sema_scope_id_hs_add(jet_hs* hs, size_t nid, size_t scope_id);
+
+
 bool jet_sema_generate_scope_symbols(jet_semantics* sema, size_t nid, jet_da* out_da); 
 bool jet_sema_construct_scope_symbol_from_node(jet_semantics* sema, size_t nid, jet_symbol* out_sym);
 bool jet_sema_construct_scope_from_node(jet_semantics* sema, size_t nid, size_t parent_scope_id, jet_scope* out_scope);

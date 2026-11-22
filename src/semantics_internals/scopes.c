@@ -5,6 +5,54 @@
 
 #define JET_SEMA_INIT_SCOPE_SYM_CAP (16)
 
+typedef struct jet_sema_scope_id_hs_entry
+{
+    size_t nid;
+    size_t scope_id;
+} jet_sema_scope_id_hs_entry;
+
+static uint64_t jet_sema_scope_id_hs_hash(const void* entry)
+{
+    const jet_sema_scope_id_hs_entry* e = entry;
+    return (uint64_t)e->nid;
+}
+
+static bool jet_sema_scope_id_hs_equals(const void* a, const void* b)
+{
+    const jet_sema_scope_id_hs_entry* _a = a;
+    const jet_sema_scope_id_hs_entry* _b = b;
+    return _a->nid == _b->nid;
+}
+
+bool jet_sema_scope_id_hs_init(jet_hs* hs, size_t capacity)
+{
+    return jet_hs_init(hs, 
+            capacity, 
+            jet_sema_scope_id_hs_hash, 
+            jet_sema_scope_id_hs_equals);
+}
+
+void jet_sema_scope_id_hs_add(jet_hs* hs, size_t nid, size_t scope_id)
+{
+    JET_ASSERT(hs != NULL);
+    JET_ASSERT(nid != JET_INVALID_NID);
+    JET_ASSERT(scope_id != JET_INVALID_SCOPEID);
+
+    jet_sema_scope_id_hs_entry entry = 
+    {
+        .nid = nid,
+        .scope_id = scope_id
+    };
+
+    JET_ASSERT(jet_hs_add(hs, &entry, sizeof(entry)) != NULL);
+}
+
+bool jet_sema_scope_id_hs_has_key(jet_hs* hs, size_t nid)
+{
+    JET_ASSERT(hs != NULL);
+    return jet_hs_contains(hs, (const void*)&nid, NULL);
+}
+
 //returns the root scope_id
 size_t jet_sema_register_node_scopes(jet_semantics* sema, size_t nid)
 {

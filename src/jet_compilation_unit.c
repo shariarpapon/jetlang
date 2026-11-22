@@ -79,6 +79,7 @@ void jet_cu_dispose(jet_compilation_unit* cu)
     for(size_t i = 0; i < jet_da_count(&cu->func_da); i++)
         jet_func_dispose((jet_func*)jet_da_get(&cu->func_da, i));
     jet_da_dispose(&cu->func_da);
+    jet_hs_dispose_full(&cu->scope_id_hs);
 
     memset(cu, 0, sizeof(*cu));
 }

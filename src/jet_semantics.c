@@ -17,7 +17,6 @@
 #define JET_SEMA_INIT_SYM_CAP (64)
 #define JET_SEMA_INIT_FUNC_CAP (32)
 
-
 // Public Interface #############################
 
 bool jet_sema_init(jet_semantics* sema, jet_compilation_unit* cu)
@@ -31,7 +30,8 @@ bool jet_sema_init(jet_semantics* sema, jet_compilation_unit* cu)
        || !jet_da_init(&cu->scope_da, JET_SEMA_INIT_SCOPE_CAP, sizeof(jet_scope)) 
        || !jet_da_init(&cu->global_sym_da, JET_SEMA_INIT_SYM_CAP, sizeof(jet_symbol))
        || !jet_ident_id_kv_hs_init(&cu->global_symid_hs, JET_SEMA_INIT_SYM_CAP)
-       || !jet_da_init(&cu->func_da, JET_SEMA_INIT_FUNC_CAP, sizeof(jet_func)) )  
+       || !jet_da_init(&cu->func_da, JET_SEMA_INIT_FUNC_CAP, sizeof(jet_func)) 
+       || !jet_sema_scope_id_hs_init(&cu->scope_id_hs, JET_SEMA_INIT_SCOPE_CAP))  
         return false;
 
     *sema = (jet_semantics){0};
@@ -43,6 +43,7 @@ bool jet_sema_init(jet_semantics* sema, jet_compilation_unit* cu)
     sema->type_id_hs = &cu->type_id_hs;
     sema->global_symid_hs = &cu->global_symid_hs;
     sema->func_da = &cu->func_da;
+    sema->scope_id_hs = &cu->scope_id_hs;
 
     if(!jet_da_init(&sema->custom_type_nid_da, JET_SEMA_INIT_TYPE_CAP, sizeof(size_t)))
         return false;
