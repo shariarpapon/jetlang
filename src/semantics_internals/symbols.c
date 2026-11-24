@@ -2,6 +2,28 @@
 #include <jet_semantics_internals.h>
 #include <jet_logger.h>
 #include <jet_ast_node.h>
+#include <jet_symbol_print.h>
+#include <jet_ast.h>
+
+static size_t jet_sema_register_record_from_node(jet_semantics* sema, size_t nid)
+{
+    JET_ASSERT(sema != NULL);
+    JET_ASSERT(nid != JET_INVALID_NID);
+    const jet_ast_node* node = jet_ast_get_node_by_nid(sema->ast, nid);
+    JET_ASSERT(node != NULL);
+    return JET_INVALID_RECORD_ID;
+}
+
+void jet_sema_resolve_global_symbol_records(jet_semantics* sema)
+{
+    JET_ASSERT(sema != NULL);
+    size_t rec_count = jet_da_count(sema->global_sym_da);
+    for(size_t i = 0; i < rec_count; i++)
+    {
+        jet_symbol* s = jet_da_get(sema->global_sym_da, i);
+        s->record_id = jet_sema_register_record_from_node(sema, s->node_id);
+    }
+}
 
 void jet_sema_register_global_symbols(jet_semantics* sema)
 {
@@ -163,4 +185,6 @@ bool jet_sema_construct_var_symbol(jet_semantics* sema, size_t nid, jet_symbol* 
     return true;
 
 }
+
+
 

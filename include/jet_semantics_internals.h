@@ -13,6 +13,7 @@
 #define JET_INVALID_SCOPEID (0)
 #define JET_INVALID_SYMID (0)
 #define JET_INVALID_FID (0)
+#define JET_INVALID_RECORD_ID (0)
 
 // types
 void jet_sema_register_type(jet_semantics* sema, jet_type def);
@@ -44,7 +45,6 @@ bool jet_sema_scope_id_hs_init(jet_hs* hs, size_t capacity);
 bool jet_sema_scope_id_hs_has_key(jet_hs* hs, size_t nid);
 void jet_sema_scope_id_hs_add(jet_hs* hs, size_t nid, size_t scope_id);
 
-
 bool jet_sema_generate_scope_symbols(jet_semantics* sema, size_t nid, jet_da* out_da); 
 bool jet_sema_construct_scope_symbol_from_node(jet_semantics* sema, size_t nid, jet_symbol* out_sym);
 bool jet_sema_construct_scope_from_node(jet_semantics* sema, size_t nid, size_t parent_scope_id, jet_scope* out_scope);
@@ -55,6 +55,7 @@ void jet_sema_register_primitive_types(jet_semantics* sema);
 void jet_sema_register_custom_types(jet_semantics* sema);
 void jet_sema_register_global_symbols(jet_semantics* sema);
 void jet_sema_resolve_type_data(jet_semantics* sema);
+void jet_sema_resolve_global_symbol_records(jet_semantics* sema);
 
 // id-index conversion
 size_t jet_sema_index_to_tid(size_t index);
